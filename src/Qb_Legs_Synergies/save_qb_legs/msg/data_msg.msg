@@ -1,0 +1,4 @@
+float64 dist_des
+float64 distance
+float64 dot_error
+float64 des_speed

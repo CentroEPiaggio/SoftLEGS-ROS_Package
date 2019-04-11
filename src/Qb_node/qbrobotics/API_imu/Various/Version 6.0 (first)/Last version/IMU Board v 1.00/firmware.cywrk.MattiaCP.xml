@@ -1,0 +1,443 @@
+<?xml version="1.0" encoding="utf-8"?>
+<CyXmlSerializer>
+<!--This file is machine generated and read. It is not intended to be edited by hand.-->
+<!--Due to this, there is no schema for this file.-->
+<CyGuid_843a90a4-0c4b-4e44-991d-05e7fb117a21 type_name="CyDesigner.Common.ProjMgmt.Model.CyPrjMgmtWrkspcCustomData" version="4">
+<CyGuid_fdba8dfd-b15b-4469-9bbb-9e40c3e70997 type_name="CyDesigner.Common.Base.CyCustomData" version="2">
+<userData>
+<dataGuid v="1b906a0f-a7b6-4e4d-a428-82f98b53cb35">
+<CyGuid_1b906a0f-a7b6-4e4d-a428-82f98b53cb35 type_name="CyDesigner.Common.ProjMgmt.GUI.CyExplorerWindow+CyExplorerWindowState" version="3" SelectedTab="Source">
+<TreeKeys>
+<v>Source</v>
+<v>Components</v>
+<v>Output</v>
+</TreeKeys>
+<TreeStates>
+<CyGuid_2a325b3b-c96a-4e9f-b7a0-2c44ecb5f237 type_name="CyDesigner.Common.Base.Controls.CyTreeViewState" version="1" SelectedNodeId="firmware\firmware\firmware.cydwr">
+<ExpandedNodeIds>
+<v>firmware</v>
+<v>firmware\firmware</v>
+<v>firmware\firmware\TopDesign</v>
+<v>firmware\firmware\firmware.cydwr</v>
+<v>firmware\firmware\Header Files</v>
+<v>firmware\firmware\Header Files\command_processing.h</v>
+<v>firmware\firmware\Header Files\commands.h</v>
+<v>firmware\firmware\Header Files\device.h</v>
+<v>firmware\firmware\Header Files\globals.h</v>
+<v>firmware\firmware\Header Files\IMU_functions.h</v>
+<v>firmware\firmware\Header Files\interruptions.h</v>
+<v>firmware\firmware\Header Files\utils.h</v>
+<v>firmware\firmware\Source Files</v>
+<v>firmware\firmware\Source Files\command_processing.c</v>
+<v>firmware\firmware\Source Files\globals.c</v>
+<v>firmware\firmware\Source Files\IMU_functions.c</v>
+<v>firmware\firmware\Source Files\interruptions.c</v>
+<v>firmware\firmware\Source Files\main.c</v>
+<v>firmware\firmware\Source Files\utils.c</v>
+<v>firmware\firmware\Generated_Source</v>
+<v>firmware\firmware\Generated_Source\PSoC3</v>
+<v>firmware\firmware\Generated_Source\PSoC3\Bootloadable</v>
+<v>firmware\firmware\Generated_Source\PSoC3\Bootloadable\Bootloadable.c</v>
+<v>firmware\firmware\Generated_Source\PSoC3\Bootloadable\Bootloadable.h</v>
+<v>firmware\firmware\Generated_Source\PSoC3\Chip_Select_A</v>
+<v>firmware\firmware\Generated_Source\PSoC3\Chip_Select_A\Chip_Select_A.c</v>
+<v>firmware\firmware\Generated_Source\PSoC3\Chip_Select_A\Chip_Select_A.h</v>
+<v>firmware\firmware\Generated_Source\PSoC3\Chip_Select_A\Chip_Select_A_PM.c</v>
+<v>firmware\firmware\Generated_Source\PSoC3\Chip_Select_B</v>
+<v>firmware\firmware\Generated_Source\PSoC3\Chip_Select_B\Chip_Select_B.c</v>
+<v>firmware\firmware\Generated_Source\PSoC3\Chip_Select_B\Chip_Select_B.h</v>
+<v>firmware\firmware\Generated_Source\PSoC3\Chip_Select_B\Chip_Select_B_PM.c</v>
+<v>firmware\firmware\Generated_Source\PSoC3\CLOCK_UART</v>
+<v>firmware\firmware\Generated_Source\PSoC3\CLOCK_UART\CLOCK_UART.c</v>
+<v>firmware\firmware\Generated_Source\PSoC3\CLOCK_UART\CLOCK_UART.h</v>
+<v>firmware\firmware\Generated_Source\PSoC3\CS00</v>
+<v>firmware\firmware\Generated_Source\PSoC3\CS00\CS00.c</v>
+<v>firmware\firmware\Generated_Source\PSoC3\CS00\CS00.h</v>
+<v>firmware\firmware\Generated_Source\PSoC3\CS00\CS00_aliases.h</v>
+<v>firmware\firmware\Generated_Source\PSoC3\CS01</v>
+<v>firmware\firmware\Generated_Source\PSoC3\CS01\CS01.c</v>
+<v>firmware\firmware\Generated_Source\PSoC3\CS01\CS01.h</v>
+<v>firmware\firmware\Generated_Source\PSoC3\CS01\CS01_aliases.h</v>
+<v>firmware\firmware\Generated_Source\PSoC3\CS02</v>
+<v>firmware\firmware\Generated_Source\PSoC3\CS02\CS02.c</v>
+<v>firmware\firmware\Generated_Source\PSoC3\CS02\CS02.h</v>
+<v>firmware\firmware\Generated_Source\PSoC3\CS02\CS02_aliases.h</v>
+<v>firmware\firmware\Generated_Source\PSoC3\CS03</v>
+<v>firmware\firmware\Generated_Source\PSoC3\CS03\CS03.c</v>
+<v>firmware\firmware\Generated_Source\PSoC3\CS03\CS03.h</v>
+<v>firmware\firmware\Generated_Source\PSoC3\CS03\CS03_aliases.h</v>
+<v>firmware\firmware\Generated_Source\PSoC3\CS04</v>
+<v>firmware\firmware\Generated_Source\PSoC3\CS04\CS04.c</v>
+<v>firmware\firmware\Generated_Source\PSoC3\CS04\CS04.h</v>
+<v>firmware\firmware\Generated_Source\PSoC3\CS04\CS04_aliases.h</v>
+<v>firmware\firmware\Generated_Source\PSoC3\CS05</v>
+<v>firmware\firmware\Generated_Source\PSoC3\CS05\CS05.c</v>
+<v>firmware\firmware\Generated_Source\PSoC3\CS05\CS05.h</v>
+<v>firmware\firmware\Generated_Source\PSoC3\CS05\CS05_aliases.h</v>
+<v>firmware\firmware\Generated_Source\PSoC3\CS06</v>
+<v>firmware\firmware\Generated_Source\PSoC3\CS06\CS06.c</v>
+<v>firmware\firmware\Generated_Source\PSoC3\CS06\CS06.h</v>
+<v>firmware\firmware\Generated_Source\PSoC3\CS06\CS06_aliases.h</v>
+<v>firmware\firmware\Generated_Source\PSoC3\CS07</v>
+<v>firmware\firmware\Generated_Source\PSoC3\CS07\CS07.c</v>
+<v>firmware\firmware\Generated_Source\PSoC3\CS07\CS07.h</v>
+<v>firmware\firmware\Generated_Source\PSoC3\CS07\CS07_aliases.h</v>
+<v>firmware\firmware\Generated_Source\PSoC3\CS08</v>
+<v>firmware\firmware\Generated_Source\PSoC3\CS08\CS08.c</v>
+<v>firmware\firmware\Generated_Source\PSoC3\CS08\CS08.h</v>
+<v>firmware\firmware\Generated_Source\PSoC3\CS08\CS08_aliases.h</v>
+<v>firmware\firmware\Generated_Source\PSoC3\CS09</v>
+<v>firmware\firmware\Generated_Source\PSoC3\CS09\CS09.c</v>
+<v>firmware\firmware\Generated_Source\PSoC3\CS09\CS09.h</v>
+<v>firmware\firmware\Generated_Source\PSoC3\CS09\CS09_aliases.h</v>
+<v>firmware\firmware\Generated_Source\PSoC3\CS10</v>
+<v>firmware\firmware\Generated_Source\PSoC3\CS10\CS10.c</v>
+<v>firmware\firmware\Generated_Source\PSoC3\CS10\CS10.h</v>
+<v>firmware\firmware\Generated_Source\PSoC3\CS10\CS10_aliases.h</v>
+<v>firmware\firmware\Generated_Source\PSoC3\CS11</v>
+<v>firmware\firmware\Generated_Source\PSoC3\CS11\CS11.c</v>
+<v>firmware\firmware\Generated_Source\PSoC3\CS11\CS11.h</v>
+<v>firmware\firmware\Generated_Source\PSoC3\CS11\CS11_aliases.h</v>
+<v>firmware\firmware\Generated_Source\PSoC3\CS12</v>
+<v>firmware\firmware\Generated_Source\PSoC3\CS12\CS12.c</v>
+<v>firmware\firmware\Generated_Source\PSoC3\CS12\CS12.h</v>
+<v>firmware\firmware\Generated_Source\PSoC3\CS12\CS12_aliases.h</v>
+<v>firmware\firmware\Generated_Source\PSoC3\CS13</v>
+<v>firmware\firmware\Generated_Source\PSoC3\CS13\CS13.c</v>
+<v>firmware\firmware\Generated_Source\PSoC3\CS13\CS13.h</v>
+<v>firmware\firmware\Generated_Source\PSoC3\CS13\CS13_aliases.h</v>
+<v>firmware\firmware\Generated_Source\PSoC3\CS14</v>
+<v>firmware\firmware\Generated_Source\PSoC3\CS14\CS14.c</v>
+<v>firmware\firmware\Generated_Source\PSoC3\CS14\CS14.h</v>
+<v>firmware\firmware\Generated_Source\PSoC3\CS14\CS14_aliases.h</v>
+<v>firmware\firmware\Generated_Source\PSoC3\CS15</v>
+<v>firmware\firmware\Generated_Source\PSoC3\CS15\CS15.c</v>
+<v>firmware\firmware\Generated_Source\PSoC3\CS15\CS15.h</v>
+<v>firmware\firmware\Generated_Source\PSoC3\CS15\CS15_aliases.h</v>
+<v>firmware\firmware\Generated_Source\PSoC3\CS16</v>
+<v>firmware\firmware\Generated_Source\PSoC3\CS16\CS16.c</v>
+<v>firmware\firmware\Generated_Source\PSoC3\CS16\CS16.h</v>
+<v>firmware\firmware\Generated_Source\PSoC3\CS16\CS16_aliases.h</v>
+<v>firmware\firmware\Generated_Source\PSoC3\cy_boot</v>
+<v>firmware\firmware\Generated_Source\PSoC3\cy_boot\CyBootAsmKeil.a51</v>
+<v>firmware\firmware\Generated_Source\PSoC3\cy_boot\CyDmac.c</v>
+<v>firmware\firmware\Generated_Source\PSoC3\cy_boot\CyDmac.h</v>
+<v>firmware\firmware\Generated_Source\PSoC3\cy_boot\CyFlash.c</v>
+<v>firmware\firmware\Generated_Source\PSoC3\cy_boot\CyFlash.h</v>
+<v>firmware\firmware\Generated_Source\PSoC3\cy_boot\CyLib.c</v>
+<v>firmware\firmware\Generated_Source\PSoC3\cy_boot\CyLib.h</v>
+<v>firmware\firmware\Generated_Source\PSoC3\cy_boot\cymem.a51</v>
+<v>firmware\firmware\Generated_Source\PSoC3\cy_boot\cypins.h</v>
+<v>firmware\firmware\Generated_Source\PSoC3\cy_boot\cyPm.c</v>
+<v>firmware\firmware\Generated_Source\PSoC3\cy_boot\cyPm.h</v>
+<v>firmware\firmware\Generated_Source\PSoC3\cy_boot\CySpc.c</v>
+<v>firmware\firmware\Generated_Source\PSoC3\cy_boot\CySpc.h</v>
+<v>firmware\firmware\Generated_Source\PSoC3\cy_boot\cytypes.h</v>
+<v>firmware\firmware\Generated_Source\PSoC3\cy_boot\cyutils.c</v>
+<v>firmware\firmware\Generated_Source\PSoC3\cy_boot\KeilStart.a51</v>
+<v>firmware\firmware\Generated_Source\PSoC3\cy_boot\PSoC3_8051.h</v>
+<v>firmware\firmware\Generated_Source\PSoC3\cy_boot\PSoC3_8051.inc</v>
+<v>firmware\firmware\Generated_Source\PSoC3\EEPROM</v>
+<v>firmware\firmware\Generated_Source\PSoC3\EEPROM\EEPROM.c</v>
+<v>firmware\firmware\Generated_Source\PSoC3\EEPROM\EEPROM.h</v>
+<v>firmware\firmware\Generated_Source\PSoC3\FF_STATUS</v>
+<v>firmware\firmware\Generated_Source\PSoC3\FF_STATUS\FF_STATUS.c</v>
+<v>firmware\firmware\Generated_Source\PSoC3\FF_STATUS\FF_STATUS.h</v>
+<v>firmware\firmware\Generated_Source\PSoC3\FTDI_ENABLE</v>
+<v>firmware\firmware\Generated_Source\PSoC3\FTDI_ENABLE\FTDI_ENABLE.c</v>
+<v>firmware\firmware\Generated_Source\PSoC3\FTDI_ENABLE\FTDI_ENABLE.h</v>
+<v>firmware\firmware\Generated_Source\PSoC3\FTDI_ENABLE\FTDI_ENABLE_aliases.h</v>
+<v>firmware\firmware\Generated_Source\PSoC3\FTDI_ENABLE_REG</v>
+<v>firmware\firmware\Generated_Source\PSoC3\FTDI_ENABLE_REG\FTDI_ENABLE_REG.c</v>
+<v>firmware\firmware\Generated_Source\PSoC3\FTDI_ENABLE_REG\FTDI_ENABLE_REG.h</v>
+<v>firmware\firmware\Generated_Source\PSoC3\FTDI_ENABLE_REG\FTDI_ENABLE_REG_PM.c</v>
+<v>firmware\firmware\Generated_Source\PSoC3\isr_clock</v>
+<v>firmware\firmware\Generated_Source\PSoC3\isr_clock\isr_clock.c</v>
+<v>firmware\firmware\Generated_Source\PSoC3\isr_clock\isr_clock.h</v>
+<v>firmware\firmware\Generated_Source\PSoC3\isr_imu</v>
+<v>firmware\firmware\Generated_Source\PSoC3\isr_imu\isr_imu.c</v>
+<v>firmware\firmware\Generated_Source\PSoC3\isr_imu\isr_imu.h</v>
+<v>firmware\firmware\Generated_Source\PSoC3\ISR_RS485_RX</v>
+<v>firmware\firmware\Generated_Source\PSoC3\ISR_RS485_RX\ISR_RS485_RX.c</v>
+<v>firmware\firmware\Generated_Source\PSoC3\ISR_RS485_RX\ISR_RS485_RX.h</v>
+<v>firmware\firmware\Generated_Source\PSoC3\ISR_WATCHDOG</v>
+<v>firmware\firmware\Generated_Source\PSoC3\ISR_WATCHDOG\ISR_WATCHDOG.c</v>
+<v>firmware\firmware\Generated_Source\PSoC3\ISR_WATCHDOG\ISR_WATCHDOG.h</v>
+<v>firmware\firmware\Generated_Source\PSoC3\MISO</v>
+<v>firmware\firmware\Generated_Source\PSoC3\MISO\MISO.c</v>
+<v>firmware\firmware\Generated_Source\PSoC3\MISO\MISO.h</v>
+<v>firmware\firmware\Generated_Source\PSoC3\MISO\MISO_aliases.h</v>
+<v>firmware\firmware\Generated_Source\PSoC3\MOSI</v>
+<v>firmware\firmware\Generated_Source\PSoC3\MOSI\MOSI.c</v>
+<v>firmware\firmware\Generated_Source\PSoC3\MOSI\MOSI.h</v>
+<v>firmware\firmware\Generated_Source\PSoC3\MOSI\MOSI_aliases.h</v>
+<v>firmware\firmware\Generated_Source\PSoC3\MY_TIMER</v>
+<v>firmware\firmware\Generated_Source\PSoC3\MY_TIMER\MY_TIMER.c</v>
+<v>firmware\firmware\Generated_Source\PSoC3\MY_TIMER\MY_TIMER.h</v>
+<v>firmware\firmware\Generated_Source\PSoC3\MY_TIMER\MY_TIMER_PM.c</v>
+<v>firmware\firmware\Generated_Source\PSoC3\Opto_Pin</v>
+<v>firmware\firmware\Generated_Source\PSoC3\Opto_Pin\Opto_Pin.c</v>
+<v>firmware\firmware\Generated_Source\PSoC3\Opto_Pin\Opto_Pin.h</v>
+<v>firmware\firmware\Generated_Source\PSoC3\Opto_Pin\Opto_Pin_aliases.h</v>
+<v>firmware\firmware\Generated_Source\PSoC3\PACER_TIMER</v>
+<v>firmware\firmware\Generated_Source\PSoC3\PACER_TIMER\PACER_TIMER.c</v>
+<v>firmware\firmware\Generated_Source\PSoC3\PACER_TIMER\PACER_TIMER.h</v>
+<v>firmware\firmware\Generated_Source\PSoC3\PACER_TIMER\PACER_TIMER_PM.c</v>
+<v>firmware\firmware\Generated_Source\PSoC3\RESET_FF</v>
+<v>firmware\firmware\Generated_Source\PSoC3\RESET_FF\RESET_FF.c</v>
+<v>firmware\firmware\Generated_Source\PSoC3\RESET_FF\RESET_FF.h</v>
+<v>firmware\firmware\Generated_Source\PSoC3\RESET_FF\RESET_FF_PM.c</v>
+<v>firmware\firmware\Generated_Source\PSoC3\RS_485_EN</v>
+<v>firmware\firmware\Generated_Source\PSoC3\RS_485_EN\RS_485_EN.c</v>
+<v>firmware\firmware\Generated_Source\PSoC3\RS_485_EN\RS_485_EN.h</v>
+<v>firmware\firmware\Generated_Source\PSoC3\RS_485_EN\RS_485_EN_aliases.h</v>
+<v>firmware\firmware\Generated_Source\PSoC3\RS485_CTS</v>
+<v>firmware\firmware\Generated_Source\PSoC3\RS485_CTS\RS485_CTS.c</v>
+<v>firmware\firmware\Generated_Source\PSoC3\RS485_CTS\RS485_CTS.h</v>
+<v>firmware\firmware\Generated_Source\PSoC3\RS485_CTS\RS485_CTS_PM.c</v>
+<v>firmware\firmware\Generated_Source\PSoC3\SCLK</v>
+<v>firmware\firmware\Generated_Source\PSoC3\SCLK\SCLK.c</v>
+<v>firmware\firmware\Generated_Source\PSoC3\SCLK\SCLK.h</v>
+<v>firmware\firmware\Generated_Source\PSoC3\SCLK\SCLK_aliases.h</v>
+<v>firmware\firmware\Generated_Source\PSoC3\SPI_IMU</v>
+<v>firmware\firmware\Generated_Source\PSoC3\SPI_IMU\SPI_IMU.c</v>
+<v>firmware\firmware\Generated_Source\PSoC3\SPI_IMU\SPI_IMU.h</v>
+<v>firmware\firmware\Generated_Source\PSoC3\SPI_IMU\SPI_IMU_INT.c</v>
+<v>firmware\firmware\Generated_Source\PSoC3\SPI_IMU\SPI_IMU_PM.c</v>
+<v>firmware\firmware\Generated_Source\PSoC3\SPI_IMU\SPI_IMU_PVT.h</v>
+<v>firmware\firmware\Generated_Source\PSoC3\SPI_IMU_IntClock</v>
+<v>firmware\firmware\Generated_Source\PSoC3\SPI_IMU_IntClock\SPI_IMU_IntClock.c</v>
+<v>firmware\firmware\Generated_Source\PSoC3\SPI_IMU_IntClock\SPI_IMU_IntClock.h</v>
+<v>firmware\firmware\Generated_Source\PSoC3\timer_clock</v>
+<v>firmware\firmware\Generated_Source\PSoC3\timer_clock\timer_clock.c</v>
+<v>firmware\firmware\Generated_Source\PSoC3\timer_clock\timer_clock.h</v>
+<v>firmware\firmware\Generated_Source\PSoC3\UART_RS485</v>
+<v>firmware\firmware\Generated_Source\PSoC3\UART_RS485\UART_RS485.c</v>
+<v>firmware\firmware\Generated_Source\PSoC3\UART_RS485\UART_RS485.h</v>
+<v>firmware\firmware\Generated_Source\PSoC3\UART_RS485\UART_RS485_BOOT.c</v>
+<v>firmware\firmware\Generated_Source\PSoC3\UART_RS485\UART_RS485_INT.c</v>
+<v>firmware\firmware\Generated_Source\PSoC3\UART_RS485\UART_RS485_PM.c</v>
+<v>firmware\firmware\Generated_Source\PSoC3\USB_VDD</v>
+<v>firmware\firmware\Generated_Source\PSoC3\USB_VDD\USB_VDD.c</v>
+<v>firmware\firmware\Generated_Source\PSoC3\USB_VDD\USB_VDD.h</v>
+<v>firmware\firmware\Generated_Source\PSoC3\USB_VDD\USB_VDD_aliases.h</v>
+<v>firmware\firmware\Generated_Source\PSoC3\WATCHDOG_CLK</v>
+<v>firmware\firmware\Generated_Source\PSoC3\WATCHDOG_CLK\WATCHDOG_CLK.c</v>
+<v>firmware\firmware\Generated_Source\PSoC3\WATCHDOG_CLK\WATCHDOG_CLK.h</v>
+<v>firmware\firmware\Generated_Source\PSoC3\WATCHDOG_COUNTER</v>
+<v>firmware\firmware\Generated_Source\PSoC3\WATCHDOG_COUNTER\WATCHDOG_COUNTER.c</v>
+<v>firmware\firmware\Generated_Source\PSoC3\WATCHDOG_COUNTER\WATCHDOG_COUNTER.h</v>
+<v>firmware\firmware\Generated_Source\PSoC3\WATCHDOG_COUNTER\WATCHDOG_COUNTER_PM.c</v>
+<v>firmware\firmware\Generated_Source\PSoC3\WATCHDOG_ENABLER</v>
+<v>firmware\firmware\Generated_Source\PSoC3\WATCHDOG_ENABLER\WATCHDOG_ENABLER.c</v>
+<v>firmware\firmware\Generated_Source\PSoC3\WATCHDOG_ENABLER\WATCHDOG_ENABLER.h</v>
+<v>firmware\firmware\Generated_Source\PSoC3\WATCHDOG_ENABLER\WATCHDOG_ENABLER_PM.c</v>
+<v>firmware\firmware\Generated_Source\PSoC3\WATCHDOG_REFRESH</v>
+<v>firmware\firmware\Generated_Source\PSoC3\WATCHDOG_REFRESH\WATCHDOG_REFRESH.c</v>
+<v>firmware\firmware\Generated_Source\PSoC3\WATCHDOG_REFRESH\WATCHDOG_REFRESH.h</v>
+<v>firmware\firmware\Generated_Source\PSoC3\WATCHDOG_REFRESH\WATCHDOG_REFRESH_PM.c</v>
+<v>firmware\firmware\Generated_Source\PSoC3\cycodeshareexport.ld</v>
+<v>firmware\firmware\Generated_Source\PSoC3\cycodeshareimport.ld</v>
+<v>firmware\firmware\Generated_Source\PSoC3\cycodeshareimport.scat</v>
+<v>firmware\firmware\Generated_Source\PSoC3\cydevice.h</v>
+<v>firmware\firmware\Generated_Source\PSoC3\cydevice_trm.h</v>
+<v>firmware\firmware\Generated_Source\PSoC3\cydevicekeil.inc</v>
+<v>firmware\firmware\Generated_Source\PSoC3\cydevicekeil_trm.inc</v>
+<v>firmware\firmware\Generated_Source\PSoC3\cydisabledsheets.h</v>
+<v>firmware\firmware\Generated_Source\PSoC3\cyfitter.h</v>
+<v>firmware\firmware\Generated_Source\PSoC3\cyfitter_cfg.c</v>
+<v>firmware\firmware\Generated_Source\PSoC3\cyfitter_cfg.h</v>
+<v>firmware\firmware\Generated_Source\PSoC3\cyfitterkeil.inc</v>
+<v>firmware\firmware\Generated_Source\PSoC3\project.h</v>
+</ExpandedNodeIds>
+<VisibleNodeIds />
+</CyGuid_2a325b3b-c96a-4e9f-b7a0-2c44ecb5f237>
+<CyGuid_2a325b3b-c96a-4e9f-b7a0-2c44ecb5f237 type_name="CyDesigner.Common.Base.Controls.CyTreeViewState" version="1" SelectedNodeId="">
+<ExpandedNodeIds>
+<v>firmware</v>
+<v>firmware\firmware</v>
+<v>firmware\firmware\TopDesign</v>
+<v>firmware\firmware\TopDesign\TopDesign.cysch</v>
+<v>firmware\firmware\TopDesign\TopDesign.cysym</v>
+</ExpandedNodeIds>
+<VisibleNodeIds />
+</CyGuid_2a325b3b-c96a-4e9f-b7a0-2c44ecb5f237>
+<CyGuid_2a325b3b-c96a-4e9f-b7a0-2c44ecb5f237 type_name="CyDesigner.Common.Base.Controls.CyTreeViewState" version="1" SelectedNodeId="">
+<ExpandedNodeIds>
+<v>firmware</v>
+<v>firmware\firmware</v>
+<v>firmware\firmware\DP8051</v>
+<v>firmware\firmware\DP8051\DP8051_Keil_951</v>
+<v>firmware\firmware\DP8051\DP8051_Keil_951\Debug</v>
+<v>firmware\firmware\DP8051\DP8051_Keil_951\Debug\Listing Files</v>
+<v>firmware\firmware\DP8051\DP8051_Keil_951\Debug\Listing Files\FTDI_ENABLE_REG_PM.lst</v>
+<v>firmware\firmware\DP8051\DP8051_Keil_951\Debug\Listing Files\ISR_WATCHDOG.lst</v>
+<v>firmware\firmware\DP8051\DP8051_Keil_951\Debug\Listing Files\RESET_FF_PM.lst</v>
+<v>firmware\firmware\DP8051\DP8051_Keil_951\Debug\Listing Files\RS485_CTS_PM.lst</v>
+<v>firmware\firmware\DP8051\DP8051_Keil_951\Debug\Listing Files\WATCHDOG_CLK.lst</v>
+<v>firmware\firmware\DP8051\DP8051_Keil_951\Debug\Listing Files\WATCHDOG_COUNTER.lst</v>
+<v>firmware\firmware\DP8051\DP8051_Keil_951\Debug\Listing Files\WATCHDOG_COUNTER_PM.lst</v>
+<v>firmware\firmware\DP8051\DP8051_Keil_951\Debug\Listing Files\WATCHDOG_ENABLER.lst</v>
+<v>firmware\firmware\DP8051\DP8051_Keil_951\Debug\Listing Files\WATCHDOG_ENABLER_PM.lst</v>
+<v>firmware\firmware\DP8051\DP8051_Keil_951\Debug\Listing Files\WATCHDOG_REFRESH.lst</v>
+<v>firmware\firmware\DP8051\DP8051_Keil_951\Debug\Listing Files\WATCHDOG_REFRESH_PM.lst</v>
+<v>firmware\firmware\DP8051\DP8051_Keil_951\Debug\firmware.cyacd</v>
+<v>firmware\firmware\DP8051\DP8051_Keil_951\Debug\firmware.elf</v>
+<v>firmware\firmware\DP8051\DP8051_Keil_951\Debug\firmware.hex</v>
+<v>firmware\firmware\DP8051\DP8051_Keil_951\Debug\firmware.map</v>
+<v>firmware\firmware\DP8051\DP8051_Keil_951\Release</v>
+<v>firmware\firmware\DP8051\DP8051_Keil_951\Release\Listing Files</v>
+<v>firmware\firmware\DP8051\DP8051_Keil_951\Release\Listing Files\Bootloadable.lst</v>
+<v>firmware\firmware\DP8051\DP8051_Keil_951\Release\Listing Files\Chip_Select_A.lst</v>
+<v>firmware\firmware\DP8051\DP8051_Keil_951\Release\Listing Files\Chip_Select_A_PM.lst</v>
+<v>firmware\firmware\DP8051\DP8051_Keil_951\Release\Listing Files\Chip_Select_B.lst</v>
+<v>firmware\firmware\DP8051\DP8051_Keil_951\Release\Listing Files\Chip_Select_B_PM.lst</v>
+<v>firmware\firmware\DP8051\DP8051_Keil_951\Release\Listing Files\CLOCK_UART.lst</v>
+<v>firmware\firmware\DP8051\DP8051_Keil_951\Release\Listing Files\command_processing.lst</v>
+<v>firmware\firmware\DP8051\DP8051_Keil_951\Release\Listing Files\CS00.lst</v>
+<v>firmware\firmware\DP8051\DP8051_Keil_951\Release\Listing Files\CS01.lst</v>
+<v>firmware\firmware\DP8051\DP8051_Keil_951\Release\Listing Files\CS02.lst</v>
+<v>firmware\firmware\DP8051\DP8051_Keil_951\Release\Listing Files\CS03.lst</v>
+<v>firmware\firmware\DP8051\DP8051_Keil_951\Release\Listing Files\CS04.lst</v>
+<v>firmware\firmware\DP8051\DP8051_Keil_951\Release\Listing Files\CS05.lst</v>
+<v>firmware\firmware\DP8051\DP8051_Keil_951\Release\Listing Files\CS06.lst</v>
+<v>firmware\firmware\DP8051\DP8051_Keil_951\Release\Listing Files\CS07.lst</v>
+<v>firmware\firmware\DP8051\DP8051_Keil_951\Release\Listing Files\CS08.lst</v>
+<v>firmware\firmware\DP8051\DP8051_Keil_951\Release\Listing Files\CS09.lst</v>
+<v>firmware\firmware\DP8051\DP8051_Keil_951\Release\Listing Files\CS10.lst</v>
+<v>firmware\firmware\DP8051\DP8051_Keil_951\Release\Listing Files\CS11.lst</v>
+<v>firmware\firmware\DP8051\DP8051_Keil_951\Release\Listing Files\CS12.lst</v>
+<v>firmware\firmware\DP8051\DP8051_Keil_951\Release\Listing Files\CS13.lst</v>
+<v>firmware\firmware\DP8051\DP8051_Keil_951\Release\Listing Files\CS14.lst</v>
+<v>firmware\firmware\DP8051\DP8051_Keil_951\Release\Listing Files\CS15.lst</v>
+<v>firmware\firmware\DP8051\DP8051_Keil_951\Release\Listing Files\CS16.lst</v>
+<v>firmware\firmware\DP8051\DP8051_Keil_951\Release\Listing Files\CyBootAsmKeil.lst</v>
+<v>firmware\firmware\DP8051\DP8051_Keil_951\Release\Listing Files\CyDmac.lst</v>
+<v>firmware\firmware\DP8051\DP8051_Keil_951\Release\Listing Files\cyfitter_cfg.lst</v>
+<v>firmware\firmware\DP8051\DP8051_Keil_951\Release\Listing Files\CyFlash.lst</v>
+<v>firmware\firmware\DP8051\DP8051_Keil_951\Release\Listing Files\CyLib.lst</v>
+<v>firmware\firmware\DP8051\DP8051_Keil_951\Release\Listing Files\cymem.lst</v>
+<v>firmware\firmware\DP8051\DP8051_Keil_951\Release\Listing Files\cyPm.lst</v>
+<v>firmware\firmware\DP8051\DP8051_Keil_951\Release\Listing Files\CySpc.lst</v>
+<v>firmware\firmware\DP8051\DP8051_Keil_951\Release\Listing Files\cyutils.lst</v>
+<v>firmware\firmware\DP8051\DP8051_Keil_951\Release\Listing Files\EEPROM.lst</v>
+<v>firmware\firmware\DP8051\DP8051_Keil_951\Release\Listing Files\FF_STATUS.lst</v>
+<v>firmware\firmware\DP8051\DP8051_Keil_951\Release\Listing Files\FTDI_ENABLE.lst</v>
+<v>firmware\firmware\DP8051\DP8051_Keil_951\Release\Listing Files\FTDI_ENABLE_REG.lst</v>
+<v>firmware\firmware\DP8051\DP8051_Keil_951\Release\Listing Files\FTDI_ENABLE_REG_PM.lst</v>
+<v>firmware\firmware\DP8051\DP8051_Keil_951\Release\Listing Files\globals.lst</v>
+<v>firmware\firmware\DP8051\DP8051_Keil_951\Release\Listing Files\IMU_functions.lst</v>
+<v>firmware\firmware\DP8051\DP8051_Keil_951\Release\Listing Files\interruptions.lst</v>
+<v>firmware\firmware\DP8051\DP8051_Keil_951\Release\Listing Files\isr_clock.lst</v>
+<v>firmware\firmware\DP8051\DP8051_Keil_951\Release\Listing Files\isr_imu.lst</v>
+<v>firmware\firmware\DP8051\DP8051_Keil_951\Release\Listing Files\ISR_RS485_RX.lst</v>
+<v>firmware\firmware\DP8051\DP8051_Keil_951\Release\Listing Files\ISR_WATCHDOG.lst</v>
+<v>firmware\firmware\DP8051\DP8051_Keil_951\Release\Listing Files\KeilStart.lst</v>
+<v>firmware\firmware\DP8051\DP8051_Keil_951\Release\Listing Files\main.lst</v>
+<v>firmware\firmware\DP8051\DP8051_Keil_951\Release\Listing Files\MISO.lst</v>
+<v>firmware\firmware\DP8051\DP8051_Keil_951\Release\Listing Files\MOSI.lst</v>
+<v>firmware\firmware\DP8051\DP8051_Keil_951\Release\Listing Files\MY_TIMER.lst</v>
+<v>firmware\firmware\DP8051\DP8051_Keil_951\Release\Listing Files\MY_TIMER_PM.lst</v>
+<v>firmware\firmware\DP8051\DP8051_Keil_951\Release\Listing Files\Opto_Pin.lst</v>
+<v>firmware\firmware\DP8051\DP8051_Keil_951\Release\Listing Files\PACER_TIMER.lst</v>
+<v>firmware\firmware\DP8051\DP8051_Keil_951\Release\Listing Files\PACER_TIMER_PM.lst</v>
+<v>firmware\firmware\DP8051\DP8051_Keil_951\Release\Listing Files\RESET_FF.lst</v>
+<v>firmware\firmware\DP8051\DP8051_Keil_951\Release\Listing Files\RESET_FF_PM.lst</v>
+<v>firmware\firmware\DP8051\DP8051_Keil_951\Release\Listing Files\RS_485_EN.lst</v>
+<v>firmware\firmware\DP8051\DP8051_Keil_951\Release\Listing Files\RS485_CTS.lst</v>
+<v>firmware\firmware\DP8051\DP8051_Keil_951\Release\Listing Files\RS485_CTS_PM.lst</v>
+<v>firmware\firmware\DP8051\DP8051_Keil_951\Release\Listing Files\SCLK.lst</v>
+<v>firmware\firmware\DP8051\DP8051_Keil_951\Release\Listing Files\SPI_IMU.lst</v>
+<v>firmware\firmware\DP8051\DP8051_Keil_951\Release\Listing Files\SPI_IMU_INT.lst</v>
+<v>firmware\firmware\DP8051\DP8051_Keil_951\Release\Listing Files\SPI_IMU_IntClock.lst</v>
+<v>firmware\firmware\DP8051\DP8051_Keil_951\Release\Listing Files\SPI_IMU_PM.lst</v>
+<v>firmware\firmware\DP8051\DP8051_Keil_951\Release\Listing Files\timer_clock.lst</v>
+<v>firmware\firmware\DP8051\DP8051_Keil_951\Release\Listing Files\UART_RS485.lst</v>
+<v>firmware\firmware\DP8051\DP8051_Keil_951\Release\Listing Files\UART_RS485_BOOT.lst</v>
+<v>firmware\firmware\DP8051\DP8051_Keil_951\Release\Listing Files\UART_RS485_INT.lst</v>
+<v>firmware\firmware\DP8051\DP8051_Keil_951\Release\Listing Files\UART_RS485_PM.lst</v>
+<v>firmware\firmware\DP8051\DP8051_Keil_951\Release\Listing Files\USB_VDD.lst</v>
+<v>firmware\firmware\DP8051\DP8051_Keil_951\Release\Listing Files\utils.lst</v>
+<v>firmware\firmware\DP8051\DP8051_Keil_951\Release\Listing Files\WATCHDOG_CLK.lst</v>
+<v>firmware\firmware\DP8051\DP8051_Keil_951\Release\Listing Files\WATCHDOG_COUNTER.lst</v>
+<v>firmware\firmware\DP8051\DP8051_Keil_951\Release\Listing Files\WATCHDOG_COUNTER_PM.lst</v>
+<v>firmware\firmware\DP8051\DP8051_Keil_951\Release\Listing Files\WATCHDOG_ENABLER.lst</v>
+<v>firmware\firmware\DP8051\DP8051_Keil_951\Release\Listing Files\WATCHDOG_ENABLER_PM.lst</v>
+<v>firmware\firmware\DP8051\DP8051_Keil_951\Release\Listing Files\WATCHDOG_REFRESH.lst</v>
+<v>firmware\firmware\DP8051\DP8051_Keil_951\Release\Listing Files\WATCHDOG_REFRESH_PM.lst</v>
+<v>firmware\firmware\DP8051\DP8051_Keil_951\Release\firmware.cyacd</v>
+<v>firmware\firmware\DP8051\DP8051_Keil_951\Release\firmware.elf</v>
+<v>firmware\firmware\DP8051\DP8051_Keil_951\Release\firmware.hex</v>
+<v>firmware\firmware\DP8051\DP8051_Keil_951\Release\firmware.map</v>
+<v>firmware\firmware\firmware.gpdsc</v>
+<v>firmware\firmware\firmware.rpt</v>
+<v>firmware\firmware\firmware_timing.html</v>
+</ExpandedNodeIds>
+<VisibleNodeIds />
+</CyGuid_2a325b3b-c96a-4e9f-b7a0-2c44ecb5f237>
+</TreeStates>
+<TreeKeysV2>
+<v>Datasheet</v>
+</TreeKeysV2>
+<TreeStatesV2>
+<CyGuid_2a325b3b-c96a-4e9f-b7a0-2c44ecb5f237 type_name="CyDesigner.Common.Base.Controls.CyTreeViewState" version="1" SelectedNodeId="">
+<ExpandedNodeIds>
+<v>firmware</v>
+<v>firmware\firmware</v>
+<v>firmware\firmware\PSoC 3 Architecture TRM</v>
+<v>firmware\firmware\CY8C32 Family Datasheet</v>
+<v>firmware\firmware\System Reference Guides</v>
+<v>firmware\firmware\System Reference Guides\cy_boot_v5_20</v>
+<v>firmware\firmware\Bootloadable_v1_40.pdf</v>
+<v>firmware\firmware\Counter_v3_0.pdf</v>
+<v>firmware\firmware\cy_clock_v2_20</v>
+<v>firmware\firmware\cy_clock_v2_20\cy_clock_v2_20.pdf</v>
+<v>firmware\firmware\cy_constant_v1_0.pdf</v>
+<v>firmware\firmware\cy_isr_v1_70</v>
+<v>firmware\firmware\cy_isr_v1_70\cy_isr_v1_70.pdf</v>
+<v>firmware\firmware\cy_pins_v2_10</v>
+<v>firmware\firmware\cy_pins_v2_10\cy_pins_v2_10.pdf</v>
+<v>firmware\firmware\cy_pins_v2_20</v>
+<v>firmware\firmware\cy_pins_v2_20\cy_pins_v2_20.pdf</v>
+<v>firmware\firmware\cy_srff_v1_0.pdf</v>
+<v>firmware\firmware\cy_sync_v1_0.pdf</v>
+<v>firmware\firmware\CyControlReg_v1_80</v>
+<v>firmware\firmware\CyControlReg_v1_80\CyControlReg_v1_80.pdf</v>
+<v>firmware\firmware\CyStatusReg_v1_90.pdf</v>
+<v>firmware\firmware\demux_v1_10</v>
+<v>firmware\firmware\demux_v1_10\demux_v1_10.pdf</v>
+<v>firmware\firmware\EEPROM_v3_0.pdf</v>
+<v>firmware\firmware\not_v1_0</v>
+<v>firmware\firmware\not_v1_0\not_v1_0.pdf</v>
+<v>firmware\firmware\or_v1_0.pdf</v>
+<v>firmware\firmware\SPI_Master_v2_50.pdf</v>
+<v>firmware\firmware\Timer_v2_70</v>
+<v>firmware\firmware\Timer_v2_70\Timer_v2_70.pdf</v>
+<v>firmware\firmware\UART_v2_50.pdf</v>
+<v>firmware\firmware\ZeroTerminal</v>
+<v>firmware\firmware\ZeroTerminal\ZeroTerminal.pdf</v>
+</ExpandedNodeIds>
+<VisibleNodeIds />
+</CyGuid_2a325b3b-c96a-4e9f-b7a0-2c44ecb5f237>
+</TreeStatesV2>
+</CyGuid_1b906a0f-a7b6-4e4d-a428-82f98b53cb35>
+</dataGuid>
+</userData>
+</CyGuid_fdba8dfd-b15b-4469-9bbb-9e40c3e70997>
+<Unloaded />
+<OpenDocs>
+<name v=".\firmware.cydsn\command_processing.c" />
+<name v=".\firmware.cydsn\globals.h" />
+<name v=".\firmware.cydsn\globals.c" />
+<name v=".\firmware.cydsn\IMU_functions.c" />
+<name v=".\firmware.cydsn\command_processing.h" />
+<name v=".\firmware.cydsn\commands.h" />
+<name v=".\firmware.cydsn\interruptions.c" />
+<name v=".\firmware.cydsn\IMU_functions.h" />
+<name v=".\firmware.cydsn\main.c" />
+<name v=".\firmware.cydsn\Generated_Source\PSoC3\isr_imu.c" />
+</OpenDocs>
+<config v="Release" />
+<AutoUpdate v="true" />
+</CyGuid_843a90a4-0c4b-4e44-991d-05e7fb117a21>
+</CyXmlSerializer>

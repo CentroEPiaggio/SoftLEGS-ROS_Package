@@ -1,0 +1,9 @@
+<launch>
+
+    <!-- launch rviz with SoftLegs robot -->
+    <include file="$(find qblegs-ros)/launch/view_legs.launch" />
+
+    <!-- launch node to redirect array message from the gui to rviz -->
+    <node name="redirect_array_to_rviz" pkg="qblegs-ros" type="redirect_array_to_rviz" output="screen"/>
+
+</launch>

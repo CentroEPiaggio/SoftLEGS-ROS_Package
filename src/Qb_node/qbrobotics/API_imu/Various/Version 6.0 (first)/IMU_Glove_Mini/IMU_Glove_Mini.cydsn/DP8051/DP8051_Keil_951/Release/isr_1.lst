@@ -1,0 +1,956 @@
+C51 COMPILER V9.51   ISR_1                                                                 04/30/2016 17:24:48 PAGE 1   
+
+
+C51 COMPILER V9.51, COMPILATION OF MODULE ISR_1
+OBJECT MODULE PLACED IN .\DP8051\DP8051_Keil_951\Release\isr_1.obj
+COMPILER INVOKED BY: C:\Program Files (x86)\Cypress\PSoC Creator\3.3\PSoC Creator\import\keil\pk51\9.51\C51\BIN\c51.exe 
+                    -.\Generated_Source\PSoC3\isr_1.c NOIV LARGE MODDP2 OMF2 VB(1) NOIP INCDIR(.,Generated_Source\PSoC3) FF(3) DB DF(NDEBUG) 
+                    -WL(2) PR(.\DP8051\DP8051_Keil_951\Release/isr_1.lst) CD OT(8,SIZE) OJ(.\DP8051\DP8051_Keil_951\Release\isr_1.obj)
+
+line level    source
+
+*** MESSAGE C286 IN LINE 0 OF (null): license limits optimization to level 5
+   1          /*******************************************************************************
+   2          * File Name: isr_1.c  
+   3          * Version 1.70
+   4          *
+   5          *  Description:
+   6          *   API for controlling the state of an interrupt.
+   7          *
+   8          *
+   9          *  Note:
+  10          *
+  11          ********************************************************************************
+  12          * Copyright 2008-2015, Cypress Semiconductor Corporation.  All rights reserved.
+  13          * You may use this file only in accordance with the license, terms, conditions, 
+  14          * disclaimers, and limitations in the end user license agreement accompanying 
+  15          * the software package with which this file was provided.
+  16          *******************************************************************************/
+  17          
+  18          
+  19          #include <cydevice_trm.h>
+  20          #include <CyLib.h>
+  21          #include <isr_1.h>
+  22          #include "cyapicallbacks.h"
+  23          
+  24          #if !defined(isr_1__REMOVED) /* Check for removal by optimization */
+  25          
+  26          /*******************************************************************************
+  27          *  Place your includes, defines and code here 
+  28          ********************************************************************************/
+  29          /* `#START isr_1_intc` */
+  30                  #include <IMU_functions.h>      
+  31                  int i,j=0;
+  32                  uint8 Accel[N_IMU][6];
+  33                  uint8 Gyro[N_IMU][6];
+  34          
+  35          /* `#END` */
+  36          
+  37          
+  38          /*******************************************************************************
+  39          * Function Name: isr_1_Start
+  40          ********************************************************************************
+  41          *
+  42          * Summary:
+  43          *  Set up the interrupt and enable it. This function disables the interrupt, 
+  44          *  sets the default interrupt vector, sets the priority from the value in the
+  45          *  Design Wide Resources Interrupt Editor, then enables the interrupt to the 
+  46          *  interrupt controller.
+  47          *
+  48          * Parameters:  
+  49          *   None
+  50          *
+  51          * Return:
+  52          *   None
+C51 COMPILER V9.51   ISR_1                                                                 04/30/2016 17:24:48 PAGE 2   
+
+  53          *
+  54          *******************************************************************************/
+  55          void isr_1_Start(void) 
+  56          {
+  57   1          /* For all we know the interrupt is active. */
+  58   1          isr_1_Disable();
+  59   1      
+  60   1          /* Set the ISR to point to the isr_1 Interrupt. */
+  61   1          isr_1_SetVector(&isr_1_Interrupt);
+  62   1      
+  63   1          /* Set the priority. */
+  64   1          isr_1_SetPriority((uint8)isr_1_INTC_PRIOR_NUMBER);
+  65   1      
+  66   1          /* Enable it. */
+  67   1          isr_1_Enable();
+  68   1      }
+  69          
+  70          
+  71          /*******************************************************************************
+  72          * Function Name: isr_1_StartEx
+  73          ********************************************************************************
+  74          *
+  75          * Summary:
+  76          *  Sets up the interrupt and enables it. This function disables the interrupt,
+  77          *  sets the interrupt vector based on the address passed in, sets the priority 
+  78          *  from the value in the Design Wide Resources Interrupt Editor, then enables 
+  79          *  the interrupt to the interrupt controller.
+  80          *  
+  81          *  When defining ISR functions, the CY_ISR and CY_ISR_PROTO macros should be 
+  82          *  used to provide consistent definition across compilers:
+  83          *  
+  84          *  Function definition example:
+  85          *   CY_ISR(MyISR)
+  86          *   {
+  87          *   }
+  88          *   Function prototype example:
+  89          *   CY_ISR_PROTO(MyISR);
+  90          *
+  91          * Parameters:  
+  92          *   address: Address of the ISR to set in the interrupt vector table.
+  93          *
+  94          * Return:
+  95          *   None
+  96          *
+  97          *******************************************************************************/
+  98          void isr_1_StartEx(cyisraddress address) 
+  99          {
+ 100   1          /* For all we know the interrupt is active. */
+ 101   1          isr_1_Disable();
+ 102   1      
+ 103   1          /* Set the ISR to point to the isr_1 Interrupt. */
+ 104   1          isr_1_SetVector(address);
+ 105   1      
+ 106   1          /* Set the priority. */
+ 107   1          isr_1_SetPriority((uint8)isr_1_INTC_PRIOR_NUMBER);
+ 108   1      
+ 109   1          /* Enable it. */
+ 110   1          isr_1_Enable();
+ 111   1      }
+ 112          
+ 113          
+ 114          /*******************************************************************************
+C51 COMPILER V9.51   ISR_1                                                                 04/30/2016 17:24:48 PAGE 3   
+
+ 115          * Function Name: isr_1_Stop
+ 116          ********************************************************************************
+ 117          *
+ 118          * Summary:
+ 119          *   Disables and removes the interrupt.
+ 120          *
+ 121          * Parameters:  
+ 122          *   None
+ 123          *
+ 124          * Return:
+ 125          *   None
+ 126          *
+ 127          *******************************************************************************/
+ 128          void isr_1_Stop(void) 
+ 129          {
+ 130   1          /* Disable this interrupt. */
+ 131   1          isr_1_Disable();
+ 132   1      }
+ 133          
+ 134          
+ 135          /*******************************************************************************
+ 136          * Function Name: isr_1_Interrupt
+ 137          ********************************************************************************
+ 138          *
+ 139          * Summary:
+ 140          *   The default Interrupt Service Routine for isr_1.
+ 141          *
+ 142          *   Add custom code between the START and END comments to keep the next version
+ 143          *   of this file from over-writing your code.
+ 144          *
+ 145          *   Note You may use either the default ISR by using this API, or you may define
+ 146          *   your own separate ISR through ISR_StartEx().
+ 147          *
+ 148          * Parameters:  
+ 149          *   None
+ 150          *
+ 151          * Return:
+ 152          *   None
+ 153          *
+ 154          *******************************************************************************/
+ 155          CY_ISR(isr_1_Interrupt)
+ 156          {
+ 157   1          #ifdef isr_1_INTERRUPT_INTERRUPT_CALLBACK
+                      isr_1_Interrupt_InterruptCallback();
+                  #endif /* isr_1_INTERRUPT_INTERRUPT_CALLBACK */
+ 160   1      
+ 161   1          /*  Place your Interrupt code here. */
+ 162   1          /* `#START isr_1_Interrupt` */
+ 163   1      
+ 164   1          extern int status;
+ 165   1              int k_imu;
+ 166   1                              
+ 167   1          for (k_imu = 0; k_imu<N_IMU; k_imu++) {    
+ 168   2              Chip_Select_Write(k_imu);
+ 169   2                  ReadIMU(k_imu);
+ 170   2          }    
+ 171   1          
+ 172   1              if (status==1){
+ 173   2                      // inizio invio corretto per software in C
+ 174   2              for(i=0; i<N_IMU; i++){   //inizio matrici dalle righe n=2
+ 175   3                      
+ 176   3                  UART_RS485_PutChar(':');
+C51 COMPILER V9.51   ISR_1                                                                 04/30/2016 17:24:48 PAGE 4   
+
+ 177   3                  for(j=0; j<6 ;j=j+2){
+ 178   4                                              
+ 179   4                                      UART_RS485_PutChar(Accel[i][j]);
+ 180   4                                      UART_RS485_PutChar(Accel[i][j+1]);
+ 181   4                                      //if(j!=4) UART_1_PutChar(',');
+ 182   4                              }
+ 183   3                                      
+ 184   3                              for(j=0; j<6 ;j=j+2){
+ 185   4                                      UART_RS485_PutChar(Gyro[i][j]);
+ 186   4                                      UART_RS485_PutChar(Gyro[i][j+1]);
+ 187   4                                      //if(j!=4)UART_1_PutChar(',');
+ 188   4                              }
+ 189   3                  UART_RS485_PutChar(':');
+ 190   3                                      
+ 191   3                      }  //   fine invio corretto per software in C*/ 
+ 192   2              status = 0;
+ 193   2                      }
+ 194   1          
+ 195   1          /* `#END` */
+ 196   1      
+ 197   1          /* PSoC3 ES1, ES2 RTC ISR PATCH  */ 
+ 198   1          #if(CYDEV_CHIP_FAMILY_USED == CYDEV_CHIP_FAMILY_PSOC3)
+ 199   1              #if((CYDEV_CHIP_REVISION_USED <= CYDEV_CHIP_REVISION_3A_ES2) && (isr_1__ES2_PATCH ))      
+                          isr_1_ISR_PATCH();
+                      #endif /* CYDEV_CHIP_REVISION_USED */
+ 202   1          #endif /* (CYDEV_CHIP_FAMILY_USED == CYDEV_CHIP_FAMILY_PSOC3) */
+ 203   1      }
+ 204          
+ 205          
+ 206          /*******************************************************************************
+ 207          * Function Name: isr_1_SetVector
+ 208          ********************************************************************************
+ 209          *
+ 210          * Summary:
+ 211          *   Change the ISR vector for the Interrupt. Note calling isr_1_Start
+ 212          *   will override any effect this method would have had. To set the vector 
+ 213          *   before the component has been started use isr_1_StartEx instead.
+ 214          * 
+ 215          *   When defining ISR functions, the CY_ISR and CY_ISR_PROTO macros should be 
+ 216          *   used to provide consistent definition across compilers:
+ 217          *
+ 218          *   Function definition example:
+ 219          *   CY_ISR(MyISR)
+ 220          *   {
+ 221          *   }
+ 222          *
+ 223          *   Function prototype example:
+ 224          *     CY_ISR_PROTO(MyISR);
+ 225          *
+ 226          * Parameters:
+ 227          *   address: Address of the ISR to set in the interrupt vector table.
+ 228          *
+ 229          * Return:
+ 230          *   None
+ 231          *
+ 232          *******************************************************************************/
+ 233          void isr_1_SetVector(cyisraddress address) 
+ 234          {
+ 235   1          CY_SET_REG16(isr_1_INTC_VECTOR, (uint16) address);
+ 236   1      }
+ 237          
+ 238          
+C51 COMPILER V9.51   ISR_1                                                                 04/30/2016 17:24:48 PAGE 5   
+
+ 239          /*******************************************************************************
+ 240          * Function Name: isr_1_GetVector
+ 241          ********************************************************************************
+ 242          *
+ 243          * Summary:
+ 244          *   Gets the "address" of the current ISR vector for the Interrupt.
+ 245          *
+ 246          * Parameters:
+ 247          *   None
+ 248          *
+ 249          * Return:
+ 250          *   Address of the ISR in the interrupt vector table.
+ 251          *
+ 252          *******************************************************************************/
+ 253          cyisraddress isr_1_GetVector(void) 
+ 254          {
+ 255   1          return (cyisraddress) CY_GET_REG16(isr_1_INTC_VECTOR);
+ 256   1      }
+ 257          
+ 258          
+ 259          /*******************************************************************************
+ 260          * Function Name: isr_1_SetPriority
+ 261          ********************************************************************************
+ 262          *
+ 263          * Summary:
+ 264          *   Sets the Priority of the Interrupt. 
+ 265          *
+ 266          *   Note calling isr_1_Start or isr_1_StartEx will 
+ 267          *   override any effect this API would have had. This API should only be called
+ 268          *   after isr_1_Start or isr_1_StartEx has been called. 
+ 269          *   To set the initial priority for the component, use the Design-Wide Resources
+ 270          *   Interrupt Editor.
+ 271          *
+ 272          *   Note This API has no effect on Non-maskable interrupt NMI).
+ 273          *
+ 274          * Parameters:
+ 275          *   priority: Priority of the interrupt, 0 being the highest priority
+ 276          *             PSoC 3 and PSoC 5LP: Priority is from 0 to 7.
+ 277          *             PSoC 4: Priority is from 0 to 3.
+ 278          *
+ 279          * Return:
+ 280          *   None
+ 281          *
+ 282          *******************************************************************************/
+ 283          void isr_1_SetPriority(uint8 priority) 
+ 284          {
+ 285   1          *isr_1_INTC_PRIOR = priority << 5;
+ 286   1      }
+ 287          
+ 288          
+ 289          /*******************************************************************************
+ 290          * Function Name: isr_1_GetPriority
+ 291          ********************************************************************************
+ 292          *
+ 293          * Summary:
+ 294          *   Gets the Priority of the Interrupt.
+ 295          *
+ 296          * Parameters:
+ 297          *   None
+ 298          *
+ 299          * Return:
+ 300          *   Priority of the interrupt, 0 being the highest priority
+C51 COMPILER V9.51   ISR_1                                                                 04/30/2016 17:24:48 PAGE 6   
+
+ 301          *    PSoC 3 and PSoC 5LP: Priority is from 0 to 7.
+ 302          *    PSoC 4: Priority is from 0 to 3.
+ 303          *
+ 304          *******************************************************************************/
+ 305          uint8 isr_1_GetPriority(void) 
+ 306          {
+ 307   1          uint8 priority;
+ 308   1      
+ 309   1      
+ 310   1          priority = *isr_1_INTC_PRIOR >> 5;
+ 311   1      
+ 312   1          return priority;
+ 313   1      }
+ 314          
+ 315          
+ 316          /*******************************************************************************
+ 317          * Function Name: isr_1_Enable
+ 318          ********************************************************************************
+ 319          *
+ 320          * Summary:
+ 321          *   Enables the interrupt to the interrupt controller. Do not call this function
+ 322          *   unless ISR_Start() has been called or the functionality of the ISR_Start() 
+ 323          *   function, which sets the vector and the priority, has been called.
+ 324          *
+ 325          * Parameters:
+ 326          *   None
+ 327          *
+ 328          * Return:
+ 329          *   None
+ 330          *
+ 331          *******************************************************************************/
+ 332          void isr_1_Enable(void) 
+ 333          {
+ 334   1          /* Enable the general interrupt. */
+ 335   1          *isr_1_INTC_SET_EN = isr_1__INTC_MASK;
+ 336   1      }
+ 337          
+ 338          
+ 339          /*******************************************************************************
+ 340          * Function Name: isr_1_GetState
+ 341          ********************************************************************************
+ 342          *
+ 343          * Summary:
+ 344          *   Gets the state (enabled, disabled) of the Interrupt.
+ 345          *
+ 346          * Parameters:
+ 347          *   None
+ 348          *
+ 349          * Return:
+ 350          *   1 if enabled, 0 if disabled.
+ 351          *
+ 352          *******************************************************************************/
+ 353          uint8 isr_1_GetState(void) 
+ 354          {
+ 355   1          /* Get the state of the general interrupt. */
+ 356   1          return ((*isr_1_INTC_SET_EN & (uint8)isr_1__INTC_MASK) != 0u) ? 1u:0u;
+ 357   1      }
+ 358          
+ 359          
+ 360          /*******************************************************************************
+ 361          * Function Name: isr_1_Disable
+ 362          ********************************************************************************
+C51 COMPILER V9.51   ISR_1                                                                 04/30/2016 17:24:48 PAGE 7   
+
+ 363          *
+ 364          * Summary:
+ 365          *   Disables the Interrupt in the interrupt controller.
+ 366          *
+ 367          * Parameters:
+ 368          *   None
+ 369          *
+ 370          * Return:
+ 371          *   None
+ 372          *
+ 373          *******************************************************************************/
+ 374          void isr_1_Disable(void) 
+ 375          {
+ 376   1          /* Disable the general interrupt. */
+ 377   1          *isr_1_INTC_CLR_EN = isr_1__INTC_MASK;
+ 378   1      }
+ 379          
+ 380          
+ 381          /*******************************************************************************
+ 382          * Function Name: isr_1_SetPending
+ 383          ********************************************************************************
+ 384          *
+ 385          * Summary:
+ 386          *   Causes the Interrupt to enter the pending state, a software method of
+ 387          *   generating the interrupt.
+ 388          *
+ 389          * Parameters:
+ 390          *   None
+ 391          *
+ 392          * Return:
+ 393          *   None
+ 394          *
+ 395          * Side Effects:
+ 396          *   If interrupts are enabled and the interrupt is set up properly, the ISR is
+ 397          *   entered (depending on the priority of this interrupt and other pending 
+ 398          *   interrupts).
+ 399          *
+ 400          *******************************************************************************/
+ 401          void isr_1_SetPending(void) 
+ 402          {
+ 403   1          *isr_1_INTC_SET_PD = isr_1__INTC_MASK;
+ 404   1      }
+ 405          
+ 406          
+ 407          /*******************************************************************************
+ 408          * Function Name: isr_1_ClearPending
+ 409          ********************************************************************************
+ 410          *
+ 411          * Summary:
+ 412          *   Clears a pending interrupt in the interrupt controller.
+ 413          *
+ 414          *   Note Some interrupt sources are clear-on-read and require the block 
+ 415          *   interrupt/status register to be read/cleared with the appropriate block API 
+ 416          *   (GPIO, UART, and so on). Otherwise the ISR will continue to remain in 
+ 417          *   pending state even though the interrupt itself is cleared using this API.
+ 418          *
+ 419          * Parameters:
+ 420          *   None
+ 421          *
+ 422          * Return:
+ 423          *   None
+ 424          *
+C51 COMPILER V9.51   ISR_1                                                                 04/30/2016 17:24:48 PAGE 8   
+
+ 425          *******************************************************************************/
+ 426          void isr_1_ClearPending(void) 
+ 427          {
+ 428   1          *isr_1_INTC_CLR_PD = isr_1__INTC_MASK;
+ 429   1      }
+ 430          
+ 431          #endif /* End check for removal by optimization */
+ 432          
+ 433          
+ 434          /* [] END OF FILE */
+C51 COMPILER V9.51   ISR_1                                                                 04/30/2016 17:24:48 PAGE 9   
+
+ASSEMBLY LISTING OF GENERATED OBJECT CODE
+
+
+             ; FUNCTION isr_1_Start (BEGIN)
+                                           ; SOURCE LINE # 55
+                                           ; SOURCE LINE # 56
+                                           ; SOURCE LINE # 58
+0000 120000      R     LCALL   isr_1_Disable
+                                           ; SOURCE LINE # 61
+0003 7E00        R     MOV     R6,#HIGH isr_1_Interrupt
+0005 7F00        R     MOV     R7,#LOW isr_1_Interrupt
+0007 120000      R     LCALL   _isr_1_SetVector
+                                           ; SOURCE LINE # 64
+000A 7F07              MOV     R7,#07H
+000C 120000      R     LCALL   _isr_1_SetPriority
+                                           ; SOURCE LINE # 67
+000F 120000      R     LCALL   isr_1_Enable
+                                           ; SOURCE LINE # 68
+0012 22                RET     
+             ; FUNCTION isr_1_Start (END)
+
+             ; FUNCTION _isr_1_StartEx (BEGIN)
+                                           ; SOURCE LINE # 98
+0000 900000      R     MOV     DPTR,#address
+0003 EE                MOV     A,R6
+0004 F0                MOVX    @DPTR,A
+0005 A3                INC     DPTR
+0006 EF                MOV     A,R7
+0007 F0                MOVX    @DPTR,A
+                                           ; SOURCE LINE # 99
+                                           ; SOURCE LINE # 101
+0008 120000      R     LCALL   isr_1_Disable
+                                           ; SOURCE LINE # 104
+000B 900000      R     MOV     DPTR,#address
+000E E0                MOVX    A,@DPTR
+000F FE                MOV     R6,A
+0010 A3                INC     DPTR
+0011 E0                MOVX    A,@DPTR
+0012 FF                MOV     R7,A
+0013 120000      R     LCALL   _isr_1_SetVector
+                                           ; SOURCE LINE # 107
+0016 7F07              MOV     R7,#07H
+0018 120000      R     LCALL   _isr_1_SetPriority
+                                           ; SOURCE LINE # 110
+001B 120000      R     LCALL   isr_1_Enable
+                                           ; SOURCE LINE # 111
+001E 22                RET     
+             ; FUNCTION _isr_1_StartEx (END)
+
+             ; FUNCTION isr_1_Stop (BEGIN)
+                                           ; SOURCE LINE # 128
+                                           ; SOURCE LINE # 129
+                                           ; SOURCE LINE # 131
+0000 120000      R     LCALL   isr_1_Disable
+                                           ; SOURCE LINE # 132
+0003 22                RET     
+             ; FUNCTION isr_1_Stop (END)
+
+             ; FUNCTION isr_1_Interrupt (BEGIN)
+0000 C0E0              PUSH    ACC
+0002 C0F0              PUSH    B
+0004 C083              PUSH    DPH
+C51 COMPILER V9.51   ISR_1                                                                 04/30/2016 17:24:48 PAGE 10  
+
+0006 C082              PUSH    DPL
+0008 C085              PUSH    DPH1
+000A C084              PUSH    DPL1
+000C C086              PUSH    DPS
+000E 758600            MOV     DPS,#00H
+0011 C000        E     PUSH    ?C?XPAGE1SFR
+0013 750000      E     MOV     ?C?XPAGE1SFR,#?C?XPAGE1RST
+0016 C0D0              PUSH    PSW
+0018 75D000            MOV     PSW,#00H
+001B C000              PUSH    AR0
+001D C001              PUSH    AR1
+001F C002              PUSH    AR2
+0021 C003              PUSH    AR3
+0023 C004              PUSH    AR4
+0025 C005              PUSH    AR5
+0027 C006              PUSH    AR6
+0029 C007              PUSH    AR7
+                                           ; SOURCE LINE # 155
+                                           ; SOURCE LINE # 167
+002B 900000      R     MOV     DPTR,#k_imu
+002E E4                CLR     A
+002F F0                MOVX    @DPTR,A
+0030 A3                INC     DPTR
+0031 F0                MOVX    @DPTR,A
+0032         ?C0004:
+0032 900000      R     MOV     DPTR,#k_imu
+0035 E0                MOVX    A,@DPTR
+0036 FE                MOV     R6,A
+0037 A3                INC     DPTR
+0038 E0                MOVX    A,@DPTR
+0039 FF                MOV     R7,A
+003A C3                CLR     C
+003B 9401              SUBB    A,#01H
+003D EE                MOV     A,R6
+003E 6480              XRL     A,#080H
+0040 9480              SUBB    A,#080H
+0042 501A              JNC     ?C0005
+                                           ; SOURCE LINE # 168
+0044 120000      E     LCALL   _Chip_Select_Write
+                                           ; SOURCE LINE # 169
+0047 900000      R     MOV     DPTR,#k_imu
+004A E0                MOVX    A,@DPTR
+004B FE                MOV     R6,A
+004C A3                INC     DPTR
+004D E0                MOVX    A,@DPTR
+004E FF                MOV     R7,A
+004F 120000      E     LCALL   _ReadIMU
+                                           ; SOURCE LINE # 170
+0052 900000      R     MOV     DPTR,#k_imu
+0055 E4                CLR     A
+0056 75F001            MOV     B,#01H
+0059 120000      E     LCALL   ?C?IILDX
+005C 80D4              SJMP    ?C0004
+005E         ?C0005:
+                                           ; SOURCE LINE # 172
+005E 900000      E     MOV     DPTR,#status
+0061 E0                MOVX    A,@DPTR
+0062 7004              JNZ     ?C0029
+0064 A3                INC     DPTR
+0065 E0                MOVX    A,@DPTR
+0066 6401              XRL     A,#01H
+0068         ?C0029:
+C51 COMPILER V9.51   ISR_1                                                                 04/30/2016 17:24:48 PAGE 11  
+
+0068 6003              JZ      $ + 5H
+006A 020000      R     LJMP    ?C0017
+                                           ; SOURCE LINE # 174
+006D 900000      R     MOV     DPTR,#i
+0070 F0                MOVX    @DPTR,A
+0071 A3                INC     DPTR
+0072 F0                MOVX    @DPTR,A
+0073         ?C0008:
+0073 C3                CLR     C
+0074 900000      R     MOV     DPTR,#i+01H
+0077 E0                MOVX    A,@DPTR
+0078 9401              SUBB    A,#01H
+007A 900000      R     MOV     DPTR,#i
+007D E0                MOVX    A,@DPTR
+007E 6480              XRL     A,#080H
+0080 9480              SUBB    A,#080H
+0082 4003              JC      $ + 5H
+0084 020000      R     LJMP    ?C0009
+                                           ; SOURCE LINE # 176
+0087 7F3A              MOV     R7,#03AH
+0089 120000      E     LCALL   _UART_RS485_PutChar
+                                           ; SOURCE LINE # 177
+008C 900000      R     MOV     DPTR,#j
+008F E4                CLR     A
+0090 F0                MOVX    @DPTR,A
+0091 A3                INC     DPTR
+0092 F0                MOVX    @DPTR,A
+0093         ?C0011:
+0093 900000      R     MOV     DPTR,#j
+0096 E0                MOVX    A,@DPTR
+0097 FE                MOV     R6,A
+0098 A3                INC     DPTR
+0099 E0                MOVX    A,@DPTR
+009A FF                MOV     R7,A
+009B C3                CLR     C
+009C 9406              SUBB    A,#06H
+009E EE                MOV     A,R6
+009F 6480              XRL     A,#080H
+00A1 9480              SUBB    A,#080H
+00A3 5064              JNC     ?C0012
+                                           ; SOURCE LINE # 179
+00A5 900000      R     MOV     DPTR,#i
+00A8 E0                MOVX    A,@DPTR
+00A9 FC                MOV     R4,A
+00AA A3                INC     DPTR
+00AB E0                MOVX    A,@DPTR
+00AC 900000      R     MOV     DPTR,#Accel
+00AF 75F006            MOV     B,#06H
+00B2 120000      E     LCALL   ?C?OFFXADD
+00B5 EC                MOV     A,R4
+00B6 75F006            MOV     B,#06H
+00B9 A4                MUL     AB
+00BA 2583              ADD     A,DPH
+00BC F583              MOV     DPH,A
+00BE E582              MOV     A,DPL
+00C0 2F                ADD     A,R7
+00C1 F582              MOV     DPL,A
+00C3 E583              MOV     A,DPH
+00C5 3E                ADDC    A,R6
+00C6 F583              MOV     DPH,A
+00C8 E0                MOVX    A,@DPTR
+00C9 FF                MOV     R7,A
+C51 COMPILER V9.51   ISR_1                                                                 04/30/2016 17:24:48 PAGE 12  
+
+00CA 120000      E     LCALL   _UART_RS485_PutChar
+                                           ; SOURCE LINE # 180
+00CD 900000      R     MOV     DPTR,#j
+00D0 E0                MOVX    A,@DPTR
+00D1 FE                MOV     R6,A
+00D2 A3                INC     DPTR
+00D3 E0                MOVX    A,@DPTR
+00D4 FF                MOV     R7,A
+00D5 900000      R     MOV     DPTR,#i
+00D8 E0                MOVX    A,@DPTR
+00D9 FC                MOV     R4,A
+00DA A3                INC     DPTR
+00DB E0                MOVX    A,@DPTR
+00DC 900000      R     MOV     DPTR,#Accel+01H
+00DF 75F006            MOV     B,#06H
+00E2 120000      E     LCALL   ?C?OFFXADD
+00E5 EC                MOV     A,R4
+00E6 75F006            MOV     B,#06H
+00E9 A4                MUL     AB
+00EA 2583              ADD     A,DPH
+00EC F583              MOV     DPH,A
+00EE E582              MOV     A,DPL
+00F0 2F                ADD     A,R7
+00F1 F582              MOV     DPL,A
+00F3 E583              MOV     A,DPH
+00F5 3E                ADDC    A,R6
+00F6 F583              MOV     DPH,A
+00F8 E0                MOVX    A,@DPTR
+00F9 FF                MOV     R7,A
+00FA 120000      E     LCALL   _UART_RS485_PutChar
+                                           ; SOURCE LINE # 182
+00FD 900000      R     MOV     DPTR,#j
+0100 E4                CLR     A
+0101 75F002            MOV     B,#02H
+0104 120000      E     LCALL   ?C?IILDX
+0107 808A              SJMP    ?C0011
+0109         ?C0012:
+                                           ; SOURCE LINE # 184
+0109 900000      R     MOV     DPTR,#j
+010C E4                CLR     A
+010D F0                MOVX    @DPTR,A
+010E A3                INC     DPTR
+010F F0                MOVX    @DPTR,A
+0110         ?C0014:
+0110 900000      R     MOV     DPTR,#j
+0113 E0                MOVX    A,@DPTR
+0114 FE                MOV     R6,A
+0115 A3                INC     DPTR
+0116 E0                MOVX    A,@DPTR
+0117 FF                MOV     R7,A
+0118 C3                CLR     C
+0119 9406              SUBB    A,#06H
+011B EE                MOV     A,R6
+011C 6480              XRL     A,#080H
+011E 9480              SUBB    A,#080H
+0120 5064              JNC     ?C0015
+                                           ; SOURCE LINE # 185
+0122 900000      R     MOV     DPTR,#i
+0125 E0                MOVX    A,@DPTR
+0126 FC                MOV     R4,A
+0127 A3                INC     DPTR
+0128 E0                MOVX    A,@DPTR
+C51 COMPILER V9.51   ISR_1                                                                 04/30/2016 17:24:48 PAGE 13  
+
+0129 900000      R     MOV     DPTR,#Gyro
+012C 75F006            MOV     B,#06H
+012F 120000      E     LCALL   ?C?OFFXADD
+0132 EC                MOV     A,R4
+0133 75F006            MOV     B,#06H
+0136 A4                MUL     AB
+0137 2583              ADD     A,DPH
+0139 F583              MOV     DPH,A
+013B E582              MOV     A,DPL
+013D 2F                ADD     A,R7
+013E F582              MOV     DPL,A
+0140 E583              MOV     A,DPH
+0142 3E                ADDC    A,R6
+0143 F583              MOV     DPH,A
+0145 E0                MOVX    A,@DPTR
+0146 FF                MOV     R7,A
+0147 120000      E     LCALL   _UART_RS485_PutChar
+                                           ; SOURCE LINE # 186
+014A 900000      R     MOV     DPTR,#j
+014D E0                MOVX    A,@DPTR
+014E FE                MOV     R6,A
+014F A3                INC     DPTR
+0150 E0                MOVX    A,@DPTR
+0151 FF                MOV     R7,A
+0152 900000      R     MOV     DPTR,#i
+0155 E0                MOVX    A,@DPTR
+0156 FC                MOV     R4,A
+0157 A3                INC     DPTR
+0158 E0                MOVX    A,@DPTR
+0159 900000      R     MOV     DPTR,#Gyro+01H
+015C 75F006            MOV     B,#06H
+015F 120000      E     LCALL   ?C?OFFXADD
+0162 EC                MOV     A,R4
+0163 75F006            MOV     B,#06H
+0166 A4                MUL     AB
+0167 2583              ADD     A,DPH
+0169 F583              MOV     DPH,A
+016B E582              MOV     A,DPL
+016D 2F                ADD     A,R7
+016E F582              MOV     DPL,A
+0170 E583              MOV     A,DPH
+0172 3E                ADDC    A,R6
+0173 F583              MOV     DPH,A
+0175 E0                MOVX    A,@DPTR
+0176 FF                MOV     R7,A
+0177 120000      E     LCALL   _UART_RS485_PutChar
+                                           ; SOURCE LINE # 188
+017A 900000      R     MOV     DPTR,#j
+017D E4                CLR     A
+017E 75F002            MOV     B,#02H
+0181 120000      E     LCALL   ?C?IILDX
+0184 808A              SJMP    ?C0014
+0186         ?C0015:
+                                           ; SOURCE LINE # 189
+0186 7F3A              MOV     R7,#03AH
+0188 120000      E     LCALL   _UART_RS485_PutChar
+                                           ; SOURCE LINE # 191
+018B 900000      R     MOV     DPTR,#i
+018E E4                CLR     A
+018F 75F001            MOV     B,#01H
+0192 120000      E     LCALL   ?C?IILDX
+0195 020000      R     LJMP    ?C0008
+C51 COMPILER V9.51   ISR_1                                                                 04/30/2016 17:24:48 PAGE 14  
+
+0198         ?C0009:
+                                           ; SOURCE LINE # 192
+0198 900000      E     MOV     DPTR,#status
+019B E4                CLR     A
+019C F0                MOVX    @DPTR,A
+019D A3                INC     DPTR
+019E F0                MOVX    @DPTR,A
+                                           ; SOURCE LINE # 193
+                                           ; SOURCE LINE # 203
+019F         ?C0017:
+019F D007              POP     AR7
+01A1 D006              POP     AR6
+01A3 D005              POP     AR5
+01A5 D004              POP     AR4
+01A7 D003              POP     AR3
+01A9 D002              POP     AR2
+01AB D001              POP     AR1
+01AD D000              POP     AR0
+01AF D0D0              POP     PSW
+01B1 D000        E     POP     ?C?XPAGE1SFR
+01B3 D086              POP     DPS
+01B5 D084              POP     DPL1
+01B7 D085              POP     DPH1
+01B9 D082              POP     DPL
+01BB D083              POP     DPH
+01BD D0F0              POP     B
+01BF D0E0              POP     ACC
+01C1 32                RETI    
+             ; FUNCTION isr_1_Interrupt (END)
+
+             ; FUNCTION _isr_1_SetVector (BEGIN)
+                                           ; SOURCE LINE # 233
+;---- Variable 'address' assigned to Register 'R6/R7' ----
+                                           ; SOURCE LINE # 234
+                                           ; SOURCE LINE # 235
+0000 7B02              MOV     R3,#02H
+0002 7A44              MOV     R2,#044H
+0004 7902              MOV     R1,#02H
+0006 AD07              MOV     R5,AR7
+0008 AC06              MOV     R4,AR6
+000A 120000      E     LCALL   _cywrite16_nodpx
+                                           ; SOURCE LINE # 236
+000D 22                RET     
+             ; FUNCTION _isr_1_SetVector (END)
+
+             ; FUNCTION isr_1_GetVector (BEGIN)
+                                           ; SOURCE LINE # 253
+                                           ; SOURCE LINE # 254
+                                           ; SOURCE LINE # 255
+0000 7B02              MOV     R3,#02H
+0002 7A44              MOV     R2,#044H
+0004 7902              MOV     R1,#02H
+0006 120000      E     LCALL   _cyread16_nodpx
+                                           ; SOURCE LINE # 256
+0009         ?C0019:
+0009 22                RET     
+             ; FUNCTION isr_1_GetVector (END)
+
+             ; FUNCTION _isr_1_SetPriority (BEGIN)
+                                           ; SOURCE LINE # 283
+;---- Variable 'priority' assigned to Register 'R7' ----
+                                           ; SOURCE LINE # 284
+C51 COMPILER V9.51   ISR_1                                                                 04/30/2016 17:24:48 PAGE 15  
+
+                                           ; SOURCE LINE # 285
+0000 EF                MOV     A,R7
+0001 C4                SWAP    A
+0002 33                RLC     A
+0003 54E0              ANL     A,#0E0H
+0005 904481            MOV     DPTR,#04481H
+0008 F0                MOVX    @DPTR,A
+                                           ; SOURCE LINE # 286
+0009 22                RET     
+             ; FUNCTION _isr_1_SetPriority (END)
+
+             ; FUNCTION isr_1_GetPriority (BEGIN)
+                                           ; SOURCE LINE # 305
+                                           ; SOURCE LINE # 306
+                                           ; SOURCE LINE # 310
+0000 904481            MOV     DPTR,#04481H
+0003 E0                MOVX    A,@DPTR
+0004 FF                MOV     R7,A
+0005 C4                SWAP    A
+0006 13                RRC     A
+0007 5407              ANL     A,#07H
+0009 FF                MOV     R7,A
+;---- Variable 'priority' assigned to Register 'R7' ----
+                                           ; SOURCE LINE # 312
+                                           ; SOURCE LINE # 313
+000A         ?C0021:
+000A 22                RET     
+             ; FUNCTION isr_1_GetPriority (END)
+
+             ; FUNCTION isr_1_Enable (BEGIN)
+                                           ; SOURCE LINE # 332
+                                           ; SOURCE LINE # 333
+                                           ; SOURCE LINE # 335
+0000 9044C0            MOV     DPTR,#044C0H
+0003 7402              MOV     A,#02H
+0005 F0                MOVX    @DPTR,A
+                                           ; SOURCE LINE # 336
+0006 22                RET     
+             ; FUNCTION isr_1_Enable (END)
+
+             ; FUNCTION isr_1_GetState (BEGIN)
+                                           ; SOURCE LINE # 353
+                                           ; SOURCE LINE # 354
+                                           ; SOURCE LINE # 356
+0000 9044C0            MOV     DPTR,#044C0H
+0003 E0                MOVX    A,@DPTR
+0004 30E104            JNB     ACC.1,?C0023
+0007 7F01              MOV     R7,#01H
+0009 8002              SJMP    ?C0024
+000B         ?C0023:
+000B 7F00              MOV     R7,#00H
+000D         ?C0024:
+                                           ; SOURCE LINE # 357
+000D         ?C0025:
+000D 22                RET     
+             ; FUNCTION isr_1_GetState (END)
+
+             ; FUNCTION isr_1_Disable (BEGIN)
+                                           ; SOURCE LINE # 374
+                                           ; SOURCE LINE # 375
+                                           ; SOURCE LINE # 377
+0000 9044C8            MOV     DPTR,#044C8H
+C51 COMPILER V9.51   ISR_1                                                                 04/30/2016 17:24:48 PAGE 16  
+
+0003 7402              MOV     A,#02H
+0005 F0                MOVX    @DPTR,A
+                                           ; SOURCE LINE # 378
+0006 22                RET     
+             ; FUNCTION isr_1_Disable (END)
+
+             ; FUNCTION isr_1_SetPending (BEGIN)
+                                           ; SOURCE LINE # 401
+                                           ; SOURCE LINE # 402
+                                           ; SOURCE LINE # 403
+0000 9044D0            MOV     DPTR,#044D0H
+0003 7402              MOV     A,#02H
+0005 F0                MOVX    @DPTR,A
+                                           ; SOURCE LINE # 404
+0006 22                RET     
+             ; FUNCTION isr_1_SetPending (END)
+
+             ; FUNCTION isr_1_ClearPending (BEGIN)
+                                           ; SOURCE LINE # 426
+                                           ; SOURCE LINE # 427
+                                           ; SOURCE LINE # 428
+0000 9044D8            MOV     DPTR,#044D8H
+0003 7402              MOV     A,#02H
+0005 F0                MOVX    @DPTR,A
+                                           ; SOURCE LINE # 429
+0006 22                RET     
+             ; FUNCTION isr_1_ClearPending (END)
+
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    591    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =     16       4
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+   EDATA SIZE       =   ----    ----
+   HDATA SIZE       =   ----    ----
+   XDATA CONST SIZE =   ----    ----
+   FAR CONST SIZE   =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

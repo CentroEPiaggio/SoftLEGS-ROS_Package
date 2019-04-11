@@ -1,0 +1,2 @@
+set(qb_legs_gui_MESSAGE_FILES "/home/riccardo/catkin_ws/src/Qb_Legs_Synergies/qb_legs_gui/msg/bias.msg;/home/riccardo/catkin_ws/src/Qb_Legs_Synergies/qb_legs_gui/msg/data_msg.msg;/home/riccardo/catkin_ws/src/Qb_Legs_Synergies/qb_legs_gui/msg/data_corr_AT.msg;/home/riccardo/catkin_ws/src/Qb_Legs_Synergies/qb_legs_gui/msg/gain_bias_err.msg;/home/riccardo/catkin_ws/src/Qb_Legs_Synergies/qb_legs_gui/msg/GG_msg.msg")
+set(qb_legs_gui_SERVICE_FILES "")

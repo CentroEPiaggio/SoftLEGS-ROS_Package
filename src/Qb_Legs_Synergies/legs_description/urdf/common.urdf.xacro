@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://ros.org/wiki/xacro">
+
+	<xacro:property name="negligible_inertia_multiplier" value="0.00001" />
+
+	<!-- common cube properties -->
+	<xacro:property name="damping_all" value="1" />
+	<xacro:property name="pi" value="3.1415926535897931" />
+	<xacro:property name="low_b" value="-90" />
+	<xacro:property name="up_b" value="90" />
+	<xacro:property name="velocity" value="0.005" />
+	<xacro:property name="effort" value="100" />
+	<xacro:property name="cube_size" value="66" />
+	<xacro:property name="scale_f" value="1000" />
+	<xacro:property name="mm2_to_m2" value="0.000001"/>
+
+	<!-- version specific properties -->
+	<!-- advanced -->
+	<xacro:property name="advanced_cube_mass" value="0.575" />
+	<!-- maker-pro -->
+	<xacro:property name="makerpro_cube_mass" value="0.25" />
+
+	<!-- connectors properties -->
+	<xacro:property name="c_flange" value="91" />
+	<xacro:property name="c_flange_mass" value="0.1" />
+	<xacro:property name="c_flange_com_z" value="48" />
+	<xacro:property name="c2_flange" value="120" />
+	<xacro:property name="c2_flange_com_z" value="72" />
+
+</robot>

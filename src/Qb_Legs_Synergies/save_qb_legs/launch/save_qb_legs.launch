@@ -1,0 +1,3 @@
+<launch>
+<node pkg="save_qb_legs" name="save_qb_legs" type="save_qb_legs"/>
+</launch>

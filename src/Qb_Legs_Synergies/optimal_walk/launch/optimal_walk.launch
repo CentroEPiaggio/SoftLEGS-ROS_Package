@@ -1,0 +1,3 @@
+<launch>
+    <node pkg="optimal_walk" name="optimal_walk_control" type="optimal_walk" output="screen"/>
+</launch>

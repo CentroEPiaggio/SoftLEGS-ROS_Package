@@ -1,0 +1,48 @@
+<launch>
+
+    <!-- `bag_name`   prefix name of the bag file -->
+    <!-- `topic`      topic to be saved -->
+
+    <arg name="saving_dir" />
+    <arg name="sub_folder" />
+
+    <!-- define topic to be Recorded -->
+    <!-- stride parameters -->
+    <arg name="bag_name1"   default="v" /> 
+    <arg name="topic1"      default="/synergies_des_speed" />
+    <arg name="bag_name2"   default="L" /> 
+    <arg name="topic2"      default="/synergies_des_length" />
+    <arg name="bag_name3"   default="fh" /> 
+    <arg name="topic3"      default="/synergies_des_foot_height" />
+    <!-- walking parameters -->
+    <arg name="bag_name4"   default="ref" /> 
+    <arg name="topic4"      default="/check_PushRecovery/ref" />
+    <arg name="bag_name5"   default="icp" /> 
+    <arg name="topic5"      default="/check_PushRecovery/icp" />
+    <!-- sensor recording -->
+    <arg name="bag_name6"   default="filt_fz1" /> 
+    <arg name="topic6"      default="/check_PushRecovery/fz1" />
+    <arg name="bag_name7"   default="filt_fz2" /> 
+    <arg name="topic7"      default="/check_PushRecovery/fz2" />
+    <arg name="bag_name8"   default="vel_from_dist" /> 
+    <arg name="topic8"      default="/current_vel" />
+    <!-- walking phase -->
+    <arg name="bag_name9"   default="robot_phase" /> 
+    <arg name="topic9"      default="/check_PushRecovery/robot_phase" />
+
+    <!-- launch Topic Recording -->
+    <!-- stride parameters -->
+    <node pkg="rosbag" type="record" name="record_vel"         args="record -o $(arg saving_dir)$(arg sub_folder)$(arg bag_name1) $(arg topic1)"/> 
+    <node pkg="rosbag" type="record" name="record_len"         args="record -o $(arg saving_dir)$(arg sub_folder)$(arg bag_name2) $(arg topic2)"/> 
+    <node pkg="rosbag" type="record" name="record_fh"          args="record -o $(arg saving_dir)$(arg sub_folder)$(arg bag_name3) $(arg topic3)"/> 
+    <!-- walking parameters -->
+    <node pkg="rosbag" type="record" name="record_ref"         args="record -o $(arg saving_dir)$(arg sub_folder)$(arg bag_name4) $(arg topic4)"/> 
+    <node pkg="rosbag" type="record" name="record_icp"         args="record -o $(arg saving_dir)$(arg sub_folder)$(arg bag_name5) $(arg topic5)"/> 
+    <!-- sensor recording -->
+    <node pkg="rosbag" type="record" name="record_filt_fz1"      args="record -o $(arg saving_dir)$(arg sub_folder)$(arg bag_name6) $(arg topic6)"/> 
+    <node pkg="rosbag" type="record" name="record_filt_fz2"      args="record -o $(arg saving_dir)$(arg sub_folder)$(arg bag_name7) $(arg topic7)"/>
+    <node pkg="rosbag" type="record" name="record_vel_from_dist" args="record -o $(arg saving_dir)$(arg sub_folder)$(arg bag_name8) $(arg topic8)"/>  
+    <!-- walking phase -->
+    <node pkg="rosbag" type="record" name="record_robot_phase" args="record -o $(arg saving_dir)$(arg sub_folder)$(arg bag_name9) $(arg topic9)"/> 
+
+</launch>

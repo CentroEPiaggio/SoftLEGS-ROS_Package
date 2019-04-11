@@ -1,0 +1,3 @@
+<launch>
+<node pkg="zmp_walk" name="zmp_walk_control" type="zmp_walk" output="screen"/>
+</launch>

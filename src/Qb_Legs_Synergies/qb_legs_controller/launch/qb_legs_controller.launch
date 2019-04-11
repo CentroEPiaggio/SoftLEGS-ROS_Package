@@ -1,0 +1,3 @@
+<launch>
+<node pkg="qb_legs_controller" name="qb_legs_controller" type="qb_legs_controller" output="screen"/>
+</launch>

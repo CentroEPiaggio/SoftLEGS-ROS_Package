@@ -1,0 +1,8 @@
+prefix=/home/riccardo/catkin_ws/install
+
+Name: qb_move_control
+Description: Description of qb_move_control
+Version: 0.7.7
+Cflags: -I/home/riccardo/catkin_ws/install/include
+Libs: -L/home/riccardo/catkin_ws/install/lib -llibqb_move_control
+Requires: roscpp qb_device_control qb_move_hardware_interface

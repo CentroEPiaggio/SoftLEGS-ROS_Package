@@ -1,0 +1,20 @@
+<launch>
+    <arg name="gui"  default="false" />
+    <arg name="rviz" default="true" />
+    <arg name="test" default="false" />
+    <arg name="rvizconfig" default="$(find qblegs-ros)/rviz/qblegs.rviz" />
+    
+    <!-- send the bigman robot XML to param server -->
+    <param name="robot_description" command="$(find xacro)/xacro.py '$(find qblegs-ros)/urdf/qblegs_robot.urdf.xacro'" />
+
+    <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" >
+        <rosparam param="source_list">["/my_data"]</rosparam>
+        <param name="use_gui" value="$(arg gui)"/>
+    </node>
+
+    <!-- start robot state publisher -->
+    <node pkg="robot_state_publisher" type="robot_state_publisher" name="robot_state_publisher" output="screen" />
+    
+  <node name="rviz" pkg="rviz" type="rviz" args="-d $(arg rvizconfig)" required="true" /> 
+
+</launch>

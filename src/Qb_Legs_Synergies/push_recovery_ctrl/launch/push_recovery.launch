@@ -1,0 +1,22 @@
+<launch>
+
+    <!-- _____ VARIABLES _____ -->
+    <arg name="stiffness"   default="geometry_msgs/Pose -- '[40, 30, 30]' '[35, 40, 40, 0']"/>
+
+
+    <!-- _____ SENSORS _____ -->
+    <!-- IMU -->
+    <include file="$(find imu_management)/launch/imu_meas_to_push_recovery.launch"/>
+    <!-- DISTANCE SENSOR -->
+    <include file="$(find distance_sensor)/launch/compute_dist_vel.launch" />
+    <!-- FORCE SENSOR -->
+    <!-- <include file="$(find opto_wrenches)/launch/opto_wrenches.launch" /> -->
+
+    <!-- _____ SYNERIGIES and PUSH RECOVERY _____ -->
+    <node name="synergies_3param" pkg="synergies" type="synergies_3param" output="screen" /> 
+    <node name="push_recovery_ctrl" pkg="push_recovery_ctrl" type="push_recovery_ctrl" output="screen"/>
+
+    <!-- ______ PUBLISH TOPICS ______ -->
+    <node pkg="rostopic" type="rostopic" name="stiffnes" args="pub -1 /qb_legs_stiffness $(arg stiffness)"/>
+
+</launch>

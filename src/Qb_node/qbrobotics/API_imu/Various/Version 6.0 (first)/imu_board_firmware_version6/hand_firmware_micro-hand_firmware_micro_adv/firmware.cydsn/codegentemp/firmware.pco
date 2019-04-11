@@ -1,0 +1,135 @@
+# firmware
+# 2016-08-31 13:58:28Z
+
+# IO_2@[IOP=(1)][IoId=(2)] is reserved: XresEnabled
+dont_use_io iocell 1 2
+dont_use_location comparatorcell -1 -1 2
+dont_use_location comparatorcell -1 -1 3
+dont_use_location sccell -1 -1 0
+dont_use_location sccell -1 -1 1
+dont_use_location sccell -1 -1 2
+dont_use_location sccell -1 -1 3
+dont_use_location vidaccell -1 -1 1
+dont_use_location vidaccell -1 -1 2
+dont_use_location vidaccell -1 -1 3
+dont_use_location abufcell -1 -1 0
+dont_use_location abufcell -1 -1 2
+dont_use_location abufcell -1 -1 1
+dont_use_location abufcell -1 -1 3
+set_location "\UART_RS485:BUART:rx_state_2_split\" 3 3 0 0
+set_location "ClockBlock" clockblockcell -1 -1 0
+set_io "RS_485_EN(0)" iocell 2 6
+set_io "RS485_TX(0)" iocell 2 7
+set_io "RS485_RX(0)" iocell 2 5
+set_io "USB_VDD(0)" iocell 2 4
+set_io "FTDI_ENABLE(0)" iocell 2 3
+set_io "MISO(0)" iocell 0 0
+set_io "MOSI(0)" iocell 12 3
+set_io "SCLK(0)" iocell 1 1
+set_io "CS01(0)" iocell 0 5
+set_io "CS02(0)" iocell 0 6
+set_io "CS03(0)" iocell 0 1
+set_io "CS04(0)" iocell 0 2
+set_io "CS05(0)" iocell 0 3
+set_io "CS06(0)" iocell 15 2
+set_io "CS07(0)" iocell 12 1
+set_io "CS08(0)" iocell 12 0
+set_io "CS09(0)" iocell 15 1
+set_io "CS10(0)" iocell 15 0
+set_io "CS11(0)" iocell 1 7
+set_io "CS12(0)" iocell 1 6
+set_io "CS13(0)" iocell 1 5
+set_io "CS14(0)" iocell 1 4
+set_io "CS15(0)" iocell 12 2
+set_io "CS16(0)" iocell 0 7
+set_io "CS00(0)" iocell 0 4
+set_io "Opto_Pin(0)" iocell 1 3
+set_location "Net_2627" 1 4 0 0
+set_location "\UART_RS485:BUART:counter_load_not\" 3 1 0 1
+set_location "\UART_RS485:BUART:tx_status_0\" 3 0 1 2
+set_location "\UART_RS485:BUART:tx_status_2\" 1 4 0 2
+set_location "\UART_RS485:BUART:rx_counter_load\" 2 3 0 3
+set_location "\UART_RS485:BUART:rx_status_4\" 1 5 1 3
+set_location "\UART_RS485:BUART:rx_status_5\" 2 2 1 3
+set_location "\MY_TIMER:TimerUDB:status_tc\" 0 5 0 0
+set_location "Net_6183" 2 2 0 2
+set_location "\SPI_IMU:BSPIM:load_rx_data\" 2 0 0 2
+set_location "\SPI_IMU:BSPIM:tx_status_0\" 2 0 0 1
+set_location "\SPI_IMU:BSPIM:tx_status_4\" 2 1 1 3
+set_location "\SPI_IMU:BSPIM:rx_status_6\" 2 0 0 3
+set_location "Net_241" 3 2 1 3
+set_location "Net_243" 3 1 0 2
+set_location "Net_245" 3 2 1 1
+set_location "Net_250" 3 1 1 0
+set_location "Net_255" 3 1 1 2
+set_location "Net_257" 3 1 0 3
+set_location "Net_252" 2 1 0 0
+set_location "Net_248" 2 1 0 1
+set_location "Net_242" 3 2 1 0
+set_location "Net_244" 2 2 0 0
+set_location "Net_246" 3 2 1 2
+set_location "Net_254" 3 1 1 1
+set_location "Net_258" 3 1 1 3
+set_location "Net_256" 2 1 0 3
+set_location "Net_251" 2 1 0 2
+set_location "Net_247" 3 2 0 2
+set_location "Net_3798" 3 2 0 3
+set_location "ISR_RS485_RX" interrupt -1 -1 0
+set_location "\PACER_TIMER:TimerHW\" timercell -1 -1 0
+set_location "__ZERO__" 0 1 0 2
+set_location "__ONE__" 2 5 0 1
+set_location "\UART_RS485:RXInternalInterrupt\" interrupt -1 -1 1
+set_location "\UART_RS485:BUART:sTX:TxShifter:u0\" 3 0 2
+set_location "\UART_RS485:BUART:sTX:sCLOCK:TxBitClkGen\" 3 1 2
+set_location "\UART_RS485:BUART:sTX:TxSts\" 3 0 4
+set_location "\UART_RS485:BUART:sRX:RxShifter:u0\" 2 3 2
+set_location "\UART_RS485:BUART:sRX:RxBitCounter\" 2 3 7
+set_location "\UART_RS485:BUART:sRX:RxSts\" 1 5 4
+set_location "\RS485_CTS:Sync:ctrl_reg\" 1 4 6
+set_location "\FTDI_ENABLE_REG:Sync:ctrl_reg\" 0 4 6
+set_location "\RESET_FF:Sync:ctrl_reg\" 2 0 6
+set_location "\FF_STATUS:sts:sts_reg\" 2 2 3
+set_location "\MY_TIMER:TimerUDB:sCTRLReg:SyncCtl:ctrlreg\" 0 5 6
+set_location "\MY_TIMER:TimerUDB:rstSts:stsreg\" 0 5 4
+set_location "\MY_TIMER:TimerUDB:sT24:timerdp:u0\" 1 4 2
+set_location "\MY_TIMER:TimerUDB:sT24:timerdp:u1\" 0 4 2
+set_location "\MY_TIMER:TimerUDB:sT24:timerdp:u2\" 0 5 2
+set_location "\Sync_1:genblk1[0]:INST\" 0 4 5 0
+set_location "ISR_WATCHDOG" interrupt -1 -1 18
+set_location "\WATCHDOG_COUNTER:CounterHW\" timercell -1 -1 1
+set_location "\WATCHDOG_ENABLER:Sync:ctrl_reg\" 1 5 6
+set_location "\WATCHDOG_REFRESH:Sync:ctrl_reg\" 2 2 6
+set_location "\SPI_IMU:BSPIM:BitCounter\" 2 1 7
+set_location "\SPI_IMU:BSPIM:TxStsReg\" 1 4 4
+set_location "\SPI_IMU:BSPIM:RxStsReg\" 2 0 4
+set_location "\SPI_IMU:BSPIM:sR8:Dp:u0\" 2 2 2
+set_location "\Chip_Select_A:Sync:ctrl_reg\" 3 1 6
+set_location "isr_imu" interrupt -1 -1 2
+set_location "\Chip_Select_B:Sync:ctrl_reg\" 3 2 6
+set_location "Net_6020" 3 0 1 3
+set_location "\UART_RS485:BUART:txn\" 3 0 0 0
+set_location "\UART_RS485:BUART:tx_state_1\" 3 0 0 1
+set_location "\UART_RS485:BUART:tx_state_0\" 3 0 1 0
+set_location "\UART_RS485:BUART:tx_state_2\" 3 1 0 0
+set_location "\UART_RS485:BUART:tx_bitclk\" 3 0 1 1
+set_location "\UART_RS485:BUART:rx_state_1\" 3 3 1 1
+set_location "\UART_RS485:BUART:rx_state_0\" 3 3 1 0
+set_location "\UART_RS485:BUART:rx_load_fifo\" 1 4 1 3
+set_location "\UART_RS485:BUART:rx_state_3\" 3 3 1 2
+set_location "\UART_RS485:BUART:rx_state_2\" 2 3 0 0
+set_location "\UART_RS485:BUART:rx_bitclk_enable\" 2 2 1 0
+set_location "\UART_RS485:BUART:rx_state_stop1_reg\" 2 3 0 2
+set_location "\UART_RS485:BUART:rx_status_1\" 2 3 1 1
+set_location "\UART_RS485:BUART:rx_status_3\" 2 3 1 3
+set_location "\UART_RS485:BUART:rx_break_detect\" 2 3 1 0
+set_location "\UART_RS485:BUART:rx_last\" 2 3 1 2
+set_location "cy_srff_1" 2 2 0 1
+set_location "Net_3669" 3 2 0 0
+set_location "\SPI_IMU:BSPIM:state_2\" 2 1 1 2
+set_location "\SPI_IMU:BSPIM:state_1\" 2 1 1 0
+set_location "\SPI_IMU:BSPIM:state_0\" 2 0 1 1
+set_location "Net_3671" 3 2 0 1
+set_location "\SPI_IMU:BSPIM:load_cond\" 2 0 1 0
+set_location "RS485_RX(0)_SYNC" 3 3 5 0
+set_location "\SPI_IMU:BSPIM:cnt_enable\" 2 0 0 0
+set_location "Net_3670" 2 1 1 1

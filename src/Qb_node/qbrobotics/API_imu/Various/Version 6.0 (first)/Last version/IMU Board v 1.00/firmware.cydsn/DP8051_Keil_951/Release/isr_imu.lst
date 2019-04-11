@@ -1,0 +1,1572 @@
+C51 COMPILER V9.51   ISR_IMU                                                               09/22/2016 17:24:20 PAGE 1   
+
+
+C51 COMPILER V9.51, COMPILATION OF MODULE ISR_IMU
+OBJECT MODULE PLACED IN .\DP8051_Keil_951\Release\isr_imu.obj
+COMPILER INVOKED BY: C:\Program Files (x86)\Cypress\PSoC Creator\3.3\PSoC Creator\import\keil\pk51\9.51\C51\BIN\c51.exe 
+                    -.\Generated_Source\PSoC3\isr_imu.c NOIV LARGE MODDP2 OMF2 VB(1) NOIP INCDIR(.,Generated_Source\PSoC3) FF(3) DB DF(NDEBUG
+                    -) WL(2) PR(.\DP8051_Keil_951\Release/isr_imu.lst) CD OT(11,SPEED) OJ(.\DP8051_Keil_951\Release\isr_imu.obj)
+
+line level    source
+
+*** MESSAGE C286 IN LINE 0 OF (null): license limits optimization to level 5
+   1          /*******************************************************************************
+   2          * File Name: isr_imu.c  
+   3          * Version 1.70
+   4          *
+   5          *  Description:
+   6          *   API for controlling the state of an interrupt.
+   7          *
+   8          *
+   9          *  Note:
+  10          *
+  11          ********************************************************************************
+  12          * Copyright 2008-2015, Cypress Semiconductor Corporation.  All rights reserved.
+  13          * You may use this file only in accordance with the license, terms, conditions, 
+  14          * disclaimers, and limitations in the end user license agreement accompanying 
+  15          * the software package with which this file was provided.
+  16          *******************************************************************************/
+  17          
+  18          
+  19          #include <cydevice_trm.h>
+  20          #include <CyLib.h>
+  21          #include <isr_imu.h>
+  22          
+  23          
+  24          #if !defined(isr_imu__REMOVED) /* Check for removal by optimization */
+  25          
+  26          /*******************************************************************************
+  27          *  Place your includes, defines and code here 
+  28          ********************************************************************************/
+  29          /* `#START isr_imu_intc` */
+  30          #include <IMU_functions.h>
+  31          #include <command_processing.h>
+  32          
+  33          extern uint8 N_IMU_Connected;
+  34          extern uint8 IMU_connected[N_IMU_MAX];
+  35          extern uint8 IMU_conf[N_IMU_MAX][3];
+  36          extern uint8 imu_send_flag;
+  37          extern int imus_data_size;
+  38          extern int single_imu_size[N_IMU_MAX];
+  39          
+  40          extern uint8 Accel[N_IMU_MAX][6];
+  41          extern uint8 Gyro[N_IMU_MAX][6];
+  42          extern uint8 Mag[N_IMU_MAX][6];    
+  43          /* `#END` */
+  44          
+  45          
+  46          /*******************************************************************************
+  47          * Function Name: isr_imu_Start
+  48          ********************************************************************************
+  49          *
+  50          * Summary:
+  51          *  Set up the interrupt and enable it. This function disables the interrupt, 
+  52          *  sets the default interrupt vector, sets the priority from the value in the
+C51 COMPILER V9.51   ISR_IMU                                                               09/22/2016 17:24:20 PAGE 2   
+
+  53          *  Design Wide Resources Interrupt Editor, then enables the interrupt to the 
+  54          *  interrupt controller.
+  55          *
+  56          * Parameters:  
+  57          *   None
+  58          *
+  59          * Return:
+  60          *   None
+  61          *
+  62          *******************************************************************************/
+  63          void isr_imu_Start(void) 
+  64          {
+  65   1          /* For all we know the interrupt is active. */
+  66   1          isr_imu_Disable();
+  67   1      
+  68   1          /* Set the ISR to point to the isr_imu Interrupt. */
+  69   1          isr_imu_SetVector(&isr_imu_Interrupt);
+  70   1      
+  71   1          /* Set the priority. */
+  72   1          isr_imu_SetPriority((uint8)isr_imu_INTC_PRIOR_NUMBER);
+  73   1      
+  74   1          /* Enable it. */
+  75   1          isr_imu_Enable();
+  76   1      }
+  77          
+  78          
+  79          /*******************************************************************************
+  80          * Function Name: isr_imu_StartEx
+  81          ********************************************************************************
+  82          *
+  83          * Summary:
+  84          *  Sets up the interrupt and enables it. This function disables the interrupt,
+  85          *  sets the interrupt vector based on the address passed in, sets the priority 
+  86          *  from the value in the Design Wide Resources Interrupt Editor, then enables 
+  87          *  the interrupt to the interrupt controller.
+  88          *  
+  89          *  When defining ISR functions, the CY_ISR and CY_ISR_PROTO macros should be 
+  90          *  used to provide consistent definition across compilers:
+  91          *  
+  92          *  Function definition example:
+  93          *   CY_ISR(MyISR)
+  94          *   {
+  95          *   }
+  96          *   Function prototype example:
+  97          *   CY_ISR_PROTO(MyISR);
+  98          *
+  99          * Parameters:  
+ 100          *   address: Address of the ISR to set in the interrupt vector table.
+ 101          *
+ 102          * Return:
+ 103          *   None
+ 104          *
+ 105          *******************************************************************************/
+ 106          void isr_imu_StartEx(cyisraddress address) 
+ 107          {
+ 108   1          /* For all we know the interrupt is active. */
+ 109   1          isr_imu_Disable();
+ 110   1      
+ 111   1          /* Set the ISR to point to the isr_imu Interrupt. */
+ 112   1          isr_imu_SetVector(address);
+ 113   1      
+ 114   1          /* Set the priority. */
+C51 COMPILER V9.51   ISR_IMU                                                               09/22/2016 17:24:20 PAGE 3   
+
+ 115   1          isr_imu_SetPriority((uint8)isr_imu_INTC_PRIOR_NUMBER);
+ 116   1      
+ 117   1          /* Enable it. */
+ 118   1          isr_imu_Enable();
+ 119   1      }
+ 120          
+ 121          
+ 122          /*******************************************************************************
+ 123          * Function Name: isr_imu_Stop
+ 124          ********************************************************************************
+ 125          *
+ 126          * Summary:
+ 127          *   Disables and removes the interrupt.
+ 128          *
+ 129          * Parameters:  
+ 130          *   None
+ 131          *
+ 132          * Return:
+ 133          *   None
+ 134          *
+ 135          *******************************************************************************/
+ 136          void isr_imu_Stop(void) 
+ 137          {
+ 138   1          /* Disable this interrupt. */
+ 139   1          isr_imu_Disable();
+ 140   1      }
+ 141          
+ 142          
+ 143          /*******************************************************************************
+ 144          * Function Name: isr_imu_Interrupt
+ 145          ********************************************************************************
+ 146          *
+ 147          * Summary:
+ 148          *   The default Interrupt Service Routine for isr_imu.
+ 149          *
+ 150          *   Add custom code between the START and END comments to keep the next version
+ 151          *   of this file from over-writing your code.
+ 152          *
+ 153          *   Note You may use either the default ISR by using this API, or you may define
+ 154          *   your own separate ISR through ISR_StartEx().
+ 155          *
+ 156          * Parameters:  
+ 157          *   None
+ 158          *
+ 159          * Return:
+ 160          *   None
+ 161          *
+ 162          *******************************************************************************/
+ 163          CY_ISR(isr_imu_Interrupt)
+ 164          {
+ 165   1          #ifdef isr_imu_INTERRUPT_INTERRUPT_CALLBACK
+                      isr_imu_Interrupt_InterruptCallback();
+                  #endif /* isr_imu_INTERRUPT_INTERRUPT_CALLBACK */
+ 168   1      
+ 169   1          /*  Place your Interrupt code here. */
+ 170   1          /* `#START isr_imu_Interrupt` */
+ 171   1          uint8 k_imu;
+ 172   1          uint8 c = 1;
+ 173   1          uint8 k = 0;
+ 174   1          uint8 gl_c = 1;
+ 175   1          uint8 s2send;
+ 176   1          // Packet: header + imu id(uint8) + imu flags(uint8) + crc  
+C51 COMPILER V9.51   ISR_IMU                                                               09/22/2016 17:24:20 PAGE 4   
+
+ 177   1          uint8 packet_data[350];
+ 178   1          uint8 single_packet[20];
+ 179   1          
+ 180   1          for (k_imu = 0; k_imu < N_IMU_Connected; k_imu++){
+ 181   2              ChipSelector(IMU_connected[k_imu]);
+ 182   2              ReadIMU(IMU_connected[k_imu]);   
+ 183   2          }
+ 184   1        
+ 185   1          
+ 186   1          if (imu_send_flag == 1){
+ 187   2              //Header package 
+ 188   2              packet_data[0] = CMD_GET_IMU_READINGS;
+ 189   2           
+ 190   2              for (k_imu = 0; k_imu < N_IMU_Connected; k_imu++) 
+ 191   2              {       
+ 192   3                  
+ 193   3                  single_packet[0] = (uint8) 0x3A; //':';
+ 194   3                  if (IMU_conf[IMU_connected[k_imu]][0]){
+ 195   4                      single_packet[c]   = (uint8) Accel[IMU_connected[k_imu]][0];
+ 196   4                      single_packet[c+1] = (uint8) Accel[IMU_connected[k_imu]][1];
+ 197   4                      single_packet[c+2] = (uint8) Accel[IMU_connected[k_imu]][2];
+ 198   4                      single_packet[c+3] = (uint8) Accel[IMU_connected[k_imu]][3];
+ 199   4                      single_packet[c+4] = (uint8) Accel[IMU_connected[k_imu]][4];
+ 200   4                      single_packet[c+5] = (uint8) Accel[IMU_connected[k_imu]][5];
+ 201   4                      c = c + 6;
+ 202   4                  }
+ 203   3                  if (IMU_conf[IMU_connected[k_imu]][1]){
+ 204   4                      single_packet[c]   = (uint8) Gyro[IMU_connected[k_imu]][0];
+ 205   4                      single_packet[c+1] = (uint8) Gyro[IMU_connected[k_imu]][1];
+ 206   4                      single_packet[c+2] = (uint8) Gyro[IMU_connected[k_imu]][2];
+ 207   4                      single_packet[c+3] = (uint8) Gyro[IMU_connected[k_imu]][3];
+ 208   4                      single_packet[c+4] = (uint8) Gyro[IMU_connected[k_imu]][4];
+ 209   4                      single_packet[c+5] = (uint8) Gyro[IMU_connected[k_imu]][5];
+ 210   4                      c = c + 6;
+ 211   4                  }
+ 212   3                  if (IMU_conf[IMU_connected[k_imu]][2]){
+ 213   4                      single_packet[c]   = (uint8) Mag[IMU_connected[k_imu]][0];
+ 214   4                      single_packet[c+1] = (uint8) Mag[IMU_connected[k_imu]][1];
+ 215   4                      single_packet[c+2] = (uint8) Mag[IMU_connected[k_imu]][2];
+ 216   4                      single_packet[c+3] = (uint8) Mag[IMU_connected[k_imu]][3];
+ 217   4                      single_packet[c+4] = (uint8) Mag[IMU_connected[k_imu]][4];
+ 218   4                      single_packet[c+5] = (uint8) Mag[IMU_connected[k_imu]][5];
+ 219   4                      c = c + 6;
+ 220   4                  }
+ 221   3                  single_packet[single_imu_size[IMU_connected[k_imu]] - 1] = (uint8) 0x3A; //':';
+ 222   3                  c = 1;
+ 223   3                 
+ 224   3                  
+ 225   3                  for(k=0; k < single_imu_size[IMU_connected[k_imu]]; k++) {
+ 226   4                      packet_data[gl_c + k] = (uint8) single_packet[k]; 
+ 227   4                  }
+ 228   3                  gl_c = gl_c + single_imu_size[IMU_connected[k_imu]];  
+ 229   3                  
+ 230   3                  memset(&single_packet, 0, sizeof(single_packet));     
+ 231   3                  
+ 232   3              }
+ 233   2      
+ 234   2              // Calculate Checksum and send message to UART 
+ 235   2              packet_data[imus_data_size-1] = LCRChecksum (packet_data, imus_data_size-1);
+ 236   2              commWrite(packet_data, imus_data_size);
+ 237   2          
+ 238   2              imu_send_flag = 0;
+C51 COMPILER V9.51   ISR_IMU                                                               09/22/2016 17:24:20 PAGE 5   
+
+ 239   2          }
+ 240   1          
+ 241   1          /* `#END` */
+ 242   1      
+ 243   1          /* PSoC3 ES1, ES2 RTC ISR PATCH  */ 
+ 244   1          #if(CYDEV_CHIP_FAMILY_USED == CYDEV_CHIP_FAMILY_PSOC3)
+ 245   1              #if((CYDEV_CHIP_REVISION_USED <= CYDEV_CHIP_REVISION_3A_ES2) && (isr_imu__ES2_PATCH ))      
+                          isr_imu_ISR_PATCH();
+                      #endif /* CYDEV_CHIP_REVISION_USED */
+ 248   1          #endif /* (CYDEV_CHIP_FAMILY_USED == CYDEV_CHIP_FAMILY_PSOC3) */
+ 249   1      }
+*** WARNING C280 IN LINE 175 OF .\Generated_Source\PSoC3\isr_imu.c: 's2send': unreferenced local variable
+ 250          
+ 251          
+ 252          /*******************************************************************************
+ 253          * Function Name: isr_imu_SetVector
+ 254          ********************************************************************************
+ 255          *
+ 256          * Summary:
+ 257          *   Change the ISR vector for the Interrupt. Note calling isr_imu_Start
+ 258          *   will override any effect this method would have had. To set the vector 
+ 259          *   before the component has been started use isr_imu_StartEx instead.
+ 260          * 
+ 261          *   When defining ISR functions, the CY_ISR and CY_ISR_PROTO macros should be 
+ 262          *   used to provide consistent definition across compilers:
+ 263          *
+ 264          *   Function definition example:
+ 265          *   CY_ISR(MyISR)
+ 266          *   {
+ 267          *   }
+ 268          *
+ 269          *   Function prototype example:
+ 270          *     CY_ISR_PROTO(MyISR);
+ 271          *
+ 272          * Parameters:
+ 273          *   address: Address of the ISR to set in the interrupt vector table.
+ 274          *
+ 275          * Return:
+ 276          *   None
+ 277          *
+ 278          *******************************************************************************/
+ 279          void isr_imu_SetVector(cyisraddress address) 
+ 280          {
+ 281   1          CY_SET_REG16(isr_imu_INTC_VECTOR, (uint16) address);
+ 282   1      }
+ 283          
+ 284          
+ 285          /*******************************************************************************
+ 286          * Function Name: isr_imu_GetVector
+ 287          ********************************************************************************
+ 288          *
+ 289          * Summary:
+ 290          *   Gets the "address" of the current ISR vector for the Interrupt.
+ 291          *
+ 292          * Parameters:
+ 293          *   None
+ 294          *
+ 295          * Return:
+ 296          *   Address of the ISR in the interrupt vector table.
+ 297          *
+ 298          *******************************************************************************/
+ 299          cyisraddress isr_imu_GetVector(void) 
+C51 COMPILER V9.51   ISR_IMU                                                               09/22/2016 17:24:20 PAGE 6   
+
+ 300          {
+ 301   1          return (cyisraddress) CY_GET_REG16(isr_imu_INTC_VECTOR);
+ 302   1      }
+ 303          
+ 304          
+ 305          /*******************************************************************************
+ 306          * Function Name: isr_imu_SetPriority
+ 307          ********************************************************************************
+ 308          *
+ 309          * Summary:
+ 310          *   Sets the Priority of the Interrupt. 
+ 311          *
+ 312          *   Note calling isr_imu_Start or isr_imu_StartEx will 
+ 313          *   override any effect this API would have had. This API should only be called
+ 314          *   after isr_imu_Start or isr_imu_StartEx has been called. 
+ 315          *   To set the initial priority for the component, use the Design-Wide Resources
+ 316          *   Interrupt Editor.
+ 317          *
+ 318          *   Note This API has no effect on Non-maskable interrupt NMI).
+ 319          *
+ 320          * Parameters:
+ 321          *   priority: Priority of the interrupt, 0 being the highest priority
+ 322          *             PSoC 3 and PSoC 5LP: Priority is from 0 to 7.
+ 323          *             PSoC 4: Priority is from 0 to 3.
+ 324          *
+ 325          * Return:
+ 326          *   None
+ 327          *
+ 328          *******************************************************************************/
+ 329          void isr_imu_SetPriority(uint8 priority) 
+ 330          {
+ 331   1          *isr_imu_INTC_PRIOR = priority << 5;
+ 332   1      }
+ 333          
+ 334          
+ 335          /*******************************************************************************
+ 336          * Function Name: isr_imu_GetPriority
+ 337          ********************************************************************************
+ 338          *
+ 339          * Summary:
+ 340          *   Gets the Priority of the Interrupt.
+ 341          *
+ 342          * Parameters:
+ 343          *   None
+ 344          *
+ 345          * Return:
+ 346          *   Priority of the interrupt, 0 being the highest priority
+ 347          *    PSoC 3 and PSoC 5LP: Priority is from 0 to 7.
+ 348          *    PSoC 4: Priority is from 0 to 3.
+ 349          *
+ 350          *******************************************************************************/
+ 351          uint8 isr_imu_GetPriority(void) 
+ 352          {
+ 353   1          uint8 priority;
+ 354   1      
+ 355   1      
+ 356   1          priority = *isr_imu_INTC_PRIOR >> 5;
+ 357   1      
+ 358   1          return priority;
+ 359   1      }
+ 360          
+ 361          
+C51 COMPILER V9.51   ISR_IMU                                                               09/22/2016 17:24:20 PAGE 7   
+
+ 362          /*******************************************************************************
+ 363          * Function Name: isr_imu_Enable
+ 364          ********************************************************************************
+ 365          *
+ 366          * Summary:
+ 367          *   Enables the interrupt to the interrupt controller. Do not call this function
+ 368          *   unless ISR_Start() has been called or the functionality of the ISR_Start() 
+ 369          *   function, which sets the vector and the priority, has been called.
+ 370          *
+ 371          * Parameters:
+ 372          *   None
+ 373          *
+ 374          * Return:
+ 375          *   None
+ 376          *
+ 377          *******************************************************************************/
+ 378          void isr_imu_Enable(void) 
+ 379          {
+ 380   1          /* Enable the general interrupt. */
+ 381   1          *isr_imu_INTC_SET_EN = isr_imu__INTC_MASK;
+ 382   1      }
+ 383          
+ 384          
+ 385          /*******************************************************************************
+ 386          * Function Name: isr_imu_GetState
+ 387          ********************************************************************************
+ 388          *
+ 389          * Summary:
+ 390          *   Gets the state (enabled, disabled) of the Interrupt.
+ 391          *
+ 392          * Parameters:
+ 393          *   None
+ 394          *
+ 395          * Return:
+ 396          *   1 if enabled, 0 if disabled.
+ 397          *
+ 398          *******************************************************************************/
+ 399          uint8 isr_imu_GetState(void) 
+ 400          {
+ 401   1          /* Get the state of the general interrupt. */
+ 402   1          return ((*isr_imu_INTC_SET_EN & (uint8)isr_imu__INTC_MASK) != 0u) ? 1u:0u;
+ 403   1      }
+ 404          
+ 405          
+ 406          /*******************************************************************************
+ 407          * Function Name: isr_imu_Disable
+ 408          ********************************************************************************
+ 409          *
+ 410          * Summary:
+ 411          *   Disables the Interrupt in the interrupt controller.
+ 412          *
+ 413          * Parameters:
+ 414          *   None
+ 415          *
+ 416          * Return:
+ 417          *   None
+ 418          *
+ 419          *******************************************************************************/
+ 420          void isr_imu_Disable(void) 
+ 421          {
+ 422   1          /* Disable the general interrupt. */
+ 423   1          *isr_imu_INTC_CLR_EN = isr_imu__INTC_MASK;
+C51 COMPILER V9.51   ISR_IMU                                                               09/22/2016 17:24:20 PAGE 8   
+
+ 424   1      }
+ 425          
+ 426          
+ 427          /*******************************************************************************
+ 428          * Function Name: isr_imu_SetPending
+ 429          ********************************************************************************
+ 430          *
+ 431          * Summary:
+ 432          *   Causes the Interrupt to enter the pending state, a software method of
+ 433          *   generating the interrupt.
+ 434          *
+ 435          * Parameters:
+ 436          *   None
+ 437          *
+ 438          * Return:
+ 439          *   None
+ 440          *
+ 441          * Side Effects:
+ 442          *   If interrupts are enabled and the interrupt is set up properly, the ISR is
+ 443          *   entered (depending on the priority of this interrupt and other pending 
+ 444          *   interrupts).
+ 445          *
+ 446          *******************************************************************************/
+ 447          void isr_imu_SetPending(void) 
+ 448          {
+ 449   1          *isr_imu_INTC_SET_PD = isr_imu__INTC_MASK;
+ 450   1      }
+ 451          
+ 452          
+ 453          /*******************************************************************************
+ 454          * Function Name: isr_imu_ClearPending
+ 455          ********************************************************************************
+ 456          *
+ 457          * Summary:
+ 458          *   Clears a pending interrupt in the interrupt controller.
+ 459          *
+ 460          *   Note Some interrupt sources are clear-on-read and require the block 
+ 461          *   interrupt/status register to be read/cleared with the appropriate block API 
+ 462          *   (GPIO, UART, and so on). Otherwise the ISR will continue to remain in 
+ 463          *   pending state even though the interrupt itself is cleared using this API.
+ 464          *
+ 465          * Parameters:
+ 466          *   None
+ 467          *
+ 468          * Return:
+ 469          *   None
+ 470          *
+ 471          *******************************************************************************/
+ 472          void isr_imu_ClearPending(void) 
+ 473          {
+ 474   1          *isr_imu_INTC_CLR_PD = isr_imu__INTC_MASK;
+ 475   1      }
+ 476          
+ 477          #endif /* End check for removal by optimization */
+ 478          
+ 479          
+ 480          /* [] END OF FILE */
+C51 COMPILER V9.51   ISR_IMU                                                               09/22/2016 17:24:20 PAGE 9   
+
+ASSEMBLY LISTING OF GENERATED OBJECT CODE
+
+
+             ; FUNCTION isr_imu_Start (BEGIN)
+                                           ; SOURCE LINE # 63
+                                           ; SOURCE LINE # 64
+                                           ; SOURCE LINE # 66
+0000 120000      R     LCALL   isr_imu_Disable
+                                           ; SOURCE LINE # 69
+0003 7E00        R     MOV     R6,#HIGH isr_imu_Interrupt
+0005 7F00        R     MOV     R7,#LOW isr_imu_Interrupt
+0007 120000      R     LCALL   _isr_imu_SetVector
+                                           ; SOURCE LINE # 72
+000A 7F03              MOV     R7,#03H
+000C 120000      R     LCALL   _isr_imu_SetPriority
+                                           ; SOURCE LINE # 75
+000F 120000      R     LCALL   isr_imu_Enable
+                                           ; SOURCE LINE # 76
+0012 22                RET     
+             ; FUNCTION isr_imu_Start (END)
+
+             ; FUNCTION _isr_imu_StartEx (BEGIN)
+                                           ; SOURCE LINE # 106
+0000 900000      R     MOV     DPTR,#address
+0003 EE                MOV     A,R6
+0004 F0                MOVX    @DPTR,A
+0005 A3                INC     DPTR
+0006 EF                MOV     A,R7
+0007 F0                MOVX    @DPTR,A
+                                           ; SOURCE LINE # 107
+                                           ; SOURCE LINE # 109
+0008 120000      R     LCALL   isr_imu_Disable
+                                           ; SOURCE LINE # 112
+000B 900000      R     MOV     DPTR,#address
+000E E0                MOVX    A,@DPTR
+000F FE                MOV     R6,A
+0010 A3                INC     DPTR
+0011 E0                MOVX    A,@DPTR
+0012 FF                MOV     R7,A
+0013 120000      R     LCALL   _isr_imu_SetVector
+                                           ; SOURCE LINE # 115
+0016 7F03              MOV     R7,#03H
+0018 120000      R     LCALL   _isr_imu_SetPriority
+                                           ; SOURCE LINE # 118
+001B 120000      R     LCALL   isr_imu_Enable
+                                           ; SOURCE LINE # 119
+001E 22                RET     
+             ; FUNCTION _isr_imu_StartEx (END)
+
+             ; FUNCTION isr_imu_Stop (BEGIN)
+                                           ; SOURCE LINE # 136
+                                           ; SOURCE LINE # 137
+                                           ; SOURCE LINE # 139
+0000 120000      R     LCALL   isr_imu_Disable
+                                           ; SOURCE LINE # 140
+0003 22                RET     
+             ; FUNCTION isr_imu_Stop (END)
+
+             ; FUNCTION isr_imu_Interrupt (BEGIN)
+0000 C0E0              PUSH    ACC
+0002 C0F0              PUSH    B
+0004 C083              PUSH    DPH
+C51 COMPILER V9.51   ISR_IMU                                                               09/22/2016 17:24:20 PAGE 10  
+
+0006 C082              PUSH    DPL
+0008 C085              PUSH    DPH1
+000A C084              PUSH    DPL1
+000C C086              PUSH    DPS
+000E 758600            MOV     DPS,#00H
+0011 C000        E     PUSH    ?C?XPAGE1SFR
+0013 750000      E     MOV     ?C?XPAGE1SFR,#?C?XPAGE1RST
+0016 C0D0              PUSH    PSW
+0018 75D000            MOV     PSW,#00H
+001B C000              PUSH    AR0
+001D C001              PUSH    AR1
+001F C002              PUSH    AR2
+0021 C003              PUSH    AR3
+0023 C004              PUSH    AR4
+0025 C005              PUSH    AR5
+0027 C006              PUSH    AR6
+0029 C007              PUSH    AR7
+                                           ; SOURCE LINE # 163
+                                           ; SOURCE LINE # 172
+002B 900000      R     MOV     DPTR,#c
+002E 7401              MOV     A,#01H
+0030 F0                MOVX    @DPTR,A
+                                           ; SOURCE LINE # 173
+0031 A3                INC     DPTR
+0032 E4                CLR     A
+0033 F0                MOVX    @DPTR,A
+                                           ; SOURCE LINE # 174
+0034 A3                INC     DPTR
+0035 04                INC     A
+0036 F0                MOVX    @DPTR,A
+                                           ; SOURCE LINE # 180
+0037 900000      R     MOV     DPTR,#k_imu
+003A E4                CLR     A
+003B F0                MOVX    @DPTR,A
+003C         ?C0004:
+003C 900000      E     MOV     DPTR,#N_IMU_Connected
+003F E0                MOVX    A,@DPTR
+0040 FF                MOV     R7,A
+0041 900000      R     MOV     DPTR,#k_imu
+0044 E0                MOVX    A,@DPTR
+0045 FE                MOV     R6,A
+0046 C3                CLR     C
+0047 9F                SUBB    A,R7
+0048 502D              JNC     ?C0005
+                                           ; SOURCE LINE # 181
+004A 7400        E     MOV     A,#LOW IMU_connected
+004C 2E                ADD     A,R6
+004D F582              MOV     DPL,A
+004F E4                CLR     A
+0050 3400        E     ADDC    A,#HIGH IMU_connected
+0052 F583              MOV     DPH,A
+0054 E0                MOVX    A,@DPTR
+0055 FF                MOV     R7,A
+0056 7E00              MOV     R6,#00H
+0058 120000      E     LCALL   _ChipSelector
+                                           ; SOURCE LINE # 182
+005B 900000      R     MOV     DPTR,#k_imu
+005E E0                MOVX    A,@DPTR
+005F 2400        E     ADD     A,#LOW IMU_connected
+0061 F582              MOV     DPL,A
+0063 E4                CLR     A
+0064 3400        E     ADDC    A,#HIGH IMU_connected
+C51 COMPILER V9.51   ISR_IMU                                                               09/22/2016 17:24:20 PAGE 11  
+
+0066 F583              MOV     DPH,A
+0068 E0                MOVX    A,@DPTR
+0069 FF                MOV     R7,A
+006A 7E00              MOV     R6,#00H
+006C 120000      E     LCALL   _ReadIMU
+                                           ; SOURCE LINE # 183
+006F 900000      R     MOV     DPTR,#k_imu
+0072 E0                MOVX    A,@DPTR
+0073 04                INC     A
+0074 F0                MOVX    @DPTR,A
+0075 80C5              SJMP    ?C0004
+0077         ?C0005:
+                                           ; SOURCE LINE # 186
+0077 900000      E     MOV     DPTR,#imu_send_flag
+007A E0                MOVX    A,@DPTR
+007B 6401              XRL     A,#01H
+007D 6003              JZ      $ + 5H
+007F 020000      R     LJMP    ?C0017
+                                           ; SOURCE LINE # 188
+0082 900000      R     MOV     DPTR,#packet_data
+0085 748E              MOV     A,#08EH
+0087 F0                MOVX    @DPTR,A
+                                           ; SOURCE LINE # 190
+0088 900000      R     MOV     DPTR,#k_imu
+008B E4                CLR     A
+008C F0                MOVX    @DPTR,A
+008D         ?C0008:
+008D 900000      E     MOV     DPTR,#N_IMU_Connected
+0090 E0                MOVX    A,@DPTR
+0091 FF                MOV     R7,A
+0092 900000      R     MOV     DPTR,#k_imu
+0095 E0                MOVX    A,@DPTR
+0096 FE                MOV     R6,A
+0097 C3                CLR     C
+0098 9F                SUBB    A,R7
+0099 4003              JC      $ + 5H
+009B 020000      R     LJMP    ?C0009
+                                           ; SOURCE LINE # 191
+                                           ; SOURCE LINE # 193
+009E 900000      R     MOV     DPTR,#single_packet
+00A1 743A              MOV     A,#03AH
+00A3 F0                MOVX    @DPTR,A
+                                           ; SOURCE LINE # 194
+00A4 7400        E     MOV     A,#LOW IMU_connected
+00A6 2E                ADD     A,R6
+00A7 F582              MOV     DPL,A
+00A9 E4                CLR     A
+00AA 3400        E     ADDC    A,#HIGH IMU_connected
+00AC F583              MOV     DPH,A
+00AE E0                MOVX    A,@DPTR
+00AF FF                MOV     R7,A
+00B0 75F003            MOV     B,#03H
+00B3 A4                MUL     AB
+00B4 2400        E     ADD     A,#LOW IMU_conf
+00B6 F582              MOV     DPL,A
+00B8 E4                CLR     A
+00B9 3400        E     ADDC    A,#HIGH IMU_conf
+00BB F583              MOV     DPH,A
+00BD E0                MOVX    A,@DPTR
+00BE 7003              JNZ     $ + 5H
+00C0 020000      R     LJMP    ?C0011
+                                           ; SOURCE LINE # 195
+C51 COMPILER V9.51   ISR_IMU                                                               09/22/2016 17:24:20 PAGE 12  
+
+00C3 900000      R     MOV     DPTR,#k_imu
+00C6 E0                MOVX    A,@DPTR
+00C7 EF                MOV     A,R7
+00C8 75F006            MOV     B,#06H
+00CB A4                MUL     AB
+00CC 2400        E     ADD     A,#LOW Accel
+00CE F582              MOV     DPL,A
+00D0 E4                CLR     A
+00D1 3400        E     ADDC    A,#HIGH Accel
+00D3 F583              MOV     DPH,A
+00D5 E0                MOVX    A,@DPTR
+00D6 FF                MOV     R7,A
+00D7 900000      R     MOV     DPTR,#c
+00DA E0                MOVX    A,@DPTR
+00DB FD                MOV     R5,A
+00DC 2400        R     ADD     A,#LOW single_packet
+00DE F582              MOV     DPL,A
+00E0 E4                CLR     A
+00E1 3400        R     ADDC    A,#HIGH single_packet
+00E3 F583              MOV     DPH,A
+00E5 EF                MOV     A,R7
+00E6 F0                MOVX    @DPTR,A
+                                           ; SOURCE LINE # 196
+00E7 7400        E     MOV     A,#LOW IMU_connected
+00E9 2E                ADD     A,R6
+00EA F582              MOV     DPL,A
+00EC E4                CLR     A
+00ED 3400        E     ADDC    A,#HIGH IMU_connected
+00EF F583              MOV     DPH,A
+00F1 E0                MOVX    A,@DPTR
+00F2 75F006            MOV     B,#06H
+00F5 A4                MUL     AB
+00F6 2400        E     ADD     A,#LOW Accel+01H
+00F8 F582              MOV     DPL,A
+00FA E4                CLR     A
+00FB 3400        E     ADDC    A,#HIGH Accel+01H
+00FD F583              MOV     DPH,A
+00FF E0                MOVX    A,@DPTR
+0100 FF                MOV     R7,A
+0101 7400        R     MOV     A,#LOW single_packet+01H
+0103 2D                ADD     A,R5
+0104 F582              MOV     DPL,A
+0106 E4                CLR     A
+0107 3400        R     ADDC    A,#HIGH single_packet+01H
+0109 F583              MOV     DPH,A
+010B EF                MOV     A,R7
+010C F0                MOVX    @DPTR,A
+                                           ; SOURCE LINE # 197
+010D 900000      R     MOV     DPTR,#k_imu
+0110 E0                MOVX    A,@DPTR
+0111 FF                MOV     R7,A
+0112 2400        E     ADD     A,#LOW IMU_connected
+0114 F582              MOV     DPL,A
+0116 E4                CLR     A
+0117 3400        E     ADDC    A,#HIGH IMU_connected
+0119 F583              MOV     DPH,A
+011B E0                MOVX    A,@DPTR
+011C 75F006            MOV     B,#06H
+011F A4                MUL     AB
+0120 2400        E     ADD     A,#LOW Accel+02H
+0122 F582              MOV     DPL,A
+0124 E4                CLR     A
+C51 COMPILER V9.51   ISR_IMU                                                               09/22/2016 17:24:20 PAGE 13  
+
+0125 3400        E     ADDC    A,#HIGH Accel+02H
+0127 F583              MOV     DPH,A
+0129 E0                MOVX    A,@DPTR
+012A FE                MOV     R6,A
+012B 7400        R     MOV     A,#LOW single_packet+02H
+012D 2D                ADD     A,R5
+012E F582              MOV     DPL,A
+0130 E4                CLR     A
+0131 3400        R     ADDC    A,#HIGH single_packet+02H
+0133 F583              MOV     DPH,A
+0135 EE                MOV     A,R6
+0136 F0                MOVX    @DPTR,A
+                                           ; SOURCE LINE # 198
+0137 7400        E     MOV     A,#LOW IMU_connected
+0139 2F                ADD     A,R7
+013A F582              MOV     DPL,A
+013C E4                CLR     A
+013D 3400        E     ADDC    A,#HIGH IMU_connected
+013F F583              MOV     DPH,A
+0141 E0                MOVX    A,@DPTR
+0142 75F006            MOV     B,#06H
+0145 A4                MUL     AB
+0146 2400        E     ADD     A,#LOW Accel+03H
+0148 F582              MOV     DPL,A
+014A E4                CLR     A
+014B 3400        E     ADDC    A,#HIGH Accel+03H
+014D F583              MOV     DPH,A
+014F E0                MOVX    A,@DPTR
+0150 FF                MOV     R7,A
+0151 7400        R     MOV     A,#LOW single_packet+03H
+0153 2D                ADD     A,R5
+0154 F582              MOV     DPL,A
+0156 E4                CLR     A
+0157 3400        R     ADDC    A,#HIGH single_packet+03H
+0159 F583              MOV     DPH,A
+015B EF                MOV     A,R7
+015C F0                MOVX    @DPTR,A
+                                           ; SOURCE LINE # 199
+015D 900000      R     MOV     DPTR,#k_imu
+0160 E0                MOVX    A,@DPTR
+0161 FF                MOV     R7,A
+0162 2400        E     ADD     A,#LOW IMU_connected
+0164 F582              MOV     DPL,A
+0166 E4                CLR     A
+0167 3400        E     ADDC    A,#HIGH IMU_connected
+0169 F583              MOV     DPH,A
+016B E0                MOVX    A,@DPTR
+016C 75F006            MOV     B,#06H
+016F A4                MUL     AB
+0170 2400        E     ADD     A,#LOW Accel+04H
+0172 F582              MOV     DPL,A
+0174 E4                CLR     A
+0175 3400        E     ADDC    A,#HIGH Accel+04H
+0177 F583              MOV     DPH,A
+0179 E0                MOVX    A,@DPTR
+017A FE                MOV     R6,A
+017B 7400        R     MOV     A,#LOW single_packet+04H
+017D 2D                ADD     A,R5
+017E F582              MOV     DPL,A
+0180 E4                CLR     A
+0181 3400        R     ADDC    A,#HIGH single_packet+04H
+0183 F583              MOV     DPH,A
+C51 COMPILER V9.51   ISR_IMU                                                               09/22/2016 17:24:20 PAGE 14  
+
+0185 EE                MOV     A,R6
+0186 F0                MOVX    @DPTR,A
+                                           ; SOURCE LINE # 200
+0187 7400        E     MOV     A,#LOW IMU_connected
+0189 2F                ADD     A,R7
+018A F582              MOV     DPL,A
+018C E4                CLR     A
+018D 3400        E     ADDC    A,#HIGH IMU_connected
+018F F583              MOV     DPH,A
+0191 E0                MOVX    A,@DPTR
+0192 75F006            MOV     B,#06H
+0195 A4                MUL     AB
+0196 2400        E     ADD     A,#LOW Accel+05H
+0198 F582              MOV     DPL,A
+019A E4                CLR     A
+019B 3400        E     ADDC    A,#HIGH Accel+05H
+019D F583              MOV     DPH,A
+019F E0                MOVX    A,@DPTR
+01A0 FF                MOV     R7,A
+01A1 7400        R     MOV     A,#LOW single_packet+05H
+01A3 2D                ADD     A,R5
+01A4 F582              MOV     DPL,A
+01A6 E4                CLR     A
+01A7 3400        R     ADDC    A,#HIGH single_packet+05H
+01A9 F583              MOV     DPH,A
+01AB EF                MOV     A,R7
+01AC F0                MOVX    @DPTR,A
+                                           ; SOURCE LINE # 201
+01AD 900000      R     MOV     DPTR,#c
+01B0 E0                MOVX    A,@DPTR
+01B1 2406              ADD     A,#06H
+01B3 F0                MOVX    @DPTR,A
+                                           ; SOURCE LINE # 202
+01B4         ?C0011:
+                                           ; SOURCE LINE # 203
+01B4 900000      R     MOV     DPTR,#k_imu
+01B7 E0                MOVX    A,@DPTR
+01B8 2400        E     ADD     A,#LOW IMU_connected
+01BA F582              MOV     DPL,A
+01BC E4                CLR     A
+01BD 3400        E     ADDC    A,#HIGH IMU_connected
+01BF F583              MOV     DPH,A
+01C1 E0                MOVX    A,@DPTR
+01C2 FF                MOV     R7,A
+01C3 75F003            MOV     B,#03H
+01C6 A4                MUL     AB
+01C7 2400        E     ADD     A,#LOW IMU_conf+01H
+01C9 F582              MOV     DPL,A
+01CB E4                CLR     A
+01CC 3400        E     ADDC    A,#HIGH IMU_conf+01H
+01CE F583              MOV     DPH,A
+01D0 E0                MOVX    A,@DPTR
+01D1 7003              JNZ     $ + 5H
+01D3 020000      R     LJMP    ?C0012
+                                           ; SOURCE LINE # 204
+01D6 900000      R     MOV     DPTR,#k_imu
+01D9 E0                MOVX    A,@DPTR
+01DA FE                MOV     R6,A
+01DB EF                MOV     A,R7
+01DC 75F006            MOV     B,#06H
+01DF A4                MUL     AB
+01E0 2400        E     ADD     A,#LOW Gyro
+C51 COMPILER V9.51   ISR_IMU                                                               09/22/2016 17:24:20 PAGE 15  
+
+01E2 F582              MOV     DPL,A
+01E4 E4                CLR     A
+01E5 3400        E     ADDC    A,#HIGH Gyro
+01E7 F583              MOV     DPH,A
+01E9 E0                MOVX    A,@DPTR
+01EA FF                MOV     R7,A
+01EB 900000      R     MOV     DPTR,#c
+01EE E0                MOVX    A,@DPTR
+01EF FD                MOV     R5,A
+01F0 2400        R     ADD     A,#LOW single_packet
+01F2 F582              MOV     DPL,A
+01F4 E4                CLR     A
+01F5 3400        R     ADDC    A,#HIGH single_packet
+01F7 F583              MOV     DPH,A
+01F9 EF                MOV     A,R7
+01FA F0                MOVX    @DPTR,A
+                                           ; SOURCE LINE # 205
+01FB 7400        E     MOV     A,#LOW IMU_connected
+01FD 2E                ADD     A,R6
+01FE F582              MOV     DPL,A
+0200 E4                CLR     A
+0201 3400        E     ADDC    A,#HIGH IMU_connected
+0203 F583              MOV     DPH,A
+0205 E0                MOVX    A,@DPTR
+0206 75F006            MOV     B,#06H
+0209 A4                MUL     AB
+020A 2400        E     ADD     A,#LOW Gyro+01H
+020C F582              MOV     DPL,A
+020E E4                CLR     A
+020F 3400        E     ADDC    A,#HIGH Gyro+01H
+0211 F583              MOV     DPH,A
+0213 E0                MOVX    A,@DPTR
+0214 FF                MOV     R7,A
+0215 7400        R     MOV     A,#LOW single_packet+01H
+0217 2D                ADD     A,R5
+0218 F582              MOV     DPL,A
+021A E4                CLR     A
+021B 3400        R     ADDC    A,#HIGH single_packet+01H
+021D F583              MOV     DPH,A
+021F EF                MOV     A,R7
+0220 F0                MOVX    @DPTR,A
+                                           ; SOURCE LINE # 206
+0221 900000      R     MOV     DPTR,#k_imu
+0224 E0                MOVX    A,@DPTR
+0225 FF                MOV     R7,A
+0226 2400        E     ADD     A,#LOW IMU_connected
+0228 F582              MOV     DPL,A
+022A E4                CLR     A
+022B 3400        E     ADDC    A,#HIGH IMU_connected
+022D F583              MOV     DPH,A
+022F E0                MOVX    A,@DPTR
+0230 75F006            MOV     B,#06H
+0233 A4                MUL     AB
+0234 2400        E     ADD     A,#LOW Gyro+02H
+0236 F582              MOV     DPL,A
+0238 E4                CLR     A
+0239 3400        E     ADDC    A,#HIGH Gyro+02H
+023B F583              MOV     DPH,A
+023D E0                MOVX    A,@DPTR
+023E FE                MOV     R6,A
+023F 7400        R     MOV     A,#LOW single_packet+02H
+0241 2D                ADD     A,R5
+C51 COMPILER V9.51   ISR_IMU                                                               09/22/2016 17:24:20 PAGE 16  
+
+0242 F582              MOV     DPL,A
+0244 E4                CLR     A
+0245 3400        R     ADDC    A,#HIGH single_packet+02H
+0247 F583              MOV     DPH,A
+0249 EE                MOV     A,R6
+024A F0                MOVX    @DPTR,A
+                                           ; SOURCE LINE # 207
+024B 7400        E     MOV     A,#LOW IMU_connected
+024D 2F                ADD     A,R7
+024E F582              MOV     DPL,A
+0250 E4                CLR     A
+0251 3400        E     ADDC    A,#HIGH IMU_connected
+0253 F583              MOV     DPH,A
+0255 E0                MOVX    A,@DPTR
+0256 75F006            MOV     B,#06H
+0259 A4                MUL     AB
+025A 2400        E     ADD     A,#LOW Gyro+03H
+025C F582              MOV     DPL,A
+025E E4                CLR     A
+025F 3400        E     ADDC    A,#HIGH Gyro+03H
+0261 F583              MOV     DPH,A
+0263 E0                MOVX    A,@DPTR
+0264 FF                MOV     R7,A
+0265 7400        R     MOV     A,#LOW single_packet+03H
+0267 2D                ADD     A,R5
+0268 F582              MOV     DPL,A
+026A E4                CLR     A
+026B 3400        R     ADDC    A,#HIGH single_packet+03H
+026D F583              MOV     DPH,A
+026F EF                MOV     A,R7
+0270 F0                MOVX    @DPTR,A
+                                           ; SOURCE LINE # 208
+0271 900000      R     MOV     DPTR,#k_imu
+0274 E0                MOVX    A,@DPTR
+0275 FF                MOV     R7,A
+0276 2400        E     ADD     A,#LOW IMU_connected
+0278 F582              MOV     DPL,A
+027A E4                CLR     A
+027B 3400        E     ADDC    A,#HIGH IMU_connected
+027D F583              MOV     DPH,A
+027F E0                MOVX    A,@DPTR
+0280 75F006            MOV     B,#06H
+0283 A4                MUL     AB
+0284 2400        E     ADD     A,#LOW Gyro+04H
+0286 F582              MOV     DPL,A
+0288 E4                CLR     A
+0289 3400        E     ADDC    A,#HIGH Gyro+04H
+028B F583              MOV     DPH,A
+028D E0                MOVX    A,@DPTR
+028E FE                MOV     R6,A
+028F 7400        R     MOV     A,#LOW single_packet+04H
+0291 2D                ADD     A,R5
+0292 F582              MOV     DPL,A
+0294 E4                CLR     A
+0295 3400        R     ADDC    A,#HIGH single_packet+04H
+0297 F583              MOV     DPH,A
+0299 EE                MOV     A,R6
+029A F0                MOVX    @DPTR,A
+                                           ; SOURCE LINE # 209
+029B 7400        E     MOV     A,#LOW IMU_connected
+029D 2F                ADD     A,R7
+029E F582              MOV     DPL,A
+C51 COMPILER V9.51   ISR_IMU                                                               09/22/2016 17:24:20 PAGE 17  
+
+02A0 E4                CLR     A
+02A1 3400        E     ADDC    A,#HIGH IMU_connected
+02A3 F583              MOV     DPH,A
+02A5 E0                MOVX    A,@DPTR
+02A6 75F006            MOV     B,#06H
+02A9 A4                MUL     AB
+02AA 2400        E     ADD     A,#LOW Gyro+05H
+02AC F582              MOV     DPL,A
+02AE E4                CLR     A
+02AF 3400        E     ADDC    A,#HIGH Gyro+05H
+02B1 F583              MOV     DPH,A
+02B3 E0                MOVX    A,@DPTR
+02B4 FF                MOV     R7,A
+02B5 7400        R     MOV     A,#LOW single_packet+05H
+02B7 2D                ADD     A,R5
+02B8 F582              MOV     DPL,A
+02BA E4                CLR     A
+02BB 3400        R     ADDC    A,#HIGH single_packet+05H
+02BD F583              MOV     DPH,A
+02BF EF                MOV     A,R7
+02C0 F0                MOVX    @DPTR,A
+                                           ; SOURCE LINE # 210
+02C1 900000      R     MOV     DPTR,#c
+02C4 E0                MOVX    A,@DPTR
+02C5 2406              ADD     A,#06H
+02C7 F0                MOVX    @DPTR,A
+                                           ; SOURCE LINE # 211
+02C8         ?C0012:
+                                           ; SOURCE LINE # 212
+02C8 900000      R     MOV     DPTR,#k_imu
+02CB E0                MOVX    A,@DPTR
+02CC FF                MOV     R7,A
+02CD 2400        E     ADD     A,#LOW IMU_connected
+02CF F582              MOV     DPL,A
+02D1 E4                CLR     A
+02D2 3400        E     ADDC    A,#HIGH IMU_connected
+02D4 F583              MOV     DPH,A
+02D6 E0                MOVX    A,@DPTR
+02D7 FE                MOV     R6,A
+02D8 75F003            MOV     B,#03H
+02DB A4                MUL     AB
+02DC 2400        E     ADD     A,#LOW IMU_conf+02H
+02DE F582              MOV     DPL,A
+02E0 E4                CLR     A
+02E1 3400        E     ADDC    A,#HIGH IMU_conf+02H
+02E3 F583              MOV     DPH,A
+02E5 E0                MOVX    A,@DPTR
+02E6 7003              JNZ     $ + 5H
+02E8 020000      R     LJMP    ?C0013
+                                           ; SOURCE LINE # 213
+02EB 900000      R     MOV     DPTR,#k_imu
+02EE E0                MOVX    A,@DPTR
+02EF FD                MOV     R5,A
+02F0 EE                MOV     A,R6
+02F1 75F006            MOV     B,#06H
+02F4 A4                MUL     AB
+02F5 2400        E     ADD     A,#LOW Mag
+02F7 F582              MOV     DPL,A
+02F9 E4                CLR     A
+02FA 3400        E     ADDC    A,#HIGH Mag
+02FC F583              MOV     DPH,A
+02FE E0                MOVX    A,@DPTR
+C51 COMPILER V9.51   ISR_IMU                                                               09/22/2016 17:24:20 PAGE 18  
+
+02FF FE                MOV     R6,A
+0300 900000      R     MOV     DPTR,#c
+0303 E0                MOVX    A,@DPTR
+0304 FC                MOV     R4,A
+0305 2400        R     ADD     A,#LOW single_packet
+0307 F582              MOV     DPL,A
+0309 E4                CLR     A
+030A 3400        R     ADDC    A,#HIGH single_packet
+030C F583              MOV     DPH,A
+030E EE                MOV     A,R6
+030F F0                MOVX    @DPTR,A
+                                           ; SOURCE LINE # 214
+0310 7400        E     MOV     A,#LOW IMU_connected
+0312 2D                ADD     A,R5
+0313 F582              MOV     DPL,A
+0315 E4                CLR     A
+0316 3400        E     ADDC    A,#HIGH IMU_connected
+0318 F583              MOV     DPH,A
+031A E0                MOVX    A,@DPTR
+031B 75F006            MOV     B,#06H
+031E A4                MUL     AB
+031F 2400        E     ADD     A,#LOW Mag+01H
+0321 F582              MOV     DPL,A
+0323 E4                CLR     A
+0324 3400        E     ADDC    A,#HIGH Mag+01H
+0326 F583              MOV     DPH,A
+0328 E0                MOVX    A,@DPTR
+0329 FE                MOV     R6,A
+032A 7400        R     MOV     A,#LOW single_packet+01H
+032C 2C                ADD     A,R4
+032D F582              MOV     DPL,A
+032F E4                CLR     A
+0330 3400        R     ADDC    A,#HIGH single_packet+01H
+0332 F583              MOV     DPH,A
+0334 EE                MOV     A,R6
+0335 F0                MOVX    @DPTR,A
+                                           ; SOURCE LINE # 215
+0336 900000      R     MOV     DPTR,#k_imu
+0339 E0                MOVX    A,@DPTR
+033A FE                MOV     R6,A
+033B 2400        E     ADD     A,#LOW IMU_connected
+033D F582              MOV     DPL,A
+033F E4                CLR     A
+0340 3400        E     ADDC    A,#HIGH IMU_connected
+0342 F583              MOV     DPH,A
+0344 E0                MOVX    A,@DPTR
+0345 75F006            MOV     B,#06H
+0348 A4                MUL     AB
+0349 2400        E     ADD     A,#LOW Mag+02H
+034B F582              MOV     DPL,A
+034D E4                CLR     A
+034E 3400        E     ADDC    A,#HIGH Mag+02H
+0350 F583              MOV     DPH,A
+0352 E0                MOVX    A,@DPTR
+0353 FD                MOV     R5,A
+0354 7400        R     MOV     A,#LOW single_packet+02H
+0356 2C                ADD     A,R4
+0357 F582              MOV     DPL,A
+0359 E4                CLR     A
+035A 3400        R     ADDC    A,#HIGH single_packet+02H
+035C F583              MOV     DPH,A
+035E ED                MOV     A,R5
+C51 COMPILER V9.51   ISR_IMU                                                               09/22/2016 17:24:20 PAGE 19  
+
+035F F0                MOVX    @DPTR,A
+                                           ; SOURCE LINE # 216
+0360 7400        E     MOV     A,#LOW IMU_connected
+0362 2E                ADD     A,R6
+0363 F582              MOV     DPL,A
+0365 E4                CLR     A
+0366 3400        E     ADDC    A,#HIGH IMU_connected
+0368 F583              MOV     DPH,A
+036A E0                MOVX    A,@DPTR
+036B 75F006            MOV     B,#06H
+036E A4                MUL     AB
+036F 2400        E     ADD     A,#LOW Mag+03H
+0371 F582              MOV     DPL,A
+0373 E4                CLR     A
+0374 3400        E     ADDC    A,#HIGH Mag+03H
+0376 F583              MOV     DPH,A
+0378 E0                MOVX    A,@DPTR
+0379 FE                MOV     R6,A
+037A 7400        R     MOV     A,#LOW single_packet+03H
+037C 2C                ADD     A,R4
+037D F582              MOV     DPL,A
+037F E4                CLR     A
+0380 3400        R     ADDC    A,#HIGH single_packet+03H
+0382 F583              MOV     DPH,A
+0384 EE                MOV     A,R6
+0385 F0                MOVX    @DPTR,A
+                                           ; SOURCE LINE # 217
+0386 900000      R     MOV     DPTR,#k_imu
+0389 E0                MOVX    A,@DPTR
+038A FE                MOV     R6,A
+038B 2400        E     ADD     A,#LOW IMU_connected
+038D F582              MOV     DPL,A
+038F E4                CLR     A
+0390 3400        E     ADDC    A,#HIGH IMU_connected
+0392 F583              MOV     DPH,A
+0394 E0                MOVX    A,@DPTR
+0395 75F006            MOV     B,#06H
+0398 A4                MUL     AB
+0399 2400        E     ADD     A,#LOW Mag+04H
+039B F582              MOV     DPL,A
+039D E4                CLR     A
+039E 3400        E     ADDC    A,#HIGH Mag+04H
+03A0 F583              MOV     DPH,A
+03A2 E0                MOVX    A,@DPTR
+03A3 FD                MOV     R5,A
+03A4 7400        R     MOV     A,#LOW single_packet+04H
+03A6 2C                ADD     A,R4
+03A7 F582              MOV     DPL,A
+03A9 E4                CLR     A
+03AA 3400        R     ADDC    A,#HIGH single_packet+04H
+03AC F583              MOV     DPH,A
+03AE ED                MOV     A,R5
+03AF F0                MOVX    @DPTR,A
+                                           ; SOURCE LINE # 218
+03B0 7400        E     MOV     A,#LOW IMU_connected
+03B2 2E                ADD     A,R6
+03B3 F582              MOV     DPL,A
+03B5 E4                CLR     A
+03B6 3400        E     ADDC    A,#HIGH IMU_connected
+03B8 F583              MOV     DPH,A
+03BA E0                MOVX    A,@DPTR
+03BB 75F006            MOV     B,#06H
+C51 COMPILER V9.51   ISR_IMU                                                               09/22/2016 17:24:20 PAGE 20  
+
+03BE A4                MUL     AB
+03BF 2400        E     ADD     A,#LOW Mag+05H
+03C1 F582              MOV     DPL,A
+03C3 E4                CLR     A
+03C4 3400        E     ADDC    A,#HIGH Mag+05H
+03C6 F583              MOV     DPH,A
+03C8 E0                MOVX    A,@DPTR
+03C9 FE                MOV     R6,A
+03CA 7400        R     MOV     A,#LOW single_packet+05H
+03CC 2C                ADD     A,R4
+03CD F582              MOV     DPL,A
+03CF E4                CLR     A
+03D0 3400        R     ADDC    A,#HIGH single_packet+05H
+03D2 F583              MOV     DPH,A
+03D4 EE                MOV     A,R6
+03D5 F0                MOVX    @DPTR,A
+                                           ; SOURCE LINE # 219
+03D6 900000      R     MOV     DPTR,#c
+03D9 E0                MOVX    A,@DPTR
+03DA 2406              ADD     A,#06H
+03DC F0                MOVX    @DPTR,A
+                                           ; SOURCE LINE # 220
+03DD         ?C0013:
+                                           ; SOURCE LINE # 221
+03DD 7400        E     MOV     A,#LOW IMU_connected
+03DF 2F                ADD     A,R7
+03E0 F582              MOV     DPL,A
+03E2 E4                CLR     A
+03E3 3400        E     ADDC    A,#HIGH IMU_connected
+03E5 F583              MOV     DPH,A
+03E7 E0                MOVX    A,@DPTR
+03E8 25E0              ADD     A,ACC
+03EA 2400        E     ADD     A,#LOW single_imu_size
+03EC F582              MOV     DPL,A
+03EE E4                CLR     A
+03EF 3400        E     ADDC    A,#HIGH single_imu_size
+03F1 F583              MOV     DPH,A
+03F3 E0                MOVX    A,@DPTR
+03F4 FE                MOV     R6,A
+03F5 A3                INC     DPTR
+03F6 E0                MOVX    A,@DPTR
+03F7 2400        R     ADD     A,#LOW single_packet+0FFFFH
+03F9 F582              MOV     DPL,A
+03FB 7400        R     MOV     A,#HIGH single_packet+0FFFFH
+03FD 3E                ADDC    A,R6
+03FE F583              MOV     DPH,A
+0400 743A              MOV     A,#03AH
+0402 F0                MOVX    @DPTR,A
+                                           ; SOURCE LINE # 222
+0403 900000      R     MOV     DPTR,#c
+0406 7401              MOV     A,#01H
+0408 F0                MOVX    @DPTR,A
+                                           ; SOURCE LINE # 225
+0409 A3                INC     DPTR
+040A E4                CLR     A
+040B F0                MOVX    @DPTR,A
+040C         ?C0014:
+040C 900000      R     MOV     DPTR,#k_imu
+040F E0                MOVX    A,@DPTR
+0410 2400        E     ADD     A,#LOW IMU_connected
+0412 F582              MOV     DPL,A
+0414 E4                CLR     A
+C51 COMPILER V9.51   ISR_IMU                                                               09/22/2016 17:24:20 PAGE 21  
+
+0415 3400        E     ADDC    A,#HIGH IMU_connected
+0417 F583              MOV     DPH,A
+0419 E0                MOVX    A,@DPTR
+041A F9                MOV     R1,A
+041B 25E0              ADD     A,ACC
+041D 2400        E     ADD     A,#LOW single_imu_size
+041F F582              MOV     DPL,A
+0421 E4                CLR     A
+0422 3400        E     ADDC    A,#HIGH single_imu_size
+0424 F583              MOV     DPH,A
+0426 E0                MOVX    A,@DPTR
+0427 FE                MOV     R6,A
+0428 A3                INC     DPTR
+0429 E0                MOVX    A,@DPTR
+042A FF                MOV     R7,A
+042B 900000      R     MOV     DPTR,#k
+042E E0                MOVX    A,@DPTR
+042F FD                MOV     R5,A
+0430 D3                SETB    C
+0431 EF                MOV     A,R7
+0432 9D                SUBB    A,R5
+0433 7480              MOV     A,#080H
+0435 F8                MOV     R0,A
+0436 EE                MOV     A,R6
+0437 6480              XRL     A,#080H
+0439 98                SUBB    A,R0
+043A 402B              JC      ?C0015
+                                           ; SOURCE LINE # 226
+043C E0                MOVX    A,@DPTR
+043D FF                MOV     R7,A
+043E 2400        R     ADD     A,#LOW single_packet
+0440 F582              MOV     DPL,A
+0442 E4                CLR     A
+0443 3400        R     ADDC    A,#HIGH single_packet
+0445 F583              MOV     DPH,A
+0447 E0                MOVX    A,@DPTR
+0448 FE                MOV     R6,A
+0449 EF                MOV     A,R7
+044A 900000      R     MOV     DPTR,#gl_c
+044D E0                MOVX    A,@DPTR
+044E 2D                ADD     A,R5
+044F FD                MOV     R5,A
+0450 E4                CLR     A
+0451 33                RLC     A
+0452 FC                MOV     R4,A
+0453 7400        R     MOV     A,#LOW packet_data
+0455 2D                ADD     A,R5
+0456 F582              MOV     DPL,A
+0458 7400        R     MOV     A,#HIGH packet_data
+045A 3C                ADDC    A,R4
+045B F583              MOV     DPH,A
+045D EE                MOV     A,R6
+045E F0                MOVX    @DPTR,A
+                                           ; SOURCE LINE # 227
+045F 900000      R     MOV     DPTR,#k
+0462 E0                MOVX    A,@DPTR
+0463 04                INC     A
+0464 F0                MOVX    @DPTR,A
+0465 80A5              SJMP    ?C0014
+0467         ?C0015:
+                                           ; SOURCE LINE # 228
+0467 E9                MOV     A,R1
+C51 COMPILER V9.51   ISR_IMU                                                               09/22/2016 17:24:20 PAGE 22  
+
+0468 25E0              ADD     A,ACC
+046A 2400        E     ADD     A,#LOW single_imu_size
+046C F582              MOV     DPL,A
+046E E4                CLR     A
+046F 3400        E     ADDC    A,#HIGH single_imu_size
+0471 F583              MOV     DPH,A
+0473 E0                MOVX    A,@DPTR
+0474 A3                INC     DPTR
+0475 E0                MOVX    A,@DPTR
+0476 FF                MOV     R7,A
+0477 900000      R     MOV     DPTR,#gl_c
+047A E0                MOVX    A,@DPTR
+047B 2F                ADD     A,R7
+047C F0                MOVX    @DPTR,A
+                                           ; SOURCE LINE # 230
+047D 7E00              MOV     R6,#00H
+047F 7F14              MOV     R7,#014H
+0481 7D00              MOV     R5,#00H
+0483 7B01              MOV     R3,#01H
+0485 7A00        R     MOV     R2,#HIGH single_packet
+0487 7900        R     MOV     R1,#LOW single_packet
+0489 120000      E     LCALL   ?C?MEMSET
+                                           ; SOURCE LINE # 232
+048C 900000      R     MOV     DPTR,#k_imu
+048F E0                MOVX    A,@DPTR
+0490 04                INC     A
+0491 F0                MOVX    @DPTR,A
+0492 020000      R     LJMP    ?C0008
+0495         ?C0009:
+                                           ; SOURCE LINE # 235
+0495 7B01              MOV     R3,#01H
+0497 7A00        R     MOV     R2,#HIGH packet_data
+0499 7900        R     MOV     R1,#LOW packet_data
+049B 900000      E     MOV     DPTR,#imus_data_size
+049E E0                MOVX    A,@DPTR
+049F A3                INC     DPTR
+04A0 E0                MOVX    A,@DPTR
+04A1 14                DEC     A
+04A2 FD                MOV     R5,A
+04A3 120000      E     LCALL   _LCRChecksum
+04A6 900000      E     MOV     DPTR,#imus_data_size
+04A9 E0                MOVX    A,@DPTR
+04AA FC                MOV     R4,A
+04AB A3                INC     DPTR
+04AC E0                MOVX    A,@DPTR
+04AD FD                MOV     R5,A
+04AE 2400        R     ADD     A,#LOW packet_data+0FFFFH
+04B0 F582              MOV     DPL,A
+04B2 7400        R     MOV     A,#HIGH packet_data+0FFFFH
+04B4 3C                ADDC    A,R4
+04B5 F583              MOV     DPH,A
+04B7 EF                MOV     A,R7
+04B8 F0                MOVX    @DPTR,A
+                                           ; SOURCE LINE # 236
+04B9 7B01              MOV     R3,#01H
+04BB 7A00        R     MOV     R2,#HIGH packet_data
+04BD 7900        R     MOV     R1,#LOW packet_data
+04BF 120000      E     LCALL   _commWrite
+                                           ; SOURCE LINE # 238
+04C2 900000      E     MOV     DPTR,#imu_send_flag
+04C5 E4                CLR     A
+04C6 F0                MOVX    @DPTR,A
+C51 COMPILER V9.51   ISR_IMU                                                               09/22/2016 17:24:20 PAGE 23  
+
+                                           ; SOURCE LINE # 239
+                                           ; SOURCE LINE # 249
+04C7         ?C0017:
+04C7 D007              POP     AR7
+04C9 D006              POP     AR6
+04CB D005              POP     AR5
+04CD D004              POP     AR4
+04CF D003              POP     AR3
+04D1 D002              POP     AR2
+04D3 D001              POP     AR1
+04D5 D000              POP     AR0
+04D7 D0D0              POP     PSW
+04D9 D000        E     POP     ?C?XPAGE1SFR
+04DB D086              POP     DPS
+04DD D084              POP     DPL1
+04DF D085              POP     DPH1
+04E1 D082              POP     DPL
+04E3 D083              POP     DPH
+04E5 D0F0              POP     B
+04E7 D0E0              POP     ACC
+04E9 32                RETI    
+             ; FUNCTION isr_imu_Interrupt (END)
+
+             ; FUNCTION _isr_imu_SetVector (BEGIN)
+                                           ; SOURCE LINE # 279
+;---- Variable 'address' assigned to Register 'R6/R7' ----
+                                           ; SOURCE LINE # 280
+                                           ; SOURCE LINE # 281
+0000 7B02              MOV     R3,#02H
+0002 7A44              MOV     R2,#044H
+0004 7904              MOV     R1,#04H
+0006 AD07              MOV     R5,AR7
+0008 AC06              MOV     R4,AR6
+000A 120000      E     LCALL   _cywrite16_nodpx
+                                           ; SOURCE LINE # 282
+000D 22                RET     
+             ; FUNCTION _isr_imu_SetVector (END)
+
+             ; FUNCTION isr_imu_GetVector (BEGIN)
+                                           ; SOURCE LINE # 299
+                                           ; SOURCE LINE # 300
+                                           ; SOURCE LINE # 301
+0000 7B02              MOV     R3,#02H
+0002 7A44              MOV     R2,#044H
+0004 7904              MOV     R1,#04H
+0006 120000      E     LCALL   _cyread16_nodpx
+                                           ; SOURCE LINE # 302
+0009         ?C0019:
+0009 22                RET     
+             ; FUNCTION isr_imu_GetVector (END)
+
+             ; FUNCTION _isr_imu_SetPriority (BEGIN)
+                                           ; SOURCE LINE # 329
+;---- Variable 'priority' assigned to Register 'R7' ----
+                                           ; SOURCE LINE # 330
+                                           ; SOURCE LINE # 331
+0000 EF                MOV     A,R7
+0001 C4                SWAP    A
+0002 33                RLC     A
+0003 54E0              ANL     A,#0E0H
+0005 904482            MOV     DPTR,#04482H
+0008 F0                MOVX    @DPTR,A
+C51 COMPILER V9.51   ISR_IMU                                                               09/22/2016 17:24:20 PAGE 24  
+
+                                           ; SOURCE LINE # 332
+0009 22                RET     
+             ; FUNCTION _isr_imu_SetPriority (END)
+
+             ; FUNCTION isr_imu_GetPriority (BEGIN)
+                                           ; SOURCE LINE # 351
+                                           ; SOURCE LINE # 352
+                                           ; SOURCE LINE # 356
+0000 904482            MOV     DPTR,#04482H
+0003 E0                MOVX    A,@DPTR
+0004 FF                MOV     R7,A
+0005 C4                SWAP    A
+0006 13                RRC     A
+0007 5407              ANL     A,#07H
+0009 FF                MOV     R7,A
+;---- Variable 'priority' assigned to Register 'R7' ----
+                                           ; SOURCE LINE # 358
+                                           ; SOURCE LINE # 359
+000A         ?C0021:
+000A 22                RET     
+             ; FUNCTION isr_imu_GetPriority (END)
+
+             ; FUNCTION isr_imu_Enable (BEGIN)
+                                           ; SOURCE LINE # 378
+                                           ; SOURCE LINE # 379
+                                           ; SOURCE LINE # 381
+0000 9044C0            MOV     DPTR,#044C0H
+0003 7404              MOV     A,#04H
+0005 F0                MOVX    @DPTR,A
+                                           ; SOURCE LINE # 382
+0006 22                RET     
+             ; FUNCTION isr_imu_Enable (END)
+
+             ; FUNCTION isr_imu_GetState (BEGIN)
+                                           ; SOURCE LINE # 399
+                                           ; SOURCE LINE # 400
+                                           ; SOURCE LINE # 402
+0000 9044C0            MOV     DPTR,#044C0H
+0003 E0                MOVX    A,@DPTR
+0004 30E204            JNB     ACC.2,?C0023
+0007 7F01              MOV     R7,#01H
+0009 8002              SJMP    ?C0024
+000B         ?C0023:
+000B 7F00              MOV     R7,#00H
+000D         ?C0024:
+                                           ; SOURCE LINE # 403
+000D         ?C0025:
+000D 22                RET     
+             ; FUNCTION isr_imu_GetState (END)
+
+             ; FUNCTION isr_imu_Disable (BEGIN)
+                                           ; SOURCE LINE # 420
+                                           ; SOURCE LINE # 421
+                                           ; SOURCE LINE # 423
+0000 9044C8            MOV     DPTR,#044C8H
+0003 7404              MOV     A,#04H
+0005 F0                MOVX    @DPTR,A
+                                           ; SOURCE LINE # 424
+0006 22                RET     
+             ; FUNCTION isr_imu_Disable (END)
+
+             ; FUNCTION isr_imu_SetPending (BEGIN)
+C51 COMPILER V9.51   ISR_IMU                                                               09/22/2016 17:24:20 PAGE 25  
+
+                                           ; SOURCE LINE # 447
+                                           ; SOURCE LINE # 448
+                                           ; SOURCE LINE # 449
+0000 9044D0            MOV     DPTR,#044D0H
+0003 7404              MOV     A,#04H
+0005 F0                MOVX    @DPTR,A
+                                           ; SOURCE LINE # 450
+0006 22                RET     
+             ; FUNCTION isr_imu_SetPending (END)
+
+             ; FUNCTION isr_imu_ClearPending (BEGIN)
+                                           ; SOURCE LINE # 472
+                                           ; SOURCE LINE # 473
+                                           ; SOURCE LINE # 474
+0000 9044D8            MOV     DPTR,#044D8H
+0003 7404              MOV     A,#04H
+0005 F0                MOVX    @DPTR,A
+                                           ; SOURCE LINE # 475
+0006 22                RET     
+             ; FUNCTION isr_imu_ClearPending (END)
+
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =   1399    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----     377
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+   EDATA SIZE       =   ----    ----
+   HDATA SIZE       =   ----    ----
+   XDATA CONST SIZE =   ----    ----
+   FAR CONST SIZE   =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  1 WARNING(S),  0 ERROR(S)

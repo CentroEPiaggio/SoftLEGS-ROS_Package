@@ -1,0 +1,27 @@
+<launch>
+
+    <!-- `bag_name`   prefix name of the bag file -->
+    <!-- `topic`      topic to be saved -->
+
+    <arg name="saving_dir" />
+    <arg name="sub_folder" />
+
+    <arg name="bag_name1"   default="imu_data" /> 
+    <arg name="topic1"      default="/imu_data" />
+    <arg name="bag_name2"   default="raw_acc" /> 
+    <arg name="topic2"      default="/check_filter/raw_acc" />
+    <arg name="bag_name3"   default="filt_acc" /> 
+    <arg name="topic3"      default="/check_filter/filt_acc" />
+    <arg name="bag_name4"   default="raw_vel" /> 
+    <arg name="topic4"      default="/check_filter/raw_vel" />
+    <arg name="bag_name5"   default="filt_vel" /> 
+    <arg name="topic5"      default="/check_filter/filt_vel" />
+    
+    <!-- launch some bags node to save data -->
+    <node pkg="rosbag" type="record" name="record_imu_data" args="record -o $(arg saving_dir)$(arg sub_folder)$(arg bag_name1) $(arg topic1)"/>
+    <node pkg="rosbag" type="record" name="record_raw_acc"  args="record -o $(arg saving_dir)$(arg sub_folder)$(arg bag_name2) $(arg topic2)"/>
+    <node pkg="rosbag" type="record" name="record_filt_acc" args="record -o $(arg saving_dir)$(arg sub_folder)$(arg bag_name3) $(arg topic3)"/>
+    <node pkg="rosbag" type="record" name="record_raw_vel"  args="record -o $(arg saving_dir)$(arg sub_folder)$(arg bag_name4) $(arg topic4)"/>
+    <node pkg="rosbag" type="record" name="record_filt_vel" args="record -o $(arg saving_dir)$(arg sub_folder)$(arg bag_name5) $(arg topic5)"/>
+
+</launch>

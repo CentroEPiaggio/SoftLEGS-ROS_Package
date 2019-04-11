@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://ros.org/wiki/xacro">
+
+    <xacro:macro name="qb_move_transmission" params="name">
+    	<!-- TODO: outer transmission has just one motor! -->
+
+    	<!-- one cube only -->
+		<transmission name="${name}_trans"> 
+			<type>transmission_interface/SimpleTransmission</type>
+			<joint name="${name}_joint"/>
+			<actuator name="${name}_motor">
+				<hardwareInterface>EffortJointInterface</hardwareInterface>
+				<mechanicalReduction>1</mechanicalReduction>
+			</actuator>
+		</transmission>
+		
+	</xacro:macro>
+
+</robot>

@@ -1,0 +1,396 @@
+<?xml version="1.0" encoding="utf-8"?>
+<CyXmlSerializer>
+<!--This file is machine generated and read. It is not intended to be edited by hand.-->
+<!--Due to this, there is no schema for this file.-->
+<CyGuid_843a90a4-0c4b-4e44-991d-05e7fb117a21 type_name="CyDesigner.Common.ProjMgmt.Model.CyPrjMgmtWrkspcCustomData" version="4">
+<CyGuid_fdba8dfd-b15b-4469-9bbb-9e40c3e70997 type_name="CyDesigner.Common.Base.CyCustomData" version="2">
+<userData>
+<dataGuid v="1b906a0f-a7b6-4e4d-a428-82f98b53cb35">
+<CyGuid_1b906a0f-a7b6-4e4d-a428-82f98b53cb35 type_name="CyDesigner.Common.ProjMgmt.GUI.CyExplorerWindow+CyExplorerWindowState" version="3" SelectedTab="Source">
+<TreeKeys>
+<v>Source</v>
+<v>Components</v>
+<v>Output</v>
+</TreeKeys>
+<TreeStates>
+<CyGuid_2a325b3b-c96a-4e9f-b7a0-2c44ecb5f237 type_name="CyDesigner.Common.Base.Controls.CyTreeViewState" version="1" SelectedNodeId="IMU_Glove_Mini\IMU_Glove_Mini\IMU_Glove_Mini.cydwr">
+<ExpandedNodeIds>
+<v>IMU_Glove_Mini</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\TopDesign</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\IMU_Glove_Mini.cydwr</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Header Files</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Header Files\cyapicallbacks.h</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Source Files</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Source Files\main.c</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Utilities</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Utilities\command_processing.c</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Utilities\command_processing.h</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Utilities\commands.h</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Utilities\device.h</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Utilities\globals.c</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Utilities\globals.h</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Utilities\IMU_functions.c</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Utilities\IMU_functions.h</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Utilities\interruptions.c</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Utilities\interruptions.h</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Generated_Source</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Generated_Source\PSoC3</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Generated_Source\PSoC3\ADC</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Generated_Source\PSoC3\ADC\ADC.c</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Generated_Source\PSoC3\ADC\ADC.h</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Generated_Source\PSoC3\ADC\ADC_INT.c</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Generated_Source\PSoC3\ADC\ADC_PM.c</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Generated_Source\PSoC3\ADC_AMux</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Generated_Source\PSoC3\ADC_AMux\ADC_AMux.c</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Generated_Source\PSoC3\ADC_AMux\ADC_AMux.h</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Generated_Source\PSoC3\ADC_Ext_CP_Clk</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Generated_Source\PSoC3\ADC_Ext_CP_Clk\ADC_Ext_CP_Clk.c</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Generated_Source\PSoC3\ADC_Ext_CP_Clk\ADC_Ext_CP_Clk.h</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Generated_Source\PSoC3\ADC_IRQ</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Generated_Source\PSoC3\ADC_IRQ\ADC_IRQ.c</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Generated_Source\PSoC3\ADC_IRQ\ADC_IRQ.h</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Generated_Source\PSoC3\ADC_theACLK</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Generated_Source\PSoC3\ADC_theACLK\ADC_theACLK.c</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Generated_Source\PSoC3\ADC_theACLK\ADC_theACLK.h</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Generated_Source\PSoC3\AMux_1</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Generated_Source\PSoC3\AMux_1\AMux_1.c</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Generated_Source\PSoC3\AMux_1\AMux_1.h</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Generated_Source\PSoC3\Bootloadable_1</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Generated_Source\PSoC3\Bootloadable_1\Bootloadable_1.c</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Generated_Source\PSoC3\Bootloadable_1\Bootloadable_1.h</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Generated_Source\PSoC3\Chip_Select</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Generated_Source\PSoC3\Chip_Select\Chip_Select.c</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Generated_Source\PSoC3\Chip_Select\Chip_Select.h</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Generated_Source\PSoC3\Chip_Select\Chip_Select_PM.c</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Generated_Source\PSoC3\CLOCK_UART</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Generated_Source\PSoC3\CLOCK_UART\CLOCK_UART.c</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Generated_Source\PSoC3\CLOCK_UART\CLOCK_UART.h</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Generated_Source\PSoC3\CS00</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Generated_Source\PSoC3\CS00\CS00.c</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Generated_Source\PSoC3\CS00\CS00.h</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Generated_Source\PSoC3\CS00\CS00_aliases.h</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Generated_Source\PSoC3\CS01</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Generated_Source\PSoC3\CS01\CS01.c</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Generated_Source\PSoC3\CS01\CS01.h</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Generated_Source\PSoC3\CS01\CS01_aliases.h</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Generated_Source\PSoC3\CS02</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Generated_Source\PSoC3\CS02\CS02.c</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Generated_Source\PSoC3\CS02\CS02.h</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Generated_Source\PSoC3\CS02\CS02_aliases.h</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Generated_Source\PSoC3\CS03</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Generated_Source\PSoC3\CS03\CS03.c</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Generated_Source\PSoC3\CS03\CS03.h</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Generated_Source\PSoC3\CS03\CS03_aliases.h</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Generated_Source\PSoC3\CS04</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Generated_Source\PSoC3\CS04\CS04.c</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Generated_Source\PSoC3\CS04\CS04.h</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Generated_Source\PSoC3\CS04\CS04_aliases.h</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Generated_Source\PSoC3\CS05</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Generated_Source\PSoC3\CS05\CS05.c</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Generated_Source\PSoC3\CS05\CS05.h</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Generated_Source\PSoC3\CS05\CS05_aliases.h</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Generated_Source\PSoC3\CS06</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Generated_Source\PSoC3\CS06\CS06.c</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Generated_Source\PSoC3\CS06\CS06.h</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Generated_Source\PSoC3\CS06\CS06_aliases.h</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Generated_Source\PSoC3\CS07</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Generated_Source\PSoC3\CS07\CS07.c</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Generated_Source\PSoC3\CS07\CS07.h</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Generated_Source\PSoC3\CS07\CS07_aliases.h</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Generated_Source\PSoC3\CS08</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Generated_Source\PSoC3\CS08\CS08.c</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Generated_Source\PSoC3\CS08\CS08.h</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Generated_Source\PSoC3\CS08\CS08_aliases.h</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Generated_Source\PSoC3\CS09</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Generated_Source\PSoC3\CS09\CS09.c</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Generated_Source\PSoC3\CS09\CS09.h</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Generated_Source\PSoC3\CS09\CS09_aliases.h</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Generated_Source\PSoC3\CS10</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Generated_Source\PSoC3\CS10\CS10.c</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Generated_Source\PSoC3\CS10\CS10.h</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Generated_Source\PSoC3\CS10\CS10_aliases.h</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Generated_Source\PSoC3\CS11</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Generated_Source\PSoC3\CS11\CS11.c</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Generated_Source\PSoC3\CS11\CS11.h</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Generated_Source\PSoC3\CS11\CS11_aliases.h</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Generated_Source\PSoC3\CS12</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Generated_Source\PSoC3\CS12\CS12.c</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Generated_Source\PSoC3\CS12\CS12.h</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Generated_Source\PSoC3\CS12\CS12_aliases.h</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Generated_Source\PSoC3\CS13</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Generated_Source\PSoC3\CS13\CS13.c</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Generated_Source\PSoC3\CS13\CS13.h</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Generated_Source\PSoC3\CS13\CS13_aliases.h</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Generated_Source\PSoC3\CS14</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Generated_Source\PSoC3\CS14\CS14.c</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Generated_Source\PSoC3\CS14\CS14.h</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Generated_Source\PSoC3\CS14\CS14_aliases.h</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Generated_Source\PSoC3\CS15</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Generated_Source\PSoC3\CS15\CS15.c</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Generated_Source\PSoC3\CS15\CS15.h</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Generated_Source\PSoC3\CS15\CS15_aliases.h</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Generated_Source\PSoC3\CS16</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Generated_Source\PSoC3\CS16\CS16.c</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Generated_Source\PSoC3\CS16\CS16.h</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Generated_Source\PSoC3\CS16\CS16_aliases.h</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Generated_Source\PSoC3\cy_boot</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Generated_Source\PSoC3\cy_boot\CyBootAsmKeil.a51</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Generated_Source\PSoC3\cy_boot\CyDmac.c</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Generated_Source\PSoC3\cy_boot\CyDmac.h</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Generated_Source\PSoC3\cy_boot\CyFlash.c</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Generated_Source\PSoC3\cy_boot\CyFlash.h</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Generated_Source\PSoC3\cy_boot\CyLib.c</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Generated_Source\PSoC3\cy_boot\CyLib.h</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Generated_Source\PSoC3\cy_boot\cymem.a51</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Generated_Source\PSoC3\cy_boot\cypins.h</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Generated_Source\PSoC3\cy_boot\cyPm.c</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Generated_Source\PSoC3\cy_boot\cyPm.h</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Generated_Source\PSoC3\cy_boot\CySpc.c</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Generated_Source\PSoC3\cy_boot\CySpc.h</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Generated_Source\PSoC3\cy_boot\cytypes.h</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Generated_Source\PSoC3\cy_boot\cyutils.c</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Generated_Source\PSoC3\cy_boot\KeilStart.a51</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Generated_Source\PSoC3\cy_boot\PSoC3_8051.h</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Generated_Source\PSoC3\cy_boot\PSoC3_8051.inc</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Generated_Source\PSoC3\EEPROM</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Generated_Source\PSoC3\EEPROM\EEPROM.c</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Generated_Source\PSoC3\EEPROM\EEPROM.h</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Generated_Source\PSoC3\EMG_1</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Generated_Source\PSoC3\EMG_1\EMG_1.c</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Generated_Source\PSoC3\EMG_1\EMG_1.h</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Generated_Source\PSoC3\EMG_1\EMG_1_aliases.h</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Generated_Source\PSoC3\EMG_2</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Generated_Source\PSoC3\EMG_2\EMG_2.c</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Generated_Source\PSoC3\EMG_2\EMG_2.h</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Generated_Source\PSoC3\EMG_2\EMG_2_aliases.h</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Generated_Source\PSoC3\FTDI_ENABLE</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Generated_Source\PSoC3\FTDI_ENABLE\FTDI_ENABLE.c</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Generated_Source\PSoC3\FTDI_ENABLE\FTDI_ENABLE.h</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Generated_Source\PSoC3\FTDI_ENABLE\FTDI_ENABLE_aliases.h</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Generated_Source\PSoC3\FTDI_ENABLE_REG</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Generated_Source\PSoC3\FTDI_ENABLE_REG\FTDI_ENABLE_REG.c</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Generated_Source\PSoC3\FTDI_ENABLE_REG\FTDI_ENABLE_REG.h</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Generated_Source\PSoC3\FTDI_ENABLE_REG\FTDI_ENABLE_REG_PM.c</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Generated_Source\PSoC3\isr_1</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Generated_Source\PSoC3\isr_1\isr_1.c</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Generated_Source\PSoC3\isr_1\isr_1.h</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Generated_Source\PSoC3\isr_clock</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Generated_Source\PSoC3\isr_clock\isr_clock.c</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Generated_Source\PSoC3\isr_clock\isr_clock.h</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Generated_Source\PSoC3\ISR_RS485_RX</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Generated_Source\PSoC3\ISR_RS485_RX\ISR_RS485_RX.c</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Generated_Source\PSoC3\ISR_RS485_RX\ISR_RS485_RX.h</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Generated_Source\PSoC3\MISO</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Generated_Source\PSoC3\MISO\MISO.c</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Generated_Source\PSoC3\MISO\MISO.h</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Generated_Source\PSoC3\MISO\MISO_aliases.h</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Generated_Source\PSoC3\MOSI</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Generated_Source\PSoC3\MOSI\MOSI.c</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Generated_Source\PSoC3\MOSI\MOSI.h</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Generated_Source\PSoC3\MOSI\MOSI_aliases.h</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Generated_Source\PSoC3\Opto_Pin</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Generated_Source\PSoC3\Opto_Pin\Opto_Pin.c</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Generated_Source\PSoC3\Opto_Pin\Opto_Pin.h</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Generated_Source\PSoC3\Opto_Pin\Opto_Pin_aliases.h</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Generated_Source\PSoC3\RS_485_EN</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Generated_Source\PSoC3\RS_485_EN\RS_485_EN.c</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Generated_Source\PSoC3\RS_485_EN\RS_485_EN.h</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Generated_Source\PSoC3\RS_485_EN\RS_485_EN_aliases.h</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Generated_Source\PSoC3\RS485_CTS</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Generated_Source\PSoC3\RS485_CTS\RS485_CTS.c</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Generated_Source\PSoC3\RS485_CTS\RS485_CTS.h</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Generated_Source\PSoC3\RS485_CTS\RS485_CTS_PM.c</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Generated_Source\PSoC3\SCLK</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Generated_Source\PSoC3\SCLK\SCLK.c</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Generated_Source\PSoC3\SCLK\SCLK.h</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Generated_Source\PSoC3\SCLK\SCLK_aliases.h</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Generated_Source\PSoC3\SPIM_1</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Generated_Source\PSoC3\SPIM_1\SPIM_1.c</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Generated_Source\PSoC3\SPIM_1\SPIM_1.h</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Generated_Source\PSoC3\SPIM_1\SPIM_1_INT.c</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Generated_Source\PSoC3\SPIM_1\SPIM_1_PM.c</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Generated_Source\PSoC3\SPIM_1\SPIM_1_PVT.h</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Generated_Source\PSoC3\SPIM_1_IntClock</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Generated_Source\PSoC3\SPIM_1_IntClock\SPIM_1_IntClock.c</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Generated_Source\PSoC3\SPIM_1_IntClock\SPIM_1_IntClock.h</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Generated_Source\PSoC3\UART_RS485</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Generated_Source\PSoC3\UART_RS485\UART_RS485.c</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Generated_Source\PSoC3\UART_RS485\UART_RS485.h</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Generated_Source\PSoC3\UART_RS485\UART_RS485_BOOT.c</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Generated_Source\PSoC3\UART_RS485\UART_RS485_INT.c</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Generated_Source\PSoC3\UART_RS485\UART_RS485_PM.c</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Generated_Source\PSoC3\USB_VDD</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Generated_Source\PSoC3\USB_VDD\USB_VDD.c</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Generated_Source\PSoC3\USB_VDD\USB_VDD.h</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Generated_Source\PSoC3\USB_VDD\USB_VDD_aliases.h</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Generated_Source\PSoC3\cycodeshareexport.ld</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Generated_Source\PSoC3\cycodeshareimport.ld</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Generated_Source\PSoC3\cycodeshareimport.scat</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Generated_Source\PSoC3\cydevice.h</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Generated_Source\PSoC3\cydevice_trm.h</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Generated_Source\PSoC3\cydevicekeil.inc</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Generated_Source\PSoC3\cydevicekeil_trm.inc</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Generated_Source\PSoC3\cydisabledsheets.h</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Generated_Source\PSoC3\cyfitter.h</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Generated_Source\PSoC3\cyfitter_cfg.c</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Generated_Source\PSoC3\cyfitter_cfg.h</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Generated_Source\PSoC3\cyfitterkeil.inc</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Generated_Source\PSoC3\project.h</v>
+</ExpandedNodeIds>
+<VisibleNodeIds />
+</CyGuid_2a325b3b-c96a-4e9f-b7a0-2c44ecb5f237>
+<CyGuid_2a325b3b-c96a-4e9f-b7a0-2c44ecb5f237 type_name="CyDesigner.Common.Base.Controls.CyTreeViewState" version="1" SelectedNodeId="">
+<ExpandedNodeIds>
+<v>IMU_Glove_Mini</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\TopDesign</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\TopDesign\TopDesign.cysch</v>
+</ExpandedNodeIds>
+<VisibleNodeIds />
+</CyGuid_2a325b3b-c96a-4e9f-b7a0-2c44ecb5f237>
+<CyGuid_2a325b3b-c96a-4e9f-b7a0-2c44ecb5f237 type_name="CyDesigner.Common.Base.Controls.CyTreeViewState" version="1" SelectedNodeId="">
+<ExpandedNodeIds>
+<v>IMU_Glove_Mini</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\DP8051</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\DP8051\DP8051_Keil_951</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\DP8051\DP8051_Keil_951\Release</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\DP8051\DP8051_Keil_951\Release\Listing Files</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\DP8051\DP8051_Keil_951\Release\Listing Files\ADC.lst</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\DP8051\DP8051_Keil_951\Release\Listing Files\ADC_AMux.lst</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\DP8051\DP8051_Keil_951\Release\Listing Files\ADC_Ext_CP_Clk.lst</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\DP8051\DP8051_Keil_951\Release\Listing Files\ADC_INT.lst</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\DP8051\DP8051_Keil_951\Release\Listing Files\ADC_IRQ.lst</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\DP8051\DP8051_Keil_951\Release\Listing Files\ADC_PM.lst</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\DP8051\DP8051_Keil_951\Release\Listing Files\ADC_theACLK.lst</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\DP8051\DP8051_Keil_951\Release\Listing Files\AMux_1.lst</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\DP8051\DP8051_Keil_951\Release\Listing Files\Bootloadable_1.lst</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\DP8051\DP8051_Keil_951\Release\Listing Files\Chip_Select.lst</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\DP8051\DP8051_Keil_951\Release\Listing Files\Chip_Select_PM.lst</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\DP8051\DP8051_Keil_951\Release\Listing Files\CLOCK_UART.lst</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\DP8051\DP8051_Keil_951\Release\Listing Files\command_processing.lst</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\DP8051\DP8051_Keil_951\Release\Listing Files\CS00.lst</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\DP8051\DP8051_Keil_951\Release\Listing Files\CS01.lst</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\DP8051\DP8051_Keil_951\Release\Listing Files\CS02.lst</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\DP8051\DP8051_Keil_951\Release\Listing Files\CS03.lst</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\DP8051\DP8051_Keil_951\Release\Listing Files\CS04.lst</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\DP8051\DP8051_Keil_951\Release\Listing Files\CS05.lst</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\DP8051\DP8051_Keil_951\Release\Listing Files\CS06.lst</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\DP8051\DP8051_Keil_951\Release\Listing Files\CS07.lst</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\DP8051\DP8051_Keil_951\Release\Listing Files\CS08.lst</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\DP8051\DP8051_Keil_951\Release\Listing Files\CS09.lst</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\DP8051\DP8051_Keil_951\Release\Listing Files\CS10.lst</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\DP8051\DP8051_Keil_951\Release\Listing Files\CS11.lst</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\DP8051\DP8051_Keil_951\Release\Listing Files\CS12.lst</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\DP8051\DP8051_Keil_951\Release\Listing Files\CS13.lst</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\DP8051\DP8051_Keil_951\Release\Listing Files\CS14.lst</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\DP8051\DP8051_Keil_951\Release\Listing Files\CS15.lst</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\DP8051\DP8051_Keil_951\Release\Listing Files\CS16.lst</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\DP8051\DP8051_Keil_951\Release\Listing Files\CyBootAsmKeil.lst</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\DP8051\DP8051_Keil_951\Release\Listing Files\CyDmac.lst</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\DP8051\DP8051_Keil_951\Release\Listing Files\cyfitter_cfg.lst</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\DP8051\DP8051_Keil_951\Release\Listing Files\CyFlash.lst</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\DP8051\DP8051_Keil_951\Release\Listing Files\CyLib.lst</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\DP8051\DP8051_Keil_951\Release\Listing Files\cymem.lst</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\DP8051\DP8051_Keil_951\Release\Listing Files\cyPm.lst</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\DP8051\DP8051_Keil_951\Release\Listing Files\CySpc.lst</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\DP8051\DP8051_Keil_951\Release\Listing Files\cyutils.lst</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\DP8051\DP8051_Keil_951\Release\Listing Files\EEPROM.lst</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\DP8051\DP8051_Keil_951\Release\Listing Files\EMG_1.lst</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\DP8051\DP8051_Keil_951\Release\Listing Files\EMG_2.lst</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\DP8051\DP8051_Keil_951\Release\Listing Files\FTDI_ENABLE.lst</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\DP8051\DP8051_Keil_951\Release\Listing Files\FTDI_ENABLE_REG.lst</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\DP8051\DP8051_Keil_951\Release\Listing Files\FTDI_ENABLE_REG_PM.lst</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\DP8051\DP8051_Keil_951\Release\Listing Files\globals.lst</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\DP8051\DP8051_Keil_951\Release\Listing Files\IMU_functions.lst</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\DP8051\DP8051_Keil_951\Release\Listing Files\interruptions.lst</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\DP8051\DP8051_Keil_951\Release\Listing Files\isr_1.lst</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\DP8051\DP8051_Keil_951\Release\Listing Files\isr_clock.lst</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\DP8051\DP8051_Keil_951\Release\Listing Files\ISR_RS485_RX.lst</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\DP8051\DP8051_Keil_951\Release\Listing Files\KeilStart.lst</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\DP8051\DP8051_Keil_951\Release\Listing Files\main.lst</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\DP8051\DP8051_Keil_951\Release\Listing Files\MISO.lst</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\DP8051\DP8051_Keil_951\Release\Listing Files\MOSI.lst</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\DP8051\DP8051_Keil_951\Release\Listing Files\Opto_Pin.lst</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\DP8051\DP8051_Keil_951\Release\Listing Files\RS_485_EN.lst</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\DP8051\DP8051_Keil_951\Release\Listing Files\RS485_CTS.lst</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\DP8051\DP8051_Keil_951\Release\Listing Files\RS485_CTS_PM.lst</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\DP8051\DP8051_Keil_951\Release\Listing Files\SCLK.lst</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\DP8051\DP8051_Keil_951\Release\Listing Files\SPIM_1.lst</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\DP8051\DP8051_Keil_951\Release\Listing Files\SPIM_1_INT.lst</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\DP8051\DP8051_Keil_951\Release\Listing Files\SPIM_1_IntClock.lst</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\DP8051\DP8051_Keil_951\Release\Listing Files\SPIM_1_PM.lst</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\DP8051\DP8051_Keil_951\Release\Listing Files\UART_RS485.lst</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\DP8051\DP8051_Keil_951\Release\Listing Files\UART_RS485_BOOT.lst</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\DP8051\DP8051_Keil_951\Release\Listing Files\UART_RS485_INT.lst</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\DP8051\DP8051_Keil_951\Release\Listing Files\UART_RS485_PM.lst</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\DP8051\DP8051_Keil_951\Release\Listing Files\USB_VDD.lst</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\DP8051\DP8051_Keil_951\Release\IMU_Glove_Mini.cyacd</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\DP8051\DP8051_Keil_951\Release\IMU_Glove_Mini.elf</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\DP8051\DP8051_Keil_951\Release\IMU_Glove_Mini.hex</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\DP8051\DP8051_Keil_951\Release\IMU_Glove_Mini.map</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\IMU_Glove_Mini.gpdsc</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\IMU_Glove_Mini.rpt</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\IMU_Glove_Mini_timing.html</v>
+</ExpandedNodeIds>
+<VisibleNodeIds />
+</CyGuid_2a325b3b-c96a-4e9f-b7a0-2c44ecb5f237>
+</TreeStates>
+<TreeKeysV2>
+<v>Datasheet</v>
+</TreeKeysV2>
+<TreeStatesV2>
+<CyGuid_2a325b3b-c96a-4e9f-b7a0-2c44ecb5f237 type_name="CyDesigner.Common.Base.Controls.CyTreeViewState" version="1" SelectedNodeId="">
+<ExpandedNodeIds>
+<v>IMU_Glove_Mini</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\PSoC 3 Architecture TRM</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\CY8C32 Family Datasheet</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\System Reference Guides</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\System Reference Guides\cy_boot_v5_30</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\ADC_DelSig_v3_20.pdf</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\AMux_v1_80.pdf</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\Bootloadable_v1_50.pdf</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\cy_clock_v2_20</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\cy_clock_v2_20\cy_clock_v2_20.pdf</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\cy_constant_v1_0.pdf</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\cy_isr_v1_70</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\cy_isr_v1_70\cy_isr_v1_70.pdf</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\cy_pins_v2_10</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\cy_pins_v2_10\cy_pins_v2_10.pdf</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\cy_pins_v2_20</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\cy_pins_v2_20\cy_pins_v2_20.pdf</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\CyControlReg_v1_80</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\CyControlReg_v1_80\CyControlReg_v1_80.pdf</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\demux_v1_10.pdf</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\EEPROM_v3_0.pdf</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\not_v1_0</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\not_v1_0\not_v1_0.pdf</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\SPI_Master_v2_50.pdf</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\UART_v2_50.pdf</v>
+<v>IMU_Glove_Mini\IMU_Glove_Mini\ZeroTerminal.pdf</v>
+</ExpandedNodeIds>
+<VisibleNodeIds />
+</CyGuid_2a325b3b-c96a-4e9f-b7a0-2c44ecb5f237>
+</TreeStatesV2>
+</CyGuid_1b906a0f-a7b6-4e4d-a428-82f98b53cb35>
+</dataGuid>
+</userData>
+</CyGuid_fdba8dfd-b15b-4469-9bbb-9e40c3e70997>
+<Unloaded />
+<OpenDocs>
+<name v=".\IMU_Glove_Mini.cydsn\TopDesign\TopDesign.cysch" />
+<name v=".\IMU_Glove_Mini.cydsn\command_processing.c" />
+<name v=".\IMU_Glove_Mini.cydsn\main.c" />
+<name v=".\IMU_Glove_Mini.cydsn\IMU_functions.h" />
+<name v=".\IMU_Glove_Mini.cydsn\interruptions.c" />
+<name v=".\IMU_Glove_Mini.cydsn\IMU_functions.c" />
+<name v=".\IMU_Glove_Mini.cydsn\globals.h" />
+<name v=".\IMU_Glove_Mini.cydsn\Generated_Source\PSoC3\isr_1.c" />
+<name v=".\IMU_Glove_Mini.cydsn\IMU_Glove_Mini.cydwr" />
+</OpenDocs>
+<config v="Release" />
+<AutoUpdate v="true" />
+</CyGuid_843a90a4-0c4b-4e44-991d-05e7fb117a21>
+</CyXmlSerializer>

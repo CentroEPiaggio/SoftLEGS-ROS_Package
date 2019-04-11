@@ -1,0 +1,8 @@
+prefix=/home/riccardo/catkin_ws/install
+
+Name: qb_device_msgs
+Description: Description of qb_device_msgs
+Version: 0.11.3
+Cflags: -I/home/riccardo/catkin_ws/install/include
+Libs: -L/home/riccardo/catkin_ws/install/lib 
+Requires: std_msgs message_runtime

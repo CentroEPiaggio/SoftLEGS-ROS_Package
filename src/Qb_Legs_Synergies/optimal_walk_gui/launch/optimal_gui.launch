@@ -1,0 +1,4 @@
+<launch>
+<node pkg="optimal_walk_gui" name="optimal_gui_main" type="optimal_walk_gui" output="screen"/>
+</launch>
+

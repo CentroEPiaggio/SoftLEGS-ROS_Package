@@ -1,0 +1,1414 @@
+C51 COMPILER V9.51   IMU_FUNCTIONS                                                         04/30/2016 17:24:41 PAGE 1   
+
+
+C51 COMPILER V9.51, COMPILATION OF MODULE IMU_FUNCTIONS
+OBJECT MODULE PLACED IN .\DP8051\DP8051_Keil_951\Release\IMU_functions.obj
+COMPILER INVOKED BY: C:\Program Files (x86)\Cypress\PSoC Creator\3.3\PSoC Creator\import\keil\pk51\9.51\C51\BIN\c51.exe 
+                    -.\IMU_functions.c NOIV LARGE MODDP2 OMF2 VB(1) NOIP INCDIR(.,Generated_Source\PSoC3) FF(3) DB DF(NDEBUG) WL(2) PR(.\DP80
+                    -51\DP8051_Keil_951\Release/IMU_functions.lst) CD OT(8,SIZE) OJ(.\DP8051\DP8051_Keil_951\Release\IMU_functions.obj)
+
+line level    source
+
+*** MESSAGE C286 IN LINE 0 OF (null): license limits optimization to level 5
+   1          /* ========================================
+   2           *
+   3           * Copyright YOUR COMPANY, THE YEAR
+   4           * All Rights Reserved
+   5           * UNPUBLISHED, LICENSED SOFTWARE.
+   6           *
+   7           * CONFIDENTIAL AND PROPRIETARY INFORMATION
+   8           * WHICH IS THE PROPERTY OF your company.
+   9           *
+  10           * ========================================
+  11          */  
+  12                  #include <IMU_functions.h>
+  13                  #include <SPIM_1.h>
+  14          
+  15                  extern uint8 Accel[N_IMU][6];
+  16                  extern uint8 Gyro[N_IMU][6];
+  17          
+  18          /*******************************************************************************
+  19          * Function Name: Glove Reset
+  20          *********************************************************************************/      
+  21          void GloveReset() {
+  22   1              
+  23   1          int k_imu;
+  24   1              ISR_1_Stop();           // Disable Time Interrupt
+*** WARNING C206 IN LINE 24 OF .\IMU_functions.c: 'ISR_1_Stop': missing function-prototype
+  25   1              ISR_1_Disable();
+*** WARNING C206 IN LINE 25 OF .\IMU_functions.c: 'ISR_1_Disable': missing function-prototype
+  26   1              
+  27   1              //init MPU9250
+  28   1              for (k_imu = 0; k_imu < N_IMU; k_imu++) {       
+  29   2              Chip_Select_Write(k_imu);
+  30   2                  CyDelay(10);
+  31   2                  InitIMU();
+  32   2                  CyDelay(10);
+  33   2              }
+  34   1          // Restart Time Interrupt
+  35   1          ISR_1_Start();
+*** WARNING C206 IN LINE 35 OF .\IMU_functions.c: 'ISR_1_Start': missing function-prototype
+  36   1              ISR_1_Enable();         
+*** WARNING C206 IN LINE 36 OF .\IMU_functions.c: 'ISR_1_Enable': missing function-prototype
+  37   1              CyDelay(50);
+  38   1      
+  39   1      }
+  40                  
+  41          /*******************************************************************************
+  42          * Function Name: IMU Initialization
+  43          *********************************************************************************/
+  44          void InitIMU(){ 
+  45   1          
+  46   1                              //configuration regiser
+  47   1      //                      WriteControlRegister(MPU9250_PWR_MGMT_1, 0x80); //reset IMU
+  48   1      //                      CyDelay(20);
+C51 COMPILER V9.51   IMU_FUNCTIONS                                                         04/30/2016 17:24:41 PAGE 2   
+
+  49   1                              WriteControlRegister(MPU9250_PWR_MGMT_1, 0x10); 
+  50   1                              CyDelay(30);    
+  51   1                              WriteControlRegister(MPU9250_USER_CTRL, 0x20);  //I2C master enable - disable I2C (prima 0x30)
+  52   1                              CyDelay(30);
+  53   1                  WriteControlRegister(MPU9250_CONFIG, 0x05); //Gyro & Temp Low Pass Filter 0x01 = 184Hz, 0x04 =
+             - 20Hz, 0x05 = 10Hz
+  54   1                  CyDelay(30);        
+  55   1                              WriteControlRegister(MPU9250_GYRO_CONFIG , 0x18); //Gyro full scale select 0x00=250°/s 0x80=500°/s 0x
+             -18=2000°/s 
+  56   1                              CyDelay(30);
+  57   1                  WriteControlRegister(MPU9250_ACCEL_CONFIG, 0x00);
+  58   1                  CyDelay(30);
+  59   1                  WriteControlRegister(MPU9250_ACCEL_CONFIG2, 0x05);
+  60   1                  CyDelay(30);
+  61   1                              //mag register
+  62   1                              WriteControlRegister(MPU9250_I2C_MST_CTRL, 0x0D); //set slave I2C speed
+  63   1                              CyDelay(30);
+  64   1                              //SLV0 (use to write)
+  65   1                              WriteControlRegister(MPU9250_I2C_SLV0_ADDR, 0x0C); //set compass address
+  66   1                              CyDelay(30);                    
+  67   1                              WriteControlRegister(MPU9250_I2C_SLV0_REG, AK8936_CNTL); //compass mode register
+  68   1                              CyDelay(30);    
+  69   1                              // Istruction used to read Compass
+  70   1                              WriteControlRegister(MPU9250_I2C_SLV0_D0, 0x16); //0x12 continuous mode1  0x16 continuous mode2
+  71   1                              // Istruction used to Calibrate Compass
+  72   1                              //WriteControlRegister(bus,MPU9250_I2C_SLV0_D0, 0x1F); //0x1F ROM access
+  73   1                              CyDelay(30);
+  74   1                              WriteControlRegister(MPU9250_I2C_SLV0_CTRL, 0x81); //enable data from register + 1 bit to write
+  75   1                              CyDelay(30);
+  76   1                              //SLV0 (use to read)
+  77   1                              WriteControlRegister(MPU9250_I2C_SLV0_ADDR, 0x8C); // RCR  | AK8963_address (0x0C) 
+  78   1                              CyDelay(30);
+  79   1                              // Istruction used to read Compass
+  80   1                              WriteControlRegister(MPU9250_I2C_SLV0_REG, 0x03); // 0x03:start from Xout Low in case of calibration 0x
+             -10:start from ASAX
+  81   1                              // Istruction used to Calibrate Compass
+  82   1                              //WriteControlRegister(bus,MPU9250_I2C_SLV0_REG, 0x10); // 0x10:start from ASAX
+  83   1                              CyDelay(30);
+  84   1                              // Istruction used to read Compass
+  85   1                              WriteControlRegister(MPU9250_I2C_SLV0_CTRL, 0x8D); //How many bits read  SEMPRE DISPARI 0x8D era quella
+             - che funzionava
+  86   1                              // Istruction used to Calibrate Compass
+  87   1                              //WriteControlRegister(bus,MPU9250_I2C_SLV0_CTRL, 0x83);
+  88   1                              CyDelay(30);
+  89   1                              WriteControlRegister(MPU9250_PWR_MGMT_1, 0x00); 
+  90   1                              CyDelay(50);
+  91   1      }       
+  92          
+  93          /*******************************************************************************
+  94          * Function Name: IMU Read
+  95          *********************************************************************************/      
+  96                  
+  97                  void ReadIMU(int n){
+  98   1              ReadAcc(n);
+  99   1              ReadGyro(n);
+ 100   1              }
+ 101          
+ 102                  void ReadAcc(int n){
+ 103   1              uint8 low=0, high=0;    
+ 104   1                      
+ 105   1              int row = n;
+ 106   1              //SELEZIONARE IMU N E INSERIRE N AL POSTO DI 0 NELLA RIGHE DI acc
+C51 COMPILER V9.51   IMU_FUNCTIONS                                                         04/30/2016 17:24:41 PAGE 3   
+
+ 107   1              
+ 108   1              //read X
+ 109   1              low=ReadControlRegister(MPU9250_ACCEL_XOUT_L);
+ 110   1                      high=ReadControlRegister(MPU9250_ACCEL_XOUT_H);
+ 111   1              
+ 112   1                      Accel[row][0] = high; 
+ 113   1                      Accel[row][1] = low; 
+ 114   1                      low=0, high=0;
+ 115   1                              
+ 116   1              //read Y
+ 117   1                      low=ReadControlRegister(MPU9250_ACCEL_YOUT_L);
+ 118   1                      high=ReadControlRegister(MPU9250_ACCEL_YOUT_H);
+ 119   1              
+ 120   1                      Accel[row][2] = high; 
+ 121   1                      Accel[row][3] = low; 
+ 122   1                      low=0, high=0;
+ 123   1                      
+ 124   1              //read Z
+ 125   1                      low=ReadControlRegister(MPU9250_ACCEL_ZOUT_L);  
+ 126   1                      high=ReadControlRegister(MPU9250_ACCEL_ZOUT_H);
+ 127   1      
+ 128   1                      Accel[row][4] = high; 
+ 129   1                      Accel[row][5] = low;
+ 130   1                      low=0, high=0;
+ 131   1      
+ 132   1      }
+ 133          
+ 134          /*******************************************************************************
+ 135          * Function Name: Read Gyro's Data of IMU n
+ 136          *********************************************************************************/
+ 137          void ReadGyro(int n){
+ 138   1              uint8 low=0, high=0;
+ 139   1          
+ 140   1              int row = n;
+ 141   1              
+ 142   1              //read X
+ 143   1                      low=ReadControlRegister(MPU9250_GYRO_XOUT_L);
+ 144   1                      high=ReadControlRegister(MPU9250_GYRO_XOUT_H);
+ 145   1              
+ 146   1                      Gyro[row][0] = high; 
+ 147   1                      Gyro[row][1] = low;
+ 148   1                      low=0, high=0;
+ 149   1              //read Y
+ 150   1                      low=ReadControlRegister(MPU9250_GYRO_YOUT_L);
+ 151   1                      high=ReadControlRegister(MPU9250_GYRO_YOUT_H);
+ 152   1              
+ 153   1                      Gyro[row][2] = high; 
+ 154   1                      Gyro[row][3] = low;
+ 155   1                      low=0, high=0;
+ 156   1      
+ 157   1              //read Z
+ 158   1              low=ReadControlRegister(MPU9250_GYRO_ZOUT_L);
+ 159   1                      high=ReadControlRegister(MPU9250_GYRO_ZOUT_H);
+ 160   1              
+ 161   1                      Gyro[row][4] = high; 
+ 162   1                      Gyro[row][5] = low;        
+ 163   1      
+ 164   1                      low=0, high=0;
+ 165   1      }
+ 166          
+ 167          
+ 168          /********************************** ********************************************
+C51 COMPILER V9.51   IMU_FUNCTIONS                                                         04/30/2016 17:24:41 PAGE 4   
+
+ 169          * Function Name: Low-Pass Filter Frequency Change
+ 170          *********************************************************************************/
+ 171          void LF_Frequency_Change_Accel_And_Gyro(int d_frequency, int n_imu) {
+ 172   1          
+ 173   1          int value;
+ 174   1          if (d_frequency == 1) {value = 0x01;}
+ 175   1          if (d_frequency == 2) {value = 0x02;}
+ 176   1          if (d_frequency == 3) {value = 0x03;}
+ 177   1          if (d_frequency == 4) {value = 0x04;}
+ 178   1          if (d_frequency == 5) {value = 0x05;}
+ 179   1          if (d_frequency == 6) {value = 0x06;}
+ 180   1          
+ 181   1          ISR_1_Stop();               // Disable Time Interrupt
+ 182   1              ISR_1_Disable();
+ 183   1                      
+ 184   1              Chip_Select_Write(n_imu);
+ 185   1              CyDelay(20);
+ 186   1          WriteControlRegister(MPU9250_CONFIG, value); //Gyro & Temp Low Pass Filter 0x01 = 184Hz, 0x04 = 20Hz
+ 187   1          CyDelay(20);        
+ 188   1          WriteControlRegister(MPU9250_ACCEL_CONFIG2, value);
+ 189   1          CyDelay(20);
+ 190   1                                                                              
+ 191   1          // Restart Time Interrupt
+ 192   1          ISR_1_Start();
+ 193   1              ISR_1_Enable();         
+ 194   1              CyDelay(10);
+ 195   1      }
+ 196          
+ 197          /********************************** ********************************************
+ 198          * Function Name: Low-Pass Filter Frequency Change Accel
+ 199          *********************************************************************************/
+ 200          void LF_Frequency_Change_Accel(int d_frequency, int n_imu) {
+ 201   1          
+ 202   1          int value;
+ 203   1          if (d_frequency == 1) {value = 0x01;}
+ 204   1          if (d_frequency == 2) {value = 0x02;}
+ 205   1          if (d_frequency == 3) {value = 0x03;}
+ 206   1          if (d_frequency == 4) {value = 0x04;}
+ 207   1          if (d_frequency == 5) {value = 0x05;}
+ 208   1          if (d_frequency == 6) {value = 0x06;}
+ 209   1          
+ 210   1          ISR_1_Stop();               // Disable Time Interrupt
+ 211   1              ISR_1_Disable();
+ 212   1                      
+ 213   1              Chip_Select_Write(n_imu);
+ 214   1              CyDelay(10);
+ 215   1          WriteControlRegister(MPU9250_ACCEL_CONFIG2, value);
+ 216   1          CyDelay(10);
+ 217   1                                              
+ 218   1          // Restart Time Interrupt
+ 219   1          ISR_1_Start();
+ 220   1              ISR_1_Enable(); 
+ 221   1              CyDelay(10);
+ 222   1      }
+ 223          
+ 224          /********************************** ********************************************
+ 225          * Function Name: Low-Pass Filter Frequency Change Gyro
+ 226          *********************************************************************************/
+ 227          void LF_Frequency_Change_Gyro(int d_frequency, int n_imu) {
+ 228   1          
+ 229   1          int value;
+ 230   1          if (d_frequency == 1) {value = 0x01;}
+C51 COMPILER V9.51   IMU_FUNCTIONS                                                         04/30/2016 17:24:41 PAGE 5   
+
+ 231   1          if (d_frequency == 2) {value = 0x02;}
+ 232   1          if (d_frequency == 3) {value = 0x03;}
+ 233   1          if (d_frequency == 4) {value = 0x04;}
+ 234   1          if (d_frequency == 5) {value = 0x05;}
+ 235   1          if (d_frequency == 6) {value = 0x06;}
+ 236   1          
+ 237   1          ISR_1_Stop();               // Disable Time Interrupt
+ 238   1              ISR_1_Disable();
+ 239   1                      
+ 240   1              Chip_Select_Write(n_imu);
+ 241   1              CyDelay(10);
+ 242   1          WriteControlRegister(MPU9250_CONFIG, value); //Gyro & Temp Low Pass Filter 0x01 = 184Hz, 0x04 = 20Hz
+ 243   1          CyDelay(10);        
+ 244   1                                                      
+ 245   1          // Restart Time Interrupt
+ 246   1          ISR_1_Start();
+ 247   1              ISR_1_Enable(); 
+ 248   1              CyDelay(10);
+ 249   1      }
+ 250          
+ 251          /********************************** *********************************************
+ 252          * Function Name: Write Control Register
+ 253          *********************************************************************************/
+ 254          void WriteControlRegister(uint8 address, uint8 dta){
+ 255   1              
+ 256   1              SPIM_1_ClearRxBuffer();
+ 257   1              SPIM_1_ClearTxBuffer();
+ 258   1              SPIM_1_ClearFIFO();
+ 259   1              SPIM_1_WriteByte(MPU9250_WCR | address);
+ 260   1              while(!( SPIM_1_ReadStatus() & SPIM_1_STS_TX_FIFO_EMPTY));              
+ 261   1              SPIM_1_WriteByte(dta);
+ 262   1              while(!( SPIM_1_ReadStatus() & SPIM_1_STS_TX_FIFO_EMPTY));
+ 263   1      }
+ 264          
+ 265          /*******************************************************************************
+ 266          * Function Name: Read Control Register
+ 267          *********************************************************************************/
+ 268          uint8 ReadControlRegister(uint8 address){
+ 269   1                      
+ 270   1                      uint8 controlreg;
+ 271   1                      
+ 272   1                      SPIM_1_WriteByte(MPU9250_RCR | address);
+ 273   1                  SPIM_1_WriteByte(0x00);
+ 274   1                      while(!( SPIM_1_ReadStatus() & SPIM_1_STS_SPI_DONE));
+ 275   1                      controlreg = SPIM_1_ReadByte(); //real data
+ 276   1                      return controlreg;
+ 277   1      }
+C51 COMPILER V9.51   IMU_FUNCTIONS                                                         04/30/2016 17:24:41 PAGE 6   
+
+ASSEMBLY LISTING OF GENERATED OBJECT CODE
+
+
+             ; FUNCTION GloveReset (BEGIN)
+                                           ; SOURCE LINE # 21
+                                           ; SOURCE LINE # 24
+0000 120000      E     LCALL   ISR_1_Stop
+                                           ; SOURCE LINE # 25
+0003 120000      E     LCALL   ISR_1_Disable
+                                           ; SOURCE LINE # 28
+0006 E4                CLR     A
+0007 900000      R     MOV     DPTR,#k_imu
+000A F0                MOVX    @DPTR,A
+000B A3                INC     DPTR
+000C F0                MOVX    @DPTR,A
+000D         ?C0001:
+000D 900000      R     MOV     DPTR,#k_imu
+0010 E0                MOVX    A,@DPTR
+0011 FE                MOV     R6,A
+0012 A3                INC     DPTR
+0013 E0                MOVX    A,@DPTR
+0014 FF                MOV     R7,A
+0015 C3                CLR     C
+0016 9401              SUBB    A,#01H
+0018 EE                MOV     A,R6
+0019 6480              XRL     A,#080H
+001B 9480              SUBB    A,#080H
+001D 5024              JNC     ?C0002
+                                           ; SOURCE LINE # 29
+001F 120000      E     LCALL   _Chip_Select_Write
+                                           ; SOURCE LINE # 30
+0022 E4                CLR     A
+0023 7F0A              MOV     R7,#0AH
+0025 FE                MOV     R6,A
+0026 FD                MOV     R5,A
+0027 FC                MOV     R4,A
+0028 120000      E     LCALL   _?CyDelay
+                                           ; SOURCE LINE # 31
+002B 120000      R     LCALL   InitIMU
+                                           ; SOURCE LINE # 32
+002E E4                CLR     A
+002F 7F0A              MOV     R7,#0AH
+0031 FE                MOV     R6,A
+0032 FD                MOV     R5,A
+0033 FC                MOV     R4,A
+0034 120000      E     LCALL   _?CyDelay
+                                           ; SOURCE LINE # 33
+0037 900000      R     MOV     DPTR,#k_imu
+003A E4                CLR     A
+003B 75F001            MOV     B,#01H
+003E 120000      E     LCALL   ?C?IILDX
+0041 80CA              SJMP    ?C0001
+0043         ?C0002:
+                                           ; SOURCE LINE # 35
+0043 120000      E     LCALL   ISR_1_Start
+                                           ; SOURCE LINE # 36
+0046 120000      E     LCALL   ISR_1_Enable
+                                           ; SOURCE LINE # 37
+0049 E4                CLR     A
+004A 7F32              MOV     R7,#032H
+004C FE                MOV     R6,A
+004D FD                MOV     R5,A
+C51 COMPILER V9.51   IMU_FUNCTIONS                                                         04/30/2016 17:24:41 PAGE 7   
+
+004E FC                MOV     R4,A
+004F 120000      E     LCALL   _?CyDelay
+                                           ; SOURCE LINE # 39
+0052 22                RET     
+             ; FUNCTION GloveReset (END)
+
+             ; FUNCTION InitIMU (BEGIN)
+                                           ; SOURCE LINE # 44
+                                           ; SOURCE LINE # 49
+0000 7D10              MOV     R5,#010H
+0002 7F6B              MOV     R7,#06BH
+0004 120000      R     LCALL   _WriteControlRegister
+                                           ; SOURCE LINE # 50
+0007 E4                CLR     A
+0008 7F1E              MOV     R7,#01EH
+000A FE                MOV     R6,A
+000B FD                MOV     R5,A
+000C FC                MOV     R4,A
+000D 120000      E     LCALL   _?CyDelay
+                                           ; SOURCE LINE # 51
+0010 7D20              MOV     R5,#020H
+0012 7F6A              MOV     R7,#06AH
+0014 120000      R     LCALL   _WriteControlRegister
+                                           ; SOURCE LINE # 52
+0017 E4                CLR     A
+0018 7F1E              MOV     R7,#01EH
+001A FE                MOV     R6,A
+001B FD                MOV     R5,A
+001C FC                MOV     R4,A
+001D 120000      E     LCALL   _?CyDelay
+                                           ; SOURCE LINE # 53
+0020 7D05              MOV     R5,#05H
+0022 7F1A              MOV     R7,#01AH
+0024 120000      R     LCALL   _WriteControlRegister
+                                           ; SOURCE LINE # 54
+0027 E4                CLR     A
+0028 7F1E              MOV     R7,#01EH
+002A FE                MOV     R6,A
+002B FD                MOV     R5,A
+002C FC                MOV     R4,A
+002D 120000      E     LCALL   _?CyDelay
+                                           ; SOURCE LINE # 55
+0030 7D18              MOV     R5,#018H
+0032 7F1B              MOV     R7,#01BH
+0034 120000      R     LCALL   _WriteControlRegister
+                                           ; SOURCE LINE # 56
+0037 E4                CLR     A
+0038 7F1E              MOV     R7,#01EH
+003A FE                MOV     R6,A
+003B FD                MOV     R5,A
+003C FC                MOV     R4,A
+003D 120000      E     LCALL   _?CyDelay
+                                           ; SOURCE LINE # 57
+0040 E4                CLR     A
+0041 FD                MOV     R5,A
+0042 7F1C              MOV     R7,#01CH
+0044 120000      R     LCALL   _WriteControlRegister
+                                           ; SOURCE LINE # 58
+0047 E4                CLR     A
+0048 7F1E              MOV     R7,#01EH
+004A FE                MOV     R6,A
+004B FD                MOV     R5,A
+C51 COMPILER V9.51   IMU_FUNCTIONS                                                         04/30/2016 17:24:41 PAGE 8   
+
+004C FC                MOV     R4,A
+004D 120000      E     LCALL   _?CyDelay
+                                           ; SOURCE LINE # 59
+0050 7D05              MOV     R5,#05H
+0052 7F1D              MOV     R7,#01DH
+0054 120000      R     LCALL   _WriteControlRegister
+                                           ; SOURCE LINE # 60
+0057 E4                CLR     A
+0058 7F1E              MOV     R7,#01EH
+005A FE                MOV     R6,A
+005B FD                MOV     R5,A
+005C FC                MOV     R4,A
+005D 120000      E     LCALL   _?CyDelay
+                                           ; SOURCE LINE # 62
+0060 7D0D              MOV     R5,#0DH
+0062 7F24              MOV     R7,#024H
+0064 120000      R     LCALL   _WriteControlRegister
+                                           ; SOURCE LINE # 63
+0067 E4                CLR     A
+0068 7F1E              MOV     R7,#01EH
+006A FE                MOV     R6,A
+006B FD                MOV     R5,A
+006C FC                MOV     R4,A
+006D 120000      E     LCALL   _?CyDelay
+                                           ; SOURCE LINE # 65
+0070 7D0C              MOV     R5,#0CH
+0072 7F25              MOV     R7,#025H
+0074 120000      R     LCALL   _WriteControlRegister
+                                           ; SOURCE LINE # 66
+0077 E4                CLR     A
+0078 7F1E              MOV     R7,#01EH
+007A FE                MOV     R6,A
+007B FD                MOV     R5,A
+007C FC                MOV     R4,A
+007D 120000      E     LCALL   _?CyDelay
+                                           ; SOURCE LINE # 67
+0080 7D0A              MOV     R5,#0AH
+0082 7F26              MOV     R7,#026H
+0084 120000      R     LCALL   _WriteControlRegister
+                                           ; SOURCE LINE # 68
+0087 E4                CLR     A
+0088 7F1E              MOV     R7,#01EH
+008A FE                MOV     R6,A
+008B FD                MOV     R5,A
+008C FC                MOV     R4,A
+008D 120000      E     LCALL   _?CyDelay
+                                           ; SOURCE LINE # 70
+0090 7D16              MOV     R5,#016H
+0092 7F63              MOV     R7,#063H
+0094 120000      R     LCALL   _WriteControlRegister
+                                           ; SOURCE LINE # 73
+0097 E4                CLR     A
+0098 7F1E              MOV     R7,#01EH
+009A FE                MOV     R6,A
+009B FD                MOV     R5,A
+009C FC                MOV     R4,A
+009D 120000      E     LCALL   _?CyDelay
+                                           ; SOURCE LINE # 74
+00A0 7D81              MOV     R5,#081H
+00A2 7F27              MOV     R7,#027H
+00A4 120000      R     LCALL   _WriteControlRegister
+                                           ; SOURCE LINE # 75
+C51 COMPILER V9.51   IMU_FUNCTIONS                                                         04/30/2016 17:24:41 PAGE 9   
+
+00A7 E4                CLR     A
+00A8 7F1E              MOV     R7,#01EH
+00AA FE                MOV     R6,A
+00AB FD                MOV     R5,A
+00AC FC                MOV     R4,A
+00AD 120000      E     LCALL   _?CyDelay
+                                           ; SOURCE LINE # 77
+00B0 7D8C              MOV     R5,#08CH
+00B2 7F25              MOV     R7,#025H
+00B4 120000      R     LCALL   _WriteControlRegister
+                                           ; SOURCE LINE # 78
+00B7 E4                CLR     A
+00B8 7F1E              MOV     R7,#01EH
+00BA FE                MOV     R6,A
+00BB FD                MOV     R5,A
+00BC FC                MOV     R4,A
+00BD 120000      E     LCALL   _?CyDelay
+                                           ; SOURCE LINE # 80
+00C0 7D03              MOV     R5,#03H
+00C2 7F26              MOV     R7,#026H
+00C4 120000      R     LCALL   _WriteControlRegister
+                                           ; SOURCE LINE # 83
+00C7 E4                CLR     A
+00C8 7F1E              MOV     R7,#01EH
+00CA FE                MOV     R6,A
+00CB FD                MOV     R5,A
+00CC FC                MOV     R4,A
+00CD 120000      E     LCALL   _?CyDelay
+                                           ; SOURCE LINE # 85
+00D0 7D8D              MOV     R5,#08DH
+00D2 7F27              MOV     R7,#027H
+00D4 120000      R     LCALL   _WriteControlRegister
+                                           ; SOURCE LINE # 88
+00D7 E4                CLR     A
+00D8 7F1E              MOV     R7,#01EH
+00DA FE                MOV     R6,A
+00DB FD                MOV     R5,A
+00DC FC                MOV     R4,A
+00DD 120000      E     LCALL   _?CyDelay
+                                           ; SOURCE LINE # 89
+00E0 E4                CLR     A
+00E1 FD                MOV     R5,A
+00E2 7F6B              MOV     R7,#06BH
+00E4 120000      R     LCALL   _WriteControlRegister
+                                           ; SOURCE LINE # 90
+00E7 E4                CLR     A
+00E8 7F32              MOV     R7,#032H
+00EA FE                MOV     R6,A
+00EB FD                MOV     R5,A
+00EC FC                MOV     R4,A
+00ED 120000      E     LCALL   _?CyDelay
+                                           ; SOURCE LINE # 91
+00F0 22                RET     
+             ; FUNCTION InitIMU (END)
+
+             ; FUNCTION _ReadIMU (BEGIN)
+                                           ; SOURCE LINE # 97
+0000 900000      R     MOV     DPTR,#n
+0003 EE                MOV     A,R6
+0004 F0                MOVX    @DPTR,A
+0005 A3                INC     DPTR
+0006 EF                MOV     A,R7
+C51 COMPILER V9.51   IMU_FUNCTIONS                                                         04/30/2016 17:24:41 PAGE 10  
+
+0007 F0                MOVX    @DPTR,A
+                                           ; SOURCE LINE # 98
+0008 120000      R     LCALL   _ReadAcc
+                                           ; SOURCE LINE # 99
+000B 900000      R     MOV     DPTR,#n
+000E E0                MOVX    A,@DPTR
+000F FE                MOV     R6,A
+0010 A3                INC     DPTR
+0011 E0                MOVX    A,@DPTR
+0012 FF                MOV     R7,A
+0013 120000      R     LCALL   _ReadGyro
+                                           ; SOURCE LINE # 100
+0016 22                RET     
+             ; FUNCTION _ReadIMU (END)
+
+             ; FUNCTION _ReadAcc (BEGIN)
+                                           ; SOURCE LINE # 102
+;---- Variable 'n' assigned to Register 'R6/R7' ----
+                                           ; SOURCE LINE # 103
+0000 E4                CLR     A
+0001 900000      R     MOV     DPTR,#low
+0004 F0                MOVX    @DPTR,A
+0005 A3                INC     DPTR
+0006 F0                MOVX    @DPTR,A
+                                           ; SOURCE LINE # 105
+0007 A3                INC     DPTR
+0008 EE                MOV     A,R6
+0009 F0                MOVX    @DPTR,A
+000A A3                INC     DPTR
+000B EF                MOV     A,R7
+000C F0                MOVX    @DPTR,A
+                                           ; SOURCE LINE # 109
+000D 7F3C              MOV     R7,#03CH
+000F 120000      R     LCALL   _ReadControlRegister
+0012 900000      R     MOV     DPTR,#low
+0015 EF                MOV     A,R7
+0016 F0                MOVX    @DPTR,A
+                                           ; SOURCE LINE # 110
+0017 7F3B              MOV     R7,#03BH
+0019 120000      R     LCALL   _ReadControlRegister
+001C 900000      R     MOV     DPTR,#high
+001F EF                MOV     A,R7
+0020 F0                MOVX    @DPTR,A
+                                           ; SOURCE LINE # 112
+0021 A3                INC     DPTR
+0022 E0                MOVX    A,@DPTR
+0023 FC                MOV     R4,A
+0024 A3                INC     DPTR
+0025 E0                MOVX    A,@DPTR
+0026 FD                MOV     R5,A
+0027 900000      E     MOV     DPTR,#Accel
+002A 75F006            MOV     B,#06H
+002D 120000      E     LCALL   ?C?OFFXADD
+0030 EC                MOV     A,R4
+0031 75F006            MOV     B,#06H
+0034 A4                MUL     AB
+0035 2583              ADD     A,DPH
+0037 F583              MOV     DPH,A
+0039 EF                MOV     A,R7
+003A F0                MOVX    @DPTR,A
+                                           ; SOURCE LINE # 113
+003B 900000      R     MOV     DPTR,#low
+C51 COMPILER V9.51   IMU_FUNCTIONS                                                         04/30/2016 17:24:41 PAGE 11  
+
+003E E0                MOVX    A,@DPTR
+003F FF                MOV     R7,A
+0040 900000      E     MOV     DPTR,#Accel+01H
+0043 75F006            MOV     B,#06H
+0046 ED                MOV     A,R5
+0047 120000      E     LCALL   ?C?OFFXADD
+004A EC                MOV     A,R4
+004B 75F006            MOV     B,#06H
+004E A4                MUL     AB
+004F 2583              ADD     A,DPH
+0051 F583              MOV     DPH,A
+0053 EF                MOV     A,R7
+0054 F0                MOVX    @DPTR,A
+                                           ; SOURCE LINE # 114
+0055 E4                CLR     A
+0056 900000      R     MOV     DPTR,#low
+0059 F0                MOVX    @DPTR,A
+005A A3                INC     DPTR
+005B F0                MOVX    @DPTR,A
+                                           ; SOURCE LINE # 117
+005C 7F3E              MOV     R7,#03EH
+005E 120000      R     LCALL   _ReadControlRegister
+0061 900000      R     MOV     DPTR,#low
+0064 EF                MOV     A,R7
+0065 F0                MOVX    @DPTR,A
+                                           ; SOURCE LINE # 118
+0066 7F3D              MOV     R7,#03DH
+0068 120000      R     LCALL   _ReadControlRegister
+006B 900000      R     MOV     DPTR,#high
+006E EF                MOV     A,R7
+006F F0                MOVX    @DPTR,A
+                                           ; SOURCE LINE # 120
+0070 A3                INC     DPTR
+0071 E0                MOVX    A,@DPTR
+0072 FC                MOV     R4,A
+0073 A3                INC     DPTR
+0074 E0                MOVX    A,@DPTR
+0075 FD                MOV     R5,A
+0076 900000      E     MOV     DPTR,#Accel+02H
+0079 75F006            MOV     B,#06H
+007C 120000      E     LCALL   ?C?OFFXADD
+007F EC                MOV     A,R4
+0080 75F006            MOV     B,#06H
+0083 A4                MUL     AB
+0084 2583              ADD     A,DPH
+0086 F583              MOV     DPH,A
+0088 EF                MOV     A,R7
+0089 F0                MOVX    @DPTR,A
+                                           ; SOURCE LINE # 121
+008A 900000      R     MOV     DPTR,#low
+008D E0                MOVX    A,@DPTR
+008E FF                MOV     R7,A
+008F 900000      E     MOV     DPTR,#Accel+03H
+0092 75F006            MOV     B,#06H
+0095 ED                MOV     A,R5
+0096 120000      E     LCALL   ?C?OFFXADD
+0099 EC                MOV     A,R4
+009A 75F006            MOV     B,#06H
+009D A4                MUL     AB
+009E 2583              ADD     A,DPH
+00A0 F583              MOV     DPH,A
+00A2 EF                MOV     A,R7
+C51 COMPILER V9.51   IMU_FUNCTIONS                                                         04/30/2016 17:24:41 PAGE 12  
+
+00A3 F0                MOVX    @DPTR,A
+                                           ; SOURCE LINE # 122
+00A4 E4                CLR     A
+00A5 900000      R     MOV     DPTR,#low
+00A8 F0                MOVX    @DPTR,A
+00A9 A3                INC     DPTR
+00AA F0                MOVX    @DPTR,A
+                                           ; SOURCE LINE # 125
+00AB 7F40              MOV     R7,#040H
+00AD 120000      R     LCALL   _ReadControlRegister
+00B0 900000      R     MOV     DPTR,#low
+00B3 EF                MOV     A,R7
+00B4 F0                MOVX    @DPTR,A
+                                           ; SOURCE LINE # 126
+00B5 7F3F              MOV     R7,#03FH
+00B7 120000      R     LCALL   _ReadControlRegister
+00BA 900000      R     MOV     DPTR,#high
+00BD EF                MOV     A,R7
+00BE F0                MOVX    @DPTR,A
+                                           ; SOURCE LINE # 128
+00BF A3                INC     DPTR
+00C0 E0                MOVX    A,@DPTR
+00C1 FC                MOV     R4,A
+00C2 A3                INC     DPTR
+00C3 E0                MOVX    A,@DPTR
+00C4 FD                MOV     R5,A
+00C5 900000      E     MOV     DPTR,#Accel+04H
+00C8 75F006            MOV     B,#06H
+00CB 120000      E     LCALL   ?C?OFFXADD
+00CE EC                MOV     A,R4
+00CF 75F006            MOV     B,#06H
+00D2 A4                MUL     AB
+00D3 2583              ADD     A,DPH
+00D5 F583              MOV     DPH,A
+00D7 EF                MOV     A,R7
+00D8 F0                MOVX    @DPTR,A
+                                           ; SOURCE LINE # 129
+00D9 900000      R     MOV     DPTR,#low
+00DC E0                MOVX    A,@DPTR
+00DD FF                MOV     R7,A
+00DE 900000      E     MOV     DPTR,#Accel+05H
+00E1 75F006            MOV     B,#06H
+00E4 ED                MOV     A,R5
+00E5 120000      E     LCALL   ?C?OFFXADD
+00E8 EC                MOV     A,R4
+00E9 75F006            MOV     B,#06H
+00EC A4                MUL     AB
+00ED 2583              ADD     A,DPH
+00EF F583              MOV     DPH,A
+00F1 EF                MOV     A,R7
+00F2 F0                MOVX    @DPTR,A
+                                           ; SOURCE LINE # 130
+00F3 E4                CLR     A
+00F4 900000      R     MOV     DPTR,#low
+00F7 F0                MOVX    @DPTR,A
+00F8 A3                INC     DPTR
+00F9 F0                MOVX    @DPTR,A
+                                           ; SOURCE LINE # 132
+00FA 22                RET     
+             ; FUNCTION _ReadAcc (END)
+
+             ; FUNCTION _ReadGyro (BEGIN)
+C51 COMPILER V9.51   IMU_FUNCTIONS                                                         04/30/2016 17:24:41 PAGE 13  
+
+                                           ; SOURCE LINE # 137
+;---- Variable 'n' assigned to Register 'R6/R7' ----
+                                           ; SOURCE LINE # 138
+0000 E4                CLR     A
+0001 900000      R     MOV     DPTR,#low
+0004 F0                MOVX    @DPTR,A
+0005 A3                INC     DPTR
+0006 F0                MOVX    @DPTR,A
+                                           ; SOURCE LINE # 140
+0007 A3                INC     DPTR
+0008 EE                MOV     A,R6
+0009 F0                MOVX    @DPTR,A
+000A A3                INC     DPTR
+000B EF                MOV     A,R7
+000C F0                MOVX    @DPTR,A
+                                           ; SOURCE LINE # 143
+000D 7F44              MOV     R7,#044H
+000F 120000      R     LCALL   _ReadControlRegister
+0012 900000      R     MOV     DPTR,#low
+0015 EF                MOV     A,R7
+0016 F0                MOVX    @DPTR,A
+                                           ; SOURCE LINE # 144
+0017 7F43              MOV     R7,#043H
+0019 120000      R     LCALL   _ReadControlRegister
+001C 900000      R     MOV     DPTR,#high
+001F EF                MOV     A,R7
+0020 F0                MOVX    @DPTR,A
+                                           ; SOURCE LINE # 146
+0021 A3                INC     DPTR
+0022 E0                MOVX    A,@DPTR
+0023 FC                MOV     R4,A
+0024 A3                INC     DPTR
+0025 E0                MOVX    A,@DPTR
+0026 FD                MOV     R5,A
+0027 900000      E     MOV     DPTR,#Gyro
+002A 75F006            MOV     B,#06H
+002D 120000      E     LCALL   ?C?OFFXADD
+0030 EC                MOV     A,R4
+0031 75F006            MOV     B,#06H
+0034 A4                MUL     AB
+0035 2583              ADD     A,DPH
+0037 F583              MOV     DPH,A
+0039 EF                MOV     A,R7
+003A F0                MOVX    @DPTR,A
+                                           ; SOURCE LINE # 147
+003B 900000      R     MOV     DPTR,#low
+003E E0                MOVX    A,@DPTR
+003F FF                MOV     R7,A
+0040 900000      E     MOV     DPTR,#Gyro+01H
+0043 75F006            MOV     B,#06H
+0046 ED                MOV     A,R5
+0047 120000      E     LCALL   ?C?OFFXADD
+004A EC                MOV     A,R4
+004B 75F006            MOV     B,#06H
+004E A4                MUL     AB
+004F 2583              ADD     A,DPH
+0051 F583              MOV     DPH,A
+0053 EF                MOV     A,R7
+0054 F0                MOVX    @DPTR,A
+                                           ; SOURCE LINE # 148
+0055 E4                CLR     A
+0056 900000      R     MOV     DPTR,#low
+C51 COMPILER V9.51   IMU_FUNCTIONS                                                         04/30/2016 17:24:41 PAGE 14  
+
+0059 F0                MOVX    @DPTR,A
+005A A3                INC     DPTR
+005B F0                MOVX    @DPTR,A
+                                           ; SOURCE LINE # 150
+005C 7F46              MOV     R7,#046H
+005E 120000      R     LCALL   _ReadControlRegister
+0061 900000      R     MOV     DPTR,#low
+0064 EF                MOV     A,R7
+0065 F0                MOVX    @DPTR,A
+                                           ; SOURCE LINE # 151
+0066 7F45              MOV     R7,#045H
+0068 120000      R     LCALL   _ReadControlRegister
+006B 900000      R     MOV     DPTR,#high
+006E EF                MOV     A,R7
+006F F0                MOVX    @DPTR,A
+                                           ; SOURCE LINE # 153
+0070 A3                INC     DPTR
+0071 E0                MOVX    A,@DPTR
+0072 FC                MOV     R4,A
+0073 A3                INC     DPTR
+0074 E0                MOVX    A,@DPTR
+0075 FD                MOV     R5,A
+0076 900000      E     MOV     DPTR,#Gyro+02H
+0079 75F006            MOV     B,#06H
+007C 120000      E     LCALL   ?C?OFFXADD
+007F EC                MOV     A,R4
+0080 75F006            MOV     B,#06H
+0083 A4                MUL     AB
+0084 2583              ADD     A,DPH
+0086 F583              MOV     DPH,A
+0088 EF                MOV     A,R7
+0089 F0                MOVX    @DPTR,A
+                                           ; SOURCE LINE # 154
+008A 900000      R     MOV     DPTR,#low
+008D E0                MOVX    A,@DPTR
+008E FF                MOV     R7,A
+008F 900000      E     MOV     DPTR,#Gyro+03H
+0092 75F006            MOV     B,#06H
+0095 ED                MOV     A,R5
+0096 120000      E     LCALL   ?C?OFFXADD
+0099 EC                MOV     A,R4
+009A 75F006            MOV     B,#06H
+009D A4                MUL     AB
+009E 2583              ADD     A,DPH
+00A0 F583              MOV     DPH,A
+00A2 EF                MOV     A,R7
+00A3 F0                MOVX    @DPTR,A
+                                           ; SOURCE LINE # 155
+00A4 E4                CLR     A
+00A5 900000      R     MOV     DPTR,#low
+00A8 F0                MOVX    @DPTR,A
+00A9 A3                INC     DPTR
+00AA F0                MOVX    @DPTR,A
+                                           ; SOURCE LINE # 158
+00AB 7F48              MOV     R7,#048H
+00AD 120000      R     LCALL   _ReadControlRegister
+00B0 900000      R     MOV     DPTR,#low
+00B3 EF                MOV     A,R7
+00B4 F0                MOVX    @DPTR,A
+                                           ; SOURCE LINE # 159
+00B5 7F47              MOV     R7,#047H
+00B7 120000      R     LCALL   _ReadControlRegister
+C51 COMPILER V9.51   IMU_FUNCTIONS                                                         04/30/2016 17:24:41 PAGE 15  
+
+00BA 900000      R     MOV     DPTR,#high
+00BD EF                MOV     A,R7
+00BE F0                MOVX    @DPTR,A
+                                           ; SOURCE LINE # 161
+00BF A3                INC     DPTR
+00C0 E0                MOVX    A,@DPTR
+00C1 FC                MOV     R4,A
+00C2 A3                INC     DPTR
+00C3 E0                MOVX    A,@DPTR
+00C4 FD                MOV     R5,A
+00C5 900000      E     MOV     DPTR,#Gyro+04H
+00C8 75F006            MOV     B,#06H
+00CB 120000      E     LCALL   ?C?OFFXADD
+00CE EC                MOV     A,R4
+00CF 75F006            MOV     B,#06H
+00D2 A4                MUL     AB
+00D3 2583              ADD     A,DPH
+00D5 F583              MOV     DPH,A
+00D7 EF                MOV     A,R7
+00D8 F0                MOVX    @DPTR,A
+                                           ; SOURCE LINE # 162
+00D9 900000      R     MOV     DPTR,#low
+00DC E0                MOVX    A,@DPTR
+00DD FF                MOV     R7,A
+00DE 900000      E     MOV     DPTR,#Gyro+05H
+00E1 75F006            MOV     B,#06H
+00E4 ED                MOV     A,R5
+00E5 120000      E     LCALL   ?C?OFFXADD
+00E8 EC                MOV     A,R4
+00E9 75F006            MOV     B,#06H
+00EC A4                MUL     AB
+00ED 2583              ADD     A,DPH
+00EF F583              MOV     DPH,A
+00F1 EF                MOV     A,R7
+00F2 F0                MOVX    @DPTR,A
+                                           ; SOURCE LINE # 164
+00F3 E4                CLR     A
+00F4 900000      R     MOV     DPTR,#low
+00F7 F0                MOVX    @DPTR,A
+00F8 A3                INC     DPTR
+00F9 F0                MOVX    @DPTR,A
+                                           ; SOURCE LINE # 165
+00FA 22                RET     
+             ; FUNCTION _ReadGyro (END)
+
+             ; FUNCTION _LF_Frequency_Change_Accel_And_Gyro (BEGIN)
+                                           ; SOURCE LINE # 171
+0000 900000      R     MOV     DPTR,#n_imu
+0003 EC                MOV     A,R4
+0004 F0                MOVX    @DPTR,A
+0005 A3                INC     DPTR
+0006 ED                MOV     A,R5
+0007 F0                MOVX    @DPTR,A
+;---- Variable 'd_frequency' assigned to Register 'R6/R7' ----
+                                           ; SOURCE LINE # 174
+0008 EF                MOV     A,R7
+0009 6401              XRL     A,#01H
+000B 4E                ORL     A,R6
+000C 7005              JNZ     ?C0009
+000E A3                INC     DPTR
+000F F0                MOVX    @DPTR,A
+0010 A3                INC     DPTR
+C51 COMPILER V9.51   IMU_FUNCTIONS                                                         04/30/2016 17:24:41 PAGE 16  
+
+0011 04                INC     A
+0012 F0                MOVX    @DPTR,A
+0013         ?C0009:
+                                           ; SOURCE LINE # 175
+0013 EF                MOV     A,R7
+0014 6402              XRL     A,#02H
+0016 4E                ORL     A,R6
+0017 7008              JNZ     ?C0010
+0019 900000      R     MOV     DPTR,#value
+001C F0                MOVX    @DPTR,A
+001D A3                INC     DPTR
+001E 7402              MOV     A,#02H
+0020 F0                MOVX    @DPTR,A
+0021         ?C0010:
+                                           ; SOURCE LINE # 176
+0021 EF                MOV     A,R7
+0022 6403              XRL     A,#03H
+0024 4E                ORL     A,R6
+0025 7008              JNZ     ?C0011
+0027 900000      R     MOV     DPTR,#value
+002A F0                MOVX    @DPTR,A
+002B A3                INC     DPTR
+002C 7403              MOV     A,#03H
+002E F0                MOVX    @DPTR,A
+002F         ?C0011:
+                                           ; SOURCE LINE # 177
+002F EF                MOV     A,R7
+0030 6404              XRL     A,#04H
+0032 4E                ORL     A,R6
+0033 7008              JNZ     ?C0012
+0035 900000      R     MOV     DPTR,#value
+0038 F0                MOVX    @DPTR,A
+0039 A3                INC     DPTR
+003A 7404              MOV     A,#04H
+003C F0                MOVX    @DPTR,A
+003D         ?C0012:
+                                           ; SOURCE LINE # 178
+003D EF                MOV     A,R7
+003E 6405              XRL     A,#05H
+0040 4E                ORL     A,R6
+0041 7008              JNZ     ?C0013
+0043 900000      R     MOV     DPTR,#value
+0046 F0                MOVX    @DPTR,A
+0047 A3                INC     DPTR
+0048 7405              MOV     A,#05H
+004A F0                MOVX    @DPTR,A
+004B         ?C0013:
+                                           ; SOURCE LINE # 179
+004B EF                MOV     A,R7
+004C 6406              XRL     A,#06H
+004E 4E                ORL     A,R6
+004F 7008              JNZ     ?C0014
+0051 900000      R     MOV     DPTR,#value
+0054 F0                MOVX    @DPTR,A
+0055 A3                INC     DPTR
+0056 7406              MOV     A,#06H
+0058 F0                MOVX    @DPTR,A
+0059         ?C0014:
+                                           ; SOURCE LINE # 181
+0059 120000      E     LCALL   ISR_1_Stop
+                                           ; SOURCE LINE # 182
+005C 120000      E     LCALL   ISR_1_Disable
+C51 COMPILER V9.51   IMU_FUNCTIONS                                                         04/30/2016 17:24:41 PAGE 17  
+
+                                           ; SOURCE LINE # 184
+005F 900000      R     MOV     DPTR,#n_imu
+0062 E0                MOVX    A,@DPTR
+0063 A3                INC     DPTR
+0064 E0                MOVX    A,@DPTR
+0065 FF                MOV     R7,A
+0066 120000      E     LCALL   _Chip_Select_Write
+                                           ; SOURCE LINE # 185
+0069 E4                CLR     A
+006A 7F14              MOV     R7,#014H
+006C FE                MOV     R6,A
+006D FD                MOV     R5,A
+006E FC                MOV     R4,A
+006F 120000      E     LCALL   _?CyDelay
+                                           ; SOURCE LINE # 186
+0072 900000      R     MOV     DPTR,#value
+0075 E0                MOVX    A,@DPTR
+0076 A3                INC     DPTR
+0077 E0                MOVX    A,@DPTR
+0078 FD                MOV     R5,A
+0079 7F1A              MOV     R7,#01AH
+007B 120000      R     LCALL   _WriteControlRegister
+                                           ; SOURCE LINE # 187
+007E E4                CLR     A
+007F 7F14              MOV     R7,#014H
+0081 FE                MOV     R6,A
+0082 FD                MOV     R5,A
+0083 FC                MOV     R4,A
+0084 120000      E     LCALL   _?CyDelay
+                                           ; SOURCE LINE # 188
+0087 900000      R     MOV     DPTR,#value
+008A E0                MOVX    A,@DPTR
+008B A3                INC     DPTR
+008C E0                MOVX    A,@DPTR
+008D FD                MOV     R5,A
+008E 7F1D              MOV     R7,#01DH
+0090 120000      R     LCALL   _WriteControlRegister
+                                           ; SOURCE LINE # 189
+0093 E4                CLR     A
+0094 7F14              MOV     R7,#014H
+0096 FE                MOV     R6,A
+0097 FD                MOV     R5,A
+0098 FC                MOV     R4,A
+0099 120000      E     LCALL   _?CyDelay
+                                           ; SOURCE LINE # 192
+009C 120000      E     LCALL   ISR_1_Start
+                                           ; SOURCE LINE # 193
+009F 120000      E     LCALL   ISR_1_Enable
+                                           ; SOURCE LINE # 194
+00A2 E4                CLR     A
+00A3 7F0A              MOV     R7,#0AH
+00A5 FE                MOV     R6,A
+00A6 FD                MOV     R5,A
+00A7 FC                MOV     R4,A
+00A8 120000      E     LCALL   _?CyDelay
+                                           ; SOURCE LINE # 195
+00AB 22                RET     
+             ; FUNCTION _LF_Frequency_Change_Accel_And_Gyro (END)
+
+             ; FUNCTION _LF_Frequency_Change_Accel (BEGIN)
+                                           ; SOURCE LINE # 200
+0000 900000      R     MOV     DPTR,#n_imu
+C51 COMPILER V9.51   IMU_FUNCTIONS                                                         04/30/2016 17:24:41 PAGE 18  
+
+0003 EC                MOV     A,R4
+0004 F0                MOVX    @DPTR,A
+0005 A3                INC     DPTR
+0006 ED                MOV     A,R5
+0007 F0                MOVX    @DPTR,A
+;---- Variable 'd_frequency' assigned to Register 'R6/R7' ----
+                                           ; SOURCE LINE # 203
+0008 EF                MOV     A,R7
+0009 6401              XRL     A,#01H
+000B 4E                ORL     A,R6
+000C 7005              JNZ     ?C0016
+000E A3                INC     DPTR
+000F F0                MOVX    @DPTR,A
+0010 A3                INC     DPTR
+0011 04                INC     A
+0012 F0                MOVX    @DPTR,A
+0013         ?C0016:
+                                           ; SOURCE LINE # 204
+0013 EF                MOV     A,R7
+0014 6402              XRL     A,#02H
+0016 4E                ORL     A,R6
+0017 7008              JNZ     ?C0017
+0019 900000      R     MOV     DPTR,#value
+001C F0                MOVX    @DPTR,A
+001D A3                INC     DPTR
+001E 7402              MOV     A,#02H
+0020 F0                MOVX    @DPTR,A
+0021         ?C0017:
+                                           ; SOURCE LINE # 205
+0021 EF                MOV     A,R7
+0022 6403              XRL     A,#03H
+0024 4E                ORL     A,R6
+0025 7008              JNZ     ?C0018
+0027 900000      R     MOV     DPTR,#value
+002A F0                MOVX    @DPTR,A
+002B A3                INC     DPTR
+002C 7403              MOV     A,#03H
+002E F0                MOVX    @DPTR,A
+002F         ?C0018:
+                                           ; SOURCE LINE # 206
+002F EF                MOV     A,R7
+0030 6404              XRL     A,#04H
+0032 4E                ORL     A,R6
+0033 7008              JNZ     ?C0019
+0035 900000      R     MOV     DPTR,#value
+0038 F0                MOVX    @DPTR,A
+0039 A3                INC     DPTR
+003A 7404              MOV     A,#04H
+003C F0                MOVX    @DPTR,A
+003D         ?C0019:
+                                           ; SOURCE LINE # 207
+003D EF                MOV     A,R7
+003E 6405              XRL     A,#05H
+0040 4E                ORL     A,R6
+0041 7008              JNZ     ?C0020
+0043 900000      R     MOV     DPTR,#value
+0046 F0                MOVX    @DPTR,A
+0047 A3                INC     DPTR
+0048 7405              MOV     A,#05H
+004A F0                MOVX    @DPTR,A
+004B         ?C0020:
+                                           ; SOURCE LINE # 208
+C51 COMPILER V9.51   IMU_FUNCTIONS                                                         04/30/2016 17:24:41 PAGE 19  
+
+004B EF                MOV     A,R7
+004C 6406              XRL     A,#06H
+004E 4E                ORL     A,R6
+004F 7008              JNZ     ?C0021
+0051 900000      R     MOV     DPTR,#value
+0054 F0                MOVX    @DPTR,A
+0055 A3                INC     DPTR
+0056 7406              MOV     A,#06H
+0058 F0                MOVX    @DPTR,A
+0059         ?C0021:
+                                           ; SOURCE LINE # 210
+0059 120000      E     LCALL   ISR_1_Stop
+                                           ; SOURCE LINE # 211
+005C 120000      E     LCALL   ISR_1_Disable
+                                           ; SOURCE LINE # 213
+005F 900000      R     MOV     DPTR,#n_imu
+0062 E0                MOVX    A,@DPTR
+0063 A3                INC     DPTR
+0064 E0                MOVX    A,@DPTR
+0065 FF                MOV     R7,A
+0066 120000      E     LCALL   _Chip_Select_Write
+                                           ; SOURCE LINE # 214
+0069 E4                CLR     A
+006A 7F0A              MOV     R7,#0AH
+006C FE                MOV     R6,A
+006D FD                MOV     R5,A
+006E FC                MOV     R4,A
+006F 120000      E     LCALL   _?CyDelay
+                                           ; SOURCE LINE # 215
+0072 900000      R     MOV     DPTR,#value
+0075 E0                MOVX    A,@DPTR
+0076 A3                INC     DPTR
+0077 E0                MOVX    A,@DPTR
+0078 FD                MOV     R5,A
+0079 7F1D              MOV     R7,#01DH
+007B 120000      R     LCALL   _WriteControlRegister
+                                           ; SOURCE LINE # 216
+007E E4                CLR     A
+007F 7F0A              MOV     R7,#0AH
+0081 FE                MOV     R6,A
+0082 FD                MOV     R5,A
+0083 FC                MOV     R4,A
+0084 120000      E     LCALL   _?CyDelay
+                                           ; SOURCE LINE # 219
+0087 120000      E     LCALL   ISR_1_Start
+                                           ; SOURCE LINE # 220
+008A 120000      E     LCALL   ISR_1_Enable
+                                           ; SOURCE LINE # 221
+008D E4                CLR     A
+008E 7F0A              MOV     R7,#0AH
+0090 FE                MOV     R6,A
+0091 FD                MOV     R5,A
+0092 FC                MOV     R4,A
+0093 120000      E     LCALL   _?CyDelay
+                                           ; SOURCE LINE # 222
+0096 22                RET     
+             ; FUNCTION _LF_Frequency_Change_Accel (END)
+
+             ; FUNCTION _LF_Frequency_Change_Gyro (BEGIN)
+                                           ; SOURCE LINE # 227
+0000 900000      R     MOV     DPTR,#n_imu
+0003 EC                MOV     A,R4
+C51 COMPILER V9.51   IMU_FUNCTIONS                                                         04/30/2016 17:24:41 PAGE 20  
+
+0004 F0                MOVX    @DPTR,A
+0005 A3                INC     DPTR
+0006 ED                MOV     A,R5
+0007 F0                MOVX    @DPTR,A
+;---- Variable 'd_frequency' assigned to Register 'R6/R7' ----
+                                           ; SOURCE LINE # 230
+0008 EF                MOV     A,R7
+0009 6401              XRL     A,#01H
+000B 4E                ORL     A,R6
+000C 7005              JNZ     ?C0023
+000E A3                INC     DPTR
+000F F0                MOVX    @DPTR,A
+0010 A3                INC     DPTR
+0011 04                INC     A
+0012 F0                MOVX    @DPTR,A
+0013         ?C0023:
+                                           ; SOURCE LINE # 231
+0013 EF                MOV     A,R7
+0014 6402              XRL     A,#02H
+0016 4E                ORL     A,R6
+0017 7008              JNZ     ?C0024
+0019 900000      R     MOV     DPTR,#value
+001C F0                MOVX    @DPTR,A
+001D A3                INC     DPTR
+001E 7402              MOV     A,#02H
+0020 F0                MOVX    @DPTR,A
+0021         ?C0024:
+                                           ; SOURCE LINE # 232
+0021 EF                MOV     A,R7
+0022 6403              XRL     A,#03H
+0024 4E                ORL     A,R6
+0025 7008              JNZ     ?C0025
+0027 900000      R     MOV     DPTR,#value
+002A F0                MOVX    @DPTR,A
+002B A3                INC     DPTR
+002C 7403              MOV     A,#03H
+002E F0                MOVX    @DPTR,A
+002F         ?C0025:
+                                           ; SOURCE LINE # 233
+002F EF                MOV     A,R7
+0030 6404              XRL     A,#04H
+0032 4E                ORL     A,R6
+0033 7008              JNZ     ?C0026
+0035 900000      R     MOV     DPTR,#value
+0038 F0                MOVX    @DPTR,A
+0039 A3                INC     DPTR
+003A 7404              MOV     A,#04H
+003C F0                MOVX    @DPTR,A
+003D         ?C0026:
+                                           ; SOURCE LINE # 234
+003D EF                MOV     A,R7
+003E 6405              XRL     A,#05H
+0040 4E                ORL     A,R6
+0041 7008              JNZ     ?C0027
+0043 900000      R     MOV     DPTR,#value
+0046 F0                MOVX    @DPTR,A
+0047 A3                INC     DPTR
+0048 7405              MOV     A,#05H
+004A F0                MOVX    @DPTR,A
+004B         ?C0027:
+                                           ; SOURCE LINE # 235
+004B EF                MOV     A,R7
+C51 COMPILER V9.51   IMU_FUNCTIONS                                                         04/30/2016 17:24:41 PAGE 21  
+
+004C 6406              XRL     A,#06H
+004E 4E                ORL     A,R6
+004F 7008              JNZ     ?C0028
+0051 900000      R     MOV     DPTR,#value
+0054 F0                MOVX    @DPTR,A
+0055 A3                INC     DPTR
+0056 7406              MOV     A,#06H
+0058 F0                MOVX    @DPTR,A
+0059         ?C0028:
+                                           ; SOURCE LINE # 237
+0059 120000      E     LCALL   ISR_1_Stop
+                                           ; SOURCE LINE # 238
+005C 120000      E     LCALL   ISR_1_Disable
+                                           ; SOURCE LINE # 240
+005F 900000      R     MOV     DPTR,#n_imu
+0062 E0                MOVX    A,@DPTR
+0063 A3                INC     DPTR
+0064 E0                MOVX    A,@DPTR
+0065 FF                MOV     R7,A
+0066 120000      E     LCALL   _Chip_Select_Write
+                                           ; SOURCE LINE # 241
+0069 E4                CLR     A
+006A 7F0A              MOV     R7,#0AH
+006C FE                MOV     R6,A
+006D FD                MOV     R5,A
+006E FC                MOV     R4,A
+006F 120000      E     LCALL   _?CyDelay
+                                           ; SOURCE LINE # 242
+0072 900000      R     MOV     DPTR,#value
+0075 E0                MOVX    A,@DPTR
+0076 A3                INC     DPTR
+0077 E0                MOVX    A,@DPTR
+0078 FD                MOV     R5,A
+0079 7F1A              MOV     R7,#01AH
+007B 120000      R     LCALL   _WriteControlRegister
+                                           ; SOURCE LINE # 243
+007E E4                CLR     A
+007F 7F0A              MOV     R7,#0AH
+0081 FE                MOV     R6,A
+0082 FD                MOV     R5,A
+0083 FC                MOV     R4,A
+0084 120000      E     LCALL   _?CyDelay
+                                           ; SOURCE LINE # 246
+0087 120000      E     LCALL   ISR_1_Start
+                                           ; SOURCE LINE # 247
+008A 120000      E     LCALL   ISR_1_Enable
+                                           ; SOURCE LINE # 248
+008D E4                CLR     A
+008E 7F0A              MOV     R7,#0AH
+0090 FE                MOV     R6,A
+0091 FD                MOV     R5,A
+0092 FC                MOV     R4,A
+0093 120000      E     LCALL   _?CyDelay
+                                           ; SOURCE LINE # 249
+0096 22                RET     
+             ; FUNCTION _LF_Frequency_Change_Gyro (END)
+
+             ; FUNCTION _WriteControlRegister (BEGIN)
+                                           ; SOURCE LINE # 254
+0000 900000      R     MOV     DPTR,#address
+0003 EF                MOV     A,R7
+0004 F0                MOVX    @DPTR,A
+C51 COMPILER V9.51   IMU_FUNCTIONS                                                         04/30/2016 17:24:41 PAGE 22  
+
+0005 A3                INC     DPTR
+0006 ED                MOV     A,R5
+0007 F0                MOVX    @DPTR,A
+                                           ; SOURCE LINE # 256
+0008 120000      E     LCALL   SPIM_1_ClearRxBuffer
+                                           ; SOURCE LINE # 257
+000B 120000      E     LCALL   SPIM_1_ClearTxBuffer
+                                           ; SOURCE LINE # 258
+000E 120000      E     LCALL   SPIM_1_ClearFIFO
+                                           ; SOURCE LINE # 259
+0011 900000      R     MOV     DPTR,#address
+0014 E0                MOVX    A,@DPTR
+0015 FF                MOV     R7,A
+0016 120000      E     LCALL   _SPIM_1_WriteTxData
+0019         ?C0030:
+                                           ; SOURCE LINE # 260
+0019 120000      E     LCALL   SPIM_1_ReadStatus
+001C EF                MOV     A,R7
+001D 30E1F9            JNB     ACC.1,?C0030
+0020         ?C0031:
+                                           ; SOURCE LINE # 261
+0020 900000      R     MOV     DPTR,#dta
+0023 E0                MOVX    A,@DPTR
+0024 FF                MOV     R7,A
+0025 120000      E     LCALL   _SPIM_1_WriteTxData
+0028         ?C0032:
+                                           ; SOURCE LINE # 262
+0028 120000      E     LCALL   SPIM_1_ReadStatus
+002B EF                MOV     A,R7
+002C 30E1F9            JNB     ACC.1,?C0032
+002F         ?C0033:
+                                           ; SOURCE LINE # 263
+002F         ?C0034:
+002F 22                RET     
+             ; FUNCTION _WriteControlRegister (END)
+
+             ; FUNCTION _ReadControlRegister (BEGIN)
+                                           ; SOURCE LINE # 268
+;---- Variable 'address' assigned to Register 'R7' ----
+                                           ; SOURCE LINE # 272
+0000 EF                MOV     A,R7
+0001 4480              ORL     A,#080H
+0003 FF                MOV     R7,A
+0004 120000      E     LCALL   _SPIM_1_WriteTxData
+                                           ; SOURCE LINE # 273
+0007 E4                CLR     A
+0008 FF                MOV     R7,A
+0009 120000      E     LCALL   _SPIM_1_WriteTxData
+000C         ?C0035:
+                                           ; SOURCE LINE # 274
+000C 120000      E     LCALL   SPIM_1_ReadStatus
+000F EF                MOV     A,R7
+0010 30E0F9            JNB     ACC.0,?C0035
+0013         ?C0036:
+                                           ; SOURCE LINE # 275
+0013 120000      E     LCALL   SPIM_1_ReadRxData
+;---- Variable 'controlreg' assigned to Register 'R7' ----
+                                           ; SOURCE LINE # 276
+                                           ; SOURCE LINE # 277
+0016         ?C0037:
+0016 22                RET     
+             ; FUNCTION _ReadControlRegister (END)
+C51 COMPILER V9.51   IMU_FUNCTIONS                                                         04/30/2016 17:24:41 PAGE 23  
+
+
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =   1394    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----      26
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+   EDATA SIZE       =   ----    ----
+   HDATA SIZE       =   ----    ----
+   XDATA CONST SIZE =   ----    ----
+   FAR CONST SIZE   =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  4 WARNING(S),  0 ERROR(S)

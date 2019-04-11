@@ -1,0 +1,5 @@
+C:\Users\MattiaCP\Desktop\FIRMWARES\Firmware IMU Mini\IMU_Glove_Mini\IMU_Glove_Mini.cydsn\IMU_Glove_Mini.cyprj|355d9a4d-c5cd-4d33-951b-4615a253d2d4
+C:\Program Files (x86)\Cypress\PSoC Creator\3.3\PSoC Creator\psoc\content\default\CyAnnotationLibrary\CyAnnotationLibrary.cylib\CyAnnotationLibrary.cyprj|254d8be7-cb3d-4a79-a010-d90045d27560
+C:\Program Files (x86)\Cypress\PSoC Creator\3.3\PSoC Creator\psoc\content\cycomponentlibraryupdates\CyComponentLibraryUpdates.cylib\CyComponentLibraryUpdates.cyprj|c0f3e8a6-4dbd-4e70-9365-cc6d3143e3e3
+C:\Program Files (x86)\Cypress\PSoC Creator\3.3\PSoC Creator\psoc\content\cycomponentlibrary\CyComponentLibrary.cylib\CyComponentLibrary.cyprj|d7ad5bde-abba-44c4-b880-000590833557
+C:\Program Files (x86)\Cypress\PSoC Creator\3.3\PSoC Creator\psoc\content\cyprimitives\CyPrimitives.cylib\CyPrimitives.cyprj|9ef84780-9d15-4320-bcfa-aafdfab62148

@@ -1,0 +1,291 @@
+C51 COMPILER V9.51   MAIN                                                                  04/30/2016 17:24:41 PAGE 1   
+
+
+C51 COMPILER V9.51, COMPILATION OF MODULE MAIN
+OBJECT MODULE PLACED IN .\DP8051\DP8051_Keil_951\Release\main.obj
+COMPILER INVOKED BY: C:\Program Files (x86)\Cypress\PSoC Creator\3.3\PSoC Creator\import\keil\pk51\9.51\C51\BIN\c51.exe 
+                    -.\main.c NOIV LARGE MODDP2 OMF2 VB(1) NOIP INCDIR(.,Generated_Source\PSoC3) FF(3) DB DF(NDEBUG) WL(2) PR(.\DP8051\DP8051
+                    -_Keil_951\Release/main.lst) CD OT(8,SIZE) OJ(.\DP8051\DP8051_Keil_951\Release\main.obj)
+
+line level    source
+
+*** MESSAGE C286 IN LINE 0 OF (null): license limits optimization to level 5
+   1          /* ========================================
+   2           *
+   3          LE DUE CONFIGURAZIONI VANNO RISCRITTE IN FUNZIONE DELLA NUOVA SCHEDA ED CONFIGURABILI TRAMITE SOFTWARE
+   4           * Configurazione Mano Sinistra
+   5           *
+   6           * CS0 = 8; CS1 = 9; CS2 = 10;    // Little
+   7           * CS3 = 4; CS4 = 5; CS5 = 6;     // Ring
+   8           * CS6 = 44; CS7 = 40; CS8 = 39;  // Medium
+   9           * CS9 = 35; CSA = 34; CSB = 33;  // Index
+  10           * CSC = 32; CSD = 30; CSE = 29;  // Thumb
+  11           * CSF = 11; CSG = 15;            // Palm
+  12           * 
+  13           * Configurazione Mano Destra
+  14           *
+  15           * CS0 = 32; CS1 = 30; CS2 = 29;  // Little
+  16           * CS3 = 35; CS4 = 34; CS5 = 33;  // Ring
+  17           * CS6 = 44; CS7 = 40; CS8 = 39;  // Medium
+  18           * CS9 = 4; CSA = 5; CSB = 6;     // Index
+  19           * CSC = 8; CSD = 9; CSE = 10;    // Thumb
+  20           * CSF = 11; CSG = 15;            // Palm
+  21           *
+  22          * ========================================
+  23          */
+  24          #include <project.h>
+  25          #include <stdlib.h>
+  26          #include <IMU_functions.h>
+  27          // FILE AGGIUNTI DA FIRMWARE MANO
+  28          #include <device.h>
+  29          #include <globals.h> // ALL GLOBAL DEFINITIONS, STRUCTURES AND MACROS HERE
+  30          #include <interruptions.h>
+  31          #include <command_processing.h>
+  32          ////
+  33          
+  34          //global variables declaration 
+  35          extern  uint8 Accel[N_IMU][6];
+  36          extern  uint8 Gyro[N_IMU][6];
+  37          int status;
+  38          uint8 flag = 0;  //if flag=? start usb uart
+  39          int soglia;
+  40          int k_imu;
+  41          
+  42          int main()
+  43          {
+  44   1          EEPROM_Start();
+  45   1          // QUESTA LA RIMETTO DOPO memRecall();                                        // recall configuration
+  46   1          // RS485
+  47   1          CyDelay(100);
+  48   1          FTDI_ENABLE_REG_Write(0x01);
+  49   1          UART_RS485_Stop();                                  // stop UART
+  50   1          UART_RS485_Start();                                 // start UART
+  51   1          UART_RS485_Init();
+  52   1          UART_RS485_ClearRxBuffer();
+C51 COMPILER V9.51   MAIN                                                                  04/30/2016 17:24:41 PAGE 2   
+
+  53   1          UART_RS485_ClearTxBuffer();
+  54   1          ISR_RS485_RX_StartEx(ISR_RS485_RX_ExInterrupt);     // RS485 isr function QUESTA VA SCRITTA
+  55   1      
+  56   1              //SPI module
+  57   1              SPIM_1_Start();
+  58   1              SPIM_1_Init();
+  59   1              SPIM_1_Enable();
+  60   1              SPIM_1_ClearRxBuffer();
+  61   1              SPIM_1_ClearTxBuffer();
+  62   1              SPIM_1_ClearFIFO();                                                     
+  63   1          CyDelay(10);
+  64   1          
+  65   1          // ADC
+  66   1          ADC_Start();                            // start ADC
+  67   1          ADC_StartConvert();
+  68   1      
+  69   1              // Init MPU9250 devices
+  70   1              for (k_imu=0; k_imu<N_IMU; k_imu++) {   
+  71   2                  Chip_Select_Write(k_imu);
+  72   2                  CyDelay(10);
+  73   2                  InitIMU();
+  74   2                  CyDelay(10);
+  75   2              }
+  76   1          
+  77   1          RS485_CTS_Write(0);
+  78   1          
+  79   1          //interrupt start
+  80   1              CyGlobalIntEnable;                         
+  81   1      
+  82   1          isr_1_Start();
+  83   1          isr_1_Enable();
+  84   1              
+  85   1          status = 0;
+  86   1              CyDelay(30);
+  87   1          
+  88   1          for(;;){
+  89   2          
+  90   2          // Nel loop controllo se è arrivato qualcosa sulla seriale 
+  91   2              
+  92   2              if(UART_RS485_ReadRxStatus() & UART_RS485_RX_STS_SOFT_BUFF_OVER) {UART_RS485_ClearRxBuffer();}
+  93   2          
+  94   2          // QUI DEVO AGGIUNGERE I COMANDI PER IL CONTROLLO DEL GUANTO    
+  95   2              
+  96   2         // Serial Communication Control
+  97   2         // flag = UART_1_GetChar();
+  98   2         //if(flag != 0u) {
+  99   2              //              if(flag == '?') {
+ 100   2              //          status = 1; //Enable Transfer Data Read from IMU
+ 101   2              //      }
+ 102   2              //      if (flag == '!') {
+ 103   2              //              status = 0; //Disable Transfer Data Read from IMU
+ 104   2              //      }
+ 105   2              //      if (flag == 'r') {
+ 106   2              //              status = 0;
+ 107   2              //          GloveReset(); // Reset Glove
+ 108   2              //      }
+ 109   2            //  if (flag == 'i') { UART_1_PutChar(device_id); } //Send Device ID to computer 
+ 110   2              
+ 111   2           //   if (flag == 'h') { UART_1_PutString("Mano Sinistra"); }
+ 112   2      
+ 113   2          //} 
+ 114   2      } // End While 
+C51 COMPILER V9.51   MAIN                                                                  04/30/2016 17:24:41 PAGE 3   
+
+ 115   1      } // End Main
+C51 COMPILER V9.51   MAIN                                                                  04/30/2016 17:24:41 PAGE 4   
+
+ASSEMBLY LISTING OF GENERATED OBJECT CODE
+
+
+             ; FUNCTION main (BEGIN)
+                                           ; SOURCE LINE # 42
+                                           ; SOURCE LINE # 43
+                                           ; SOURCE LINE # 44
+0000 120000      E     LCALL   EEPROM_Start
+                                           ; SOURCE LINE # 47
+0003 E4                CLR     A
+0004 7F64              MOV     R7,#064H
+0006 FE                MOV     R6,A
+0007 FD                MOV     R5,A
+0008 FC                MOV     R4,A
+0009 120000      E     LCALL   _?CyDelay
+                                           ; SOURCE LINE # 48
+000C 7F01              MOV     R7,#01H
+000E 120000      E     LCALL   _FTDI_ENABLE_REG_Write
+                                           ; SOURCE LINE # 49
+0011 120000      E     LCALL   UART_RS485_Stop
+                                           ; SOURCE LINE # 50
+0014 120000      E     LCALL   UART_RS485_Start
+                                           ; SOURCE LINE # 51
+0017 120000      E     LCALL   UART_RS485_Init
+                                           ; SOURCE LINE # 52
+001A 120000      E     LCALL   UART_RS485_ClearRxBuffer
+                                           ; SOURCE LINE # 53
+001D 120000      E     LCALL   UART_RS485_ClearTxBuffer
+                                           ; SOURCE LINE # 54
+0020 7E00        E     MOV     R6,#HIGH ISR_RS485_RX_ExInterrupt
+0022 7F00        E     MOV     R7,#LOW ISR_RS485_RX_ExInterrupt
+0024 120000      E     LCALL   _ISR_RS485_RX_StartEx
+                                           ; SOURCE LINE # 57
+0027 120000      E     LCALL   SPIM_1_Start
+                                           ; SOURCE LINE # 58
+002A 120000      E     LCALL   SPIM_1_Init
+                                           ; SOURCE LINE # 59
+002D 120000      E     LCALL   SPIM_1_Enable
+                                           ; SOURCE LINE # 60
+0030 120000      E     LCALL   SPIM_1_ClearRxBuffer
+                                           ; SOURCE LINE # 61
+0033 120000      E     LCALL   SPIM_1_ClearTxBuffer
+                                           ; SOURCE LINE # 62
+0036 120000      E     LCALL   SPIM_1_ClearFIFO
+                                           ; SOURCE LINE # 63
+0039 E4                CLR     A
+003A 7F0A              MOV     R7,#0AH
+003C FE                MOV     R6,A
+003D FD                MOV     R5,A
+003E FC                MOV     R4,A
+003F 120000      E     LCALL   _?CyDelay
+                                           ; SOURCE LINE # 66
+0042 120000      E     LCALL   ADC_Start
+                                           ; SOURCE LINE # 67
+0045 120000      E     LCALL   ADC_StartConvert
+                                           ; SOURCE LINE # 70
+0048 E4                CLR     A
+0049 900000      R     MOV     DPTR,#k_imu
+004C F0                MOVX    @DPTR,A
+004D A3                INC     DPTR
+004E F0                MOVX    @DPTR,A
+004F         ?C0001:
+C51 COMPILER V9.51   MAIN                                                                  04/30/2016 17:24:41 PAGE 5   
+
+004F 900000      R     MOV     DPTR,#k_imu
+0052 E0                MOVX    A,@DPTR
+0053 FE                MOV     R6,A
+0054 A3                INC     DPTR
+0055 E0                MOVX    A,@DPTR
+0056 FF                MOV     R7,A
+0057 C3                CLR     C
+0058 9401              SUBB    A,#01H
+005A EE                MOV     A,R6
+005B 6480              XRL     A,#080H
+005D 9480              SUBB    A,#080H
+005F 5024              JNC     ?C0002
+                                           ; SOURCE LINE # 71
+0061 120000      E     LCALL   _Chip_Select_Write
+                                           ; SOURCE LINE # 72
+0064 E4                CLR     A
+0065 7F0A              MOV     R7,#0AH
+0067 FE                MOV     R6,A
+0068 FD                MOV     R5,A
+0069 FC                MOV     R4,A
+006A 120000      E     LCALL   _?CyDelay
+                                           ; SOURCE LINE # 73
+006D 120000      E     LCALL   InitIMU
+                                           ; SOURCE LINE # 74
+0070 E4                CLR     A
+0071 7F0A              MOV     R7,#0AH
+0073 FE                MOV     R6,A
+0074 FD                MOV     R5,A
+0075 FC                MOV     R4,A
+0076 120000      E     LCALL   _?CyDelay
+                                           ; SOURCE LINE # 75
+0079 900000      R     MOV     DPTR,#k_imu
+007C E4                CLR     A
+007D 75F001            MOV     B,#01H
+0080 120000      E     LCALL   ?C?IILDX
+0083 80CA              SJMP    ?C0001
+0085         ?C0002:
+                                           ; SOURCE LINE # 77
+0085 E4                CLR     A
+0086 FF                MOV     R7,A
+0087 120000      E     LCALL   _RS485_CTS_Write
+                                           ; SOURCE LINE # 80
+008A D2AF              SETB    EA
+008C 9044F4            MOV     DPTR,#044F4H
+008F 74FD              MOV     A,#0FDH
+0091 F0                MOVX    @DPTR,A
+                                           ; SOURCE LINE # 82
+0092 120000      E     LCALL   isr_1_Start
+                                           ; SOURCE LINE # 83
+0095 120000      E     LCALL   isr_1_Enable
+                                           ; SOURCE LINE # 85
+0098 E4                CLR     A
+0099 900000      R     MOV     DPTR,#status
+009C F0                MOVX    @DPTR,A
+009D A3                INC     DPTR
+009E F0                MOVX    @DPTR,A
+                                           ; SOURCE LINE # 86
+009F 7F1E              MOV     R7,#01EH
+00A1 FE                MOV     R6,A
+00A2 FD                MOV     R5,A
+00A3 FC                MOV     R4,A
+00A4 120000      E     LCALL   _?CyDelay
+C51 COMPILER V9.51   MAIN                                                                  04/30/2016 17:24:41 PAGE 6   
+
+                                           ; SOURCE LINE # 88
+00A7         ?C0004:
+                                           ; SOURCE LINE # 92
+00A7 120000      E     LCALL   UART_RS485_ReadRxStatus
+00AA EF                MOV     A,R7
+00AB 30E7F9            JNB     ACC.7,?C0004
+00AE 120000      E     LCALL   UART_RS485_ClearRxBuffer
+                                           ; SOURCE LINE # 114
+00B1 80F4              SJMP    ?C0004
+00B3 22                RET     
+             ; FUNCTION main (END)
+
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    180    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =      7    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+   EDATA SIZE       =   ----    ----
+   HDATA SIZE       =   ----    ----
+   XDATA CONST SIZE =   ----    ----
+   FAR CONST SIZE   =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

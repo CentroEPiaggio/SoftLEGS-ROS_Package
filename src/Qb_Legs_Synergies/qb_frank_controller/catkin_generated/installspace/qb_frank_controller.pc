@@ -1,0 +1,8 @@
+prefix=/home/riccardo/catkin_ws/install
+
+Name: qb_frank_controller
+Description: Description of qb_frank_controller
+Version: 0.0.0
+Cflags: 
+Libs: -L/home/riccardo/catkin_ws/install/lib 
+Requires: 

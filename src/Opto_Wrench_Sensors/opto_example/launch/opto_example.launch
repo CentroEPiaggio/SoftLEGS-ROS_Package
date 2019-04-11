@@ -1,0 +1,6 @@
+<launch>
+
+  <node name="opto_example" pkg="opto_example" type="opto_example" output="screen" />
+
+
+</launch>

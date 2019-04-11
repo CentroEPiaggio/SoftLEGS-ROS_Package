@@ -1,0 +1,19 @@
+<!--<launch>
+<node pkg="synergies" name="synergies" type="synergies" output="screen"/>
+</launch>-->
+
+
+
+
+<!--<launch>
+<node pkg="synergies" name="test_synergy_map_fun" type="synergies" output="screen"/>
+</launch>-->
+
+
+
+<launch>
+  <!-- phidgets_interface_kit interface_kit_node -->
+<node pkg="phidgets_interface_kit" name="interface_kit_node" type="interface_kit_node" output="screen"/> 
+<node pkg="distance_sensor" name="Desired_Velocity_Calculus" type="distance_sensor" output="screen"/>
+
+</launch>

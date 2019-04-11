@@ -1,0 +1,2 @@
+set(Distance_Sensor_MESSAGE_FILES "/home/riccardo/catkin_ws/src/Qb_Legs_Synergies/Distance_Sensor/msg/pid_msg.msg;/home/riccardo/catkin_ws/src/Qb_Legs_Synergies/Distance_Sensor/msg/N_msg.msg;/home/riccardo/catkin_ws/src/Qb_Legs_Synergies/Distance_Sensor/msg/GG_msg.msg;/home/riccardo/catkin_ws/src/Qb_Legs_Synergies/Distance_Sensor/msg/data_msg.msg")
+set(Distance_Sensor_SERVICE_FILES "")

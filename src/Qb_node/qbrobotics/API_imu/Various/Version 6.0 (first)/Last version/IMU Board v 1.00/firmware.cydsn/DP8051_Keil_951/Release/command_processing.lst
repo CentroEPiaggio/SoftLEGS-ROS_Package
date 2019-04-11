@@ -1,0 +1,3273 @@
+C51 COMPILER V9.51   COMMAND_PROCESSING                                                    09/22/2016 17:24:10 PAGE 1   
+
+
+C51 COMPILER V9.51, COMPILATION OF MODULE COMMAND_PROCESSING
+OBJECT MODULE PLACED IN .\DP8051_Keil_951\Release\command_processing.obj
+COMPILER INVOKED BY: C:\Program Files (x86)\Cypress\PSoC Creator\3.3\PSoC Creator\import\keil\pk51\9.51\C51\BIN\c51.exe 
+                    -.\command_processing.c NOIV LARGE MODDP2 OMF2 VB(1) NOIP INCDIR(.,Generated_Source\PSoC3) FF(3) DB DF(NDEBUG) WL(2) PR(.
+                    -\DP8051_Keil_951\Release/command_processing.lst) CD OT(11,SPEED) OJ(.\DP8051_Keil_951\Release\command_processing.obj)
+
+line level    source
+
+*** MESSAGE C286 IN LINE 0 OF (null): license limits optimization to level 5
+   1          // ----------------------------------------------------------------------------
+   2          // Copyright (C)  qbrobotics. All rights reserved.
+   3          // www.qbrobotics.com
+   4          // ----------------------------------------------------------------------------
+   5          
+   6          
+   7          /**
+   8          * \file         command_processing.c
+   9          *
+  10          
+  11          * \brief        Command processing functions.
+  12          * \date         May 16, 2016
+  13          * \author       qbrobotics
+  14          * \copyright    (C)  qbrobotics. All rights reserved.
+  15          */
+  16          
+  17          //=================================================================     includes
+  18          #include <command_processing.h>
+  19          #include <interruptions.h>
+  20          #include <stdio.h>
+  21          #include <utils.h>
+  22          #include <IMU_functions.h>
+  23          #include <globals.h>
+  24          
+  25          #include "commands.h"
+  26          
+  27          //================================================================     variables
+  28          
+  29          reg8 * EEPROM_ADDR = (reg8 *) CYDEV_EE_BASE;
+  30          
+  31          //==============================================================================
+  32          //                                                            RX DATA PROCESSING
+  33          //==============================================================================
+  34          //  This function checks for the availability of a data packet and process it:
+  35          //      - Verify checksum;
+  36          //      - Process commands;
+  37          //==============================================================================
+  38          
+  39          void commProcess(){
+  40   1      
+  41   1          uint8 CYDATA rx_cmd;
+  42   1      
+  43   1          rx_cmd = g_rx.buffer[0];
+  44   1      
+  45   1      //==========================================================     verify checksum
+  46   1      
+  47   1          if (!(LCRChecksum(g_rx.buffer, g_rx.length - 1) == g_rx.buffer[g_rx.length - 1])){
+  48   2              // Wrong checksum
+  49   2              g_rx.ready = 0;
+  50   2              return;
+  51   2          }
+  52   1      
+C51 COMPILER V9.51   COMMAND_PROCESSING                                                    09/22/2016 17:24:10 PAGE 2   
+
+  53   1      
+  54   1          switch(rx_cmd) {
+  55   2      
+  56   2      //=============================================================     CMD_ACTIVATE
+  57   2              case CMD_ACTIVATE:
+  58   2                  cmd_activate();
+  59   2                  break;
+  60   2      
+  61   2      //===========================================================     CMD_SET_INPUTS
+  62   2      
+  63   2              case CMD_SET_INPUTS:
+  64   2                  cmd_set_inputs();
+  65   2                  break;
+  66   2      
+  67   2      //=====================================================     CMD_GET_MEASUREMENTS
+  68   2      
+  69   2              case CMD_GET_MEASUREMENTS:
+  70   2                  cmd_get_measurements();
+  71   2                  break;
+  72   2      
+  73   2      //=========================================================     CMD_GET_CURRENTS
+  74   2      
+  75   2              case CMD_GET_CURRENTS:
+  76   2                  cmd_get_currents();
+  77   2                  break;
+  78   2      
+  79   2      
+  80   2      //=========================================================     CMD_GET_EMG
+  81   2      
+  82   2              case CMD_GET_EMG:
+  83   2                  cmd_get_emg();
+  84   2                  break;
+  85   2      
+  86   2      //=============================================================     CMD_WATCHDOG
+  87   2                  
+  88   2              case CMD_SET_WATCHDOG:
+  89   2                  cmd_set_watchdog();
+  90   2                  break;
+  91   2                  
+  92   2      //=========================================================     CMD_GET_ACTIVATE
+  93   2                  
+  94   2              case CMD_GET_ACTIVATE:
+  95   2                  cmd_get_activate();
+  96   2                  break;
+  97   2                  
+  98   2      //=========================================================     CMD_SET_BAUDRATE
+  99   2                  
+ 100   2              case CMD_SET_BAUDRATE:
+ 101   2                  cmd_set_baudrate();
+ 102   2                  break;  
+ 103   2                  
+ 104   2      //============================================================     CMD_GET_INPUT
+ 105   2      
+ 106   2              case CMD_GET_INPUTS:
+ 107   2                  cmd_get_inputs();
+ 108   2                  break;
+ 109   2      
+ 110   2      //=============================================================     CMD_GET_INFO
+ 111   2      
+ 112   2              case CMD_GET_INFO:
+ 113   2                  infoGet( *((uint16 *) &g_rx.buffer[1]));
+ 114   2                  break;
+C51 COMPILER V9.51   COMMAND_PROCESSING                                                    09/22/2016 17:24:10 PAGE 3   
+
+ 115   2      
+ 116   2      //============================================================     CMD_SET_PARAM
+ 117   2      
+ 118   2              case CMD_SET_PARAM:
+ 119   2                  paramSet( *((uint16 *) &g_rx.buffer[1]) );
+ 120   2                  break;
+ 121   2      
+ 122   2      //============================================================     CMD_GET_PARAM
+ 123   2      
+ 124   2              case CMD_GET_PARAM:
+ 125   2                  paramGet( *((uint16 *) &g_rx.buffer[1]) );
+ 126   2                  break;
+ 127   2      
+ 128   2      //=================================================================     CMD_PING
+ 129   2                  
+ 130   2              case CMD_PING:
+ 131   2                  cmd_ping();
+ 132   2                  break;
+ 133   2      
+ 134   2      //=========================================================     CMD_STORE_PARAMS
+ 135   2                  
+ 136   2              case CMD_STORE_PARAMS:
+ 137   2                  cmd_store_params();
+ 138   2                  break;
+ 139   2      
+ 140   2      //=================================================     CMD_STORE_DEFAULT_PARAMS
+ 141   2      
+ 142   2              case CMD_STORE_DEFAULT_PARAMS:
+ 143   2                  if(memStore(DEFAULT_EEPROM_DISPLACEMENT))
+ 144   2                      sendAcknowledgment(ACK_OK);
+ 145   2                  else
+ 146   2                      sendAcknowledgment(ACK_ERROR);
+ 147   2                  break;
+ 148   2      
+ 149   2      //=======================================================     CMD_RESTORE_PARAMS
+ 150   2      
+ 151   2              case CMD_RESTORE_PARAMS:
+ 152   2                  if(memRestore())
+ 153   2                      sendAcknowledgment(ACK_OK);
+ 154   2                  else
+ 155   2                      sendAcknowledgment(ACK_ERROR);
+ 156   2                  break;
+ 157   2      
+ 158   2      //=============================================================     CMD_INIT_MEM
+ 159   2      
+ 160   2              case CMD_INIT_MEM:
+ 161   2                  if(memInit())
+ 162   2                      sendAcknowledgment(ACK_OK);
+ 163   2                  else
+ 164   2                      sendAcknowledgment(ACK_ERROR);
+ 165   2                  break;
+ 166   2      
+ 167   2      //===========================================================     CMD_BOOTLOADER
+ 168   2      
+ 169   2              case CMD_BOOTLOADER:
+ 170   2                  //Not sure if ACK_OK is correct, should check
+ 171   2                  sendAcknowledgment(ACK_OK);
+ 172   2                  CyDelay(1000);
+ 173   2                  FTDI_ENABLE_REG_Write(0x00);
+ 174   2                  CyDelay(1000);
+ 175   2                  Bootloadable_Load();
+ 176   2                  break;
+C51 COMPILER V9.51   COMMAND_PROCESSING                                                    09/22/2016 17:24:10 PAGE 4   
+
+ 177   2      
+ 178   2      //============================================================     CMD_CALIBRATE
+ 179   2      
+ 180   2              case CMD_CALIBRATE:
+ 181   2                  break;
+ 182   2        
+ 183   2      //============================================================     CMD_GET_N_IMU
+ 184   2      
+ 185   2              case CMD_GET_N_IMU:
+ 186   2                  cmd_get_n_imu();
+ 187   2                  break;
+ 188   2                  
+ 189   2      //========================================================     CMD_GET_MAG_PARAM
+ 190   2      
+ 191   2              case CMD_GET_MAG_PARAM:
+ 192   2                  cmd_get_mag_param();
+ 193   2                  break;   
+ 194   2                  
+ 195   2      //=====================================================     CMD_GET_IMU_READINGS
+ 196   2      
+ 197   2              case CMD_GET_IMU_READINGS:
+ 198   2                  cmd_get_imu_readings();
+ 199   2                  break;
+ 200   2                  
+ 201   2      //=========================================================     CMD_SET_IMU_MODE
+ 202   2      
+ 203   2              case CMD_SET_IMU_MODE:
+ 204   2                  cmd_set_imu_mode();
+ 205   2                  break;
+ 206   2                  
+ 207   2      //========================================================     CMD_GET_IMUS_MODE
+ 208   2      
+ 209   2              case CMD_GET_IMUS_MODE:
+ 210   2                  cmd_get_imus_mode();
+ 211   2                  break;    
+ 212   2                  
+ 213   2          }
+ 214   1          
+ 215   1      }
+ 216          
+ 217          
+ 218          //==============================================================================
+ 219          //                                                                     INFO SEND
+ 220          //==============================================================================
+ 221          
+ 222          void infoSend(){
+ 223   1          unsigned char packet_string[1100];
+ 224   1          infoPrepare(packet_string);
+ 225   1          UART_RS485_PutString(packet_string);
+ 226   1      }
+ 227          
+ 228          
+ 229          //==============================================================================
+ 230          //                                                              COMMAND GET INFO
+ 231          //==============================================================================
+ 232          
+ 233          void infoGet(uint16 info_type) {
+ 234   1          static unsigned char packet_string[1100];
+ 235   1      
+ 236   1          //==================================     choose info type and prepare string
+ 237   1      
+ 238   1          switch (info_type) {
+C51 COMPILER V9.51   COMMAND_PROCESSING                                                    09/22/2016 17:24:10 PAGE 5   
+
+ 239   2              case INFO_ALL:
+ 240   2                  infoPrepare(packet_string);
+ 241   2                  UART_RS485_PutString(packet_string);
+ 242   2                  break;
+ 243   2      
+ 244   2              default:
+ 245   2                  break;
+ 246   2          }
+ 247   1      }
+ 248          
+ 249          //==============================================================================
+ 250          //                                                        COMMAND SET PARAMETER
+ 251          //==============================================================================
+ 252          
+ 253          
+ 254          void paramSet(uint16 param_type)
+ 255          {
+ 256   1          uint8 CYDATA i;        // iterator
+ 257   1          int32 aux_int;  // auxiliary variable
+ 258   1          uint8 aux_uchar;
+ 259   1      
+ 260   1          switch(param_type) {
+ 261   2      
+ 262   2      //===================================================================     set_id
+ 263   2      
+ 264   2              case PARAM_ID:
+ 265   2                  g_mem.id = g_rx.buffer[3];
+ 266   2                  break;
+ 267   2      
+ 268   2      //=======================================================     set_pid_parameters
+ 269   2      
+ 270   2              case PARAM_PID_CONTROL:
+ 271   2                  break;
+ 272   2      
+ 273   2      //==================================================     set_curr_pid_parameters
+ 274   2      
+ 275   2              case PARAM_PID_CURR_CONTROL:
+ 276   2                  break;
+ 277   2      
+ 278   2      //===================================================     set_startup_activation
+ 279   2      
+ 280   2              case PARAM_STARTUP_ACTIVATION:
+ 281   2                  break;
+ 282   2      
+ 283   2      //===========================================================     set_input_mode
+ 284   2      
+ 285   2              case PARAM_INPUT_MODE:
+ 286   2                  break;
+ 287   2      
+ 288   2      //=========================================================     set_control_mode
+ 289   2      
+ 290   2              case PARAM_CONTROL_MODE:
+ 291   2                  break;
+ 292   2      
+ 293   2      //===========================================================     set_resolution
+ 294   2      
+ 295   2              case PARAM_POS_RESOLUTION:
+ 296   2                  break;
+ 297   2      
+ 298   2      //===============================================================     set_offset
+ 299   2      
+ 300   2              case PARAM_MEASUREMENT_OFFSET:
+C51 COMPILER V9.51   COMMAND_PROCESSING                                                    09/22/2016 17:24:10 PAGE 6   
+
+ 301   2                  break;
+ 302   2      
+ 303   2      //===========================================================     set_multiplier
+ 304   2      
+ 305   2              case PARAM_MEASUREMENT_MULTIPLIER:
+ 306   2                  break;
+ 307   2      
+ 308   2      //=====================================================     set_pos_limit_enable
+ 309   2      
+ 310   2              case PARAM_POS_LIMIT_FLAG:
+ 311   2                  break;
+ 312   2      
+ 313   2      //============================================================     set_pos_limit
+ 314   2      
+ 315   2              case PARAM_POS_LIMIT:
+ 316   2                  break;
+ 317   2      
+ 318   2      //===============================================     set_max_step_pos_per_cycle
+ 319   2      
+ 320   2              case PARAM_MAX_STEP_POS:
+ 321   2                  break;
+ 322   2      
+ 323   2      //===============================================     set_max_step_neg_per_cycle
+ 324   2      
+ 325   2              case PARAM_MAX_STEP_NEG:
+ 326   2                  break;
+ 327   2      
+ 328   2      //========================================================     set_current_limit
+ 329   2      
+ 330   2              case PARAM_CURRENT_LIMIT:
+ 331   2                  break;
+ 332   2      
+ 333   2      //=======================================================     set_emg_calib_flag
+ 334   2      
+ 335   2              case PARAM_EMG_CALIB_FLAG:
+ 336   2                  break;
+ 337   2      
+ 338   2      //========================================================     set_emg_threshold
+ 339   2      
+ 340   2              case PARAM_EMG_THRESHOLD:
+ 341   2                  break;
+ 342   2      
+ 343   2      //========================================================     set_emg_max_value
+ 344   2      
+ 345   2              case PARAM_EMG_MAX_VALUE:
+ 346   2                  break;
+ 347   2      
+ 348   2      //============================================================     set_emg_speed
+ 349   2      
+ 350   2              case PARAM_EMG_SPEED:
+ 351   2                  break;
+ 352   2      
+ 353   2      //================================================     set_double_encoder_on_off
+ 354   2              case PARAM_DOUBLE_ENC_ON_OFF:
+ 355   2                  break;
+ 356   2      
+ 357   2      //===================================================     set_motor_handle_ratio
+ 358   2              case PARAM_MOT_HANDLE_RATIO:
+ 359   2                  break;
+ 360   2      
+ 361   2      //===================================================     set_motor_supply_type
+ 362   2              case PARAM_MOTOR_SUPPLY:
+C51 COMPILER V9.51   COMMAND_PROCESSING                                                    09/22/2016 17:24:10 PAGE 7   
+
+ 363   2                  break;
+ 364   2      
+ 365   2          }
+ 366   1          //Not sure if ACK_OK is correct, should check
+ 367   1          sendAcknowledgment(ACK_OK);
+ 368   1      }
+*** WARNING C280 IN LINE 256 OF .\command_processing.c: 'i': unreferenced local variable
+*** WARNING C280 IN LINE 257 OF .\command_processing.c: 'aux_int': unreferenced local variable
+*** WARNING C280 IN LINE 258 OF .\command_processing.c: 'aux_uchar': unreferenced local variable
+ 369          
+ 370          
+ 371          //==============================================================================
+ 372          //                                                         COMMAND GET PARAMETER
+ 373          //==============================================================================
+ 374          
+ 375          void paramGet(uint16 param_type)
+ 376          {
+ 377   1          uint8 packet_data[20];
+ 378   1          uint16 packet_lenght;
+ 379   1          uint8 i;                // iterator
+ 380   1      
+ 381   1          packet_data[0] = CMD_GET_PARAM;
+ 382   1      
+ 383   1          switch(param_type) {
+ 384   2      
+ 385   2      //===================================================================     get_id
+ 386   2      
+ 387   2              case PARAM_ID:
+ 388   2                  packet_data[1] = c_mem.id;
+ 389   2                  packet_lenght = 3;
+ 390   2                  break;
+ 391   2      
+ 392   2      //=======================================================     get_pid_parameters
+ 393   2      
+ 394   2              case PARAM_PID_CONTROL:
+ 395   2                  break;
+ 396   2      
+ 397   2      //=======================================================     get_pid_parameters
+ 398   2      
+ 399   2              case PARAM_PID_CURR_CONTROL:
+ 400   2                  break;
+ 401   2      
+ 402   2      //===================================================     get_startup_activation
+ 403   2      
+ 404   2              case PARAM_STARTUP_ACTIVATION:
+ 405   2                  break;
+ 406   2      
+ 407   2      //===========================================================     get_input_mode
+ 408   2      
+ 409   2              case PARAM_INPUT_MODE:
+ 410   2                  break;
+ 411   2      
+ 412   2      //=========================================================     get_control_mode
+ 413   2      
+ 414   2              case PARAM_CONTROL_MODE:
+ 415   2                  break;
+ 416   2      
+ 417   2      //===========================================================     get_resolution
+ 418   2      
+ 419   2              case PARAM_POS_RESOLUTION:
+ 420   2                  break;
+ 421   2      
+C51 COMPILER V9.51   COMMAND_PROCESSING                                                    09/22/2016 17:24:10 PAGE 8   
+
+ 422   2      //===============================================================     get_offset
+ 423   2      
+ 424   2              case PARAM_MEASUREMENT_OFFSET:
+ 425   2                  break;
+ 426   2      
+ 427   2      //===========================================================     get_multiplier
+ 428   2      
+ 429   2              case PARAM_MEASUREMENT_MULTIPLIER:
+ 430   2                  break;
+ 431   2      
+ 432   2      //=====================================================     get_pos_limit_enable
+ 433   2      
+ 434   2              case PARAM_POS_LIMIT_FLAG:
+ 435   2                  break;
+ 436   2      
+ 437   2      //============================================================     get_pos_limit
+ 438   2      
+ 439   2              case PARAM_POS_LIMIT:
+ 440   2                  break;
+ 441   2      
+ 442   2      //=========================================================     get_max_step_pos
+ 443   2      
+ 444   2              case PARAM_MAX_STEP_POS:
+ 445   2                  break;
+ 446   2      
+ 447   2      //=========================================================     get_max_step_neg
+ 448   2      
+ 449   2              case PARAM_MAX_STEP_NEG:
+ 450   2                  break;
+ 451   2      
+ 452   2      //========================================================     get_current_limit
+ 453   2      
+ 454   2              case PARAM_CURRENT_LIMIT:
+ 455   2                  break;
+ 456   2      
+ 457   2      //=======================================================     get_emg_calib_flag
+ 458   2      
+ 459   2              case PARAM_EMG_CALIB_FLAG:
+ 460   2                  break;
+ 461   2      
+ 462   2      //========================================================     get_emg_threshold
+ 463   2      
+ 464   2              case PARAM_EMG_THRESHOLD:
+ 465   2                  break;
+ 466   2      
+ 467   2      //========================================================     get_emg_max_value
+ 468   2      
+ 469   2              case PARAM_EMG_MAX_VALUE:
+ 470   2                  break;
+ 471   2      
+ 472   2      //============================================================     get_emg_speed
+ 473   2      
+ 474   2              case PARAM_EMG_SPEED:
+ 475   2                  break;
+ 476   2      
+ 477   2      //================================================     get_double_encoder_on_off
+ 478   2              case PARAM_DOUBLE_ENC_ON_OFF:
+ 479   2                  break;
+ 480   2      
+ 481   2      //===================================================     get_motor_handle_ratio
+ 482   2              case PARAM_MOT_HANDLE_RATIO:
+ 483   2                  break;
+C51 COMPILER V9.51   COMMAND_PROCESSING                                                    09/22/2016 17:24:10 PAGE 9   
+
+ 484   2      
+ 485   2      //===================================================     get_motor_supply_type
+ 486   2              case PARAM_MOTOR_SUPPLY:
+ 487   2                  break;
+ 488   2      
+ 489   2      //===================================================     default
+ 490   2              default:
+ 491   2                  break;
+ 492   2          }
+ 493   1      
+ 494   1          packet_data[packet_lenght - 1] = LCRChecksum(packet_data,packet_lenght - 1);
+ 495   1          commWrite(packet_data, packet_lenght);
+ 496   1      }
+*** WARNING C280 IN LINE 379 OF .\command_processing.c: 'i': unreferenced local variable
+ 497          
+ 498          //==============================================================================
+ 499          //                                                           PREPARE DEVICE INFO
+ 500          //==============================================================================
+ 501          
+ 502          void infoPrepare(unsigned char *info_string)
+ 503          {
+ 504   1          int i;
+ 505   1          if(c_mem.id != 250){                //To avoid dummy board ping
+ 506   2              unsigned char str[100];
+ 507   2              strcpy(info_string, "");
+ 508   2              strcat(info_string, "\r\n");
+ 509   2              strcat(info_string, "Firmware version: ");
+ 510   2              strcat(info_string, VERSION);
+ 511   2              strcat(info_string, "\r\n\r\n");
+ 512   2      
+ 513   2              strcat(info_string, "DEVICE INFO\r\n");
+ 514   2              sprintf(str, "ID: %d\r\n", (int) c_mem.id);
+ 515   2              strcat(info_string, str);
+ 516   2              
+ 517   2            
+ 518   2              //strcat(info_string, "ACC\r\n");
+ 519   2              //sprintf(str, "X - acc H: %d   acc L: %d \r\n", (int) Accel[0][0], (int) Accel[0][1]);
+ 520   2              //strcat(info_string, str);
+ 521   2              //sprintf(str, "Y - acc H: %d   acc L: %d \r\n", (int) Accel[0][2], (int) Accel[0][3]);
+ 522   2              //strcat(info_string, str);
+ 523   2              //sprintf(str, "Z - acc H: %d   acc L: %d \r\n", (int) Accel[0][4], (int) Accel[0][5]);
+ 524   2              //strcat(info_string, str);
+ 525   2              
+ 526   2              
+ 527   2              strcat(info_string, "IMU Connected\r\n");
+ 528   2              sprintf(str, "numero: %d\r\n", (int) N_IMU_Connected);
+ 529   2              strcat(info_string, str);
+ 530   2              
+ 531   2              for (i=0; i<N_IMU_Connected; i++){
+ 532   3                  sprintf(str, "Imu %d: %d\r\n", i, (int) IMU_connected[i]);
+ 533   3                  strcat(info_string, str);
+ 534   3                  sprintf(str, "Flags: %d, %d, %d\r\n", (int)(IMU_conf[IMU_connected[i]][0]), (int)(IMU_conf[IMU
+             -_connected[i]][1]), (int)(IMU_conf[IMU_connected[i]][2]));
+ 535   3                  strcat(info_string, str);
+ 536   3                 
+ 537   3                  
+ 538   3                  
+ 539   3      /*            sprintf(str, "Acc values %f, %f, %f\r\n", (float)g_imu[i].accel_value[0], (float)g_imu[i].ac
+             -cel_value[1], (float)g_imu[i].accel_value[2]);
+ 540   3                  strcat(info_string, str);
+ 541   3                  sprintf(str, "Gyro values %f, %f, %f\r\n", (float)g_imu[i].gyro_value[0], (float)g_imu[i].gyro
+             -_value[1], (float)g_imu[i].gyro_value[2]);
+C51 COMPILER V9.51   COMMAND_PROCESSING                                                    09/22/2016 17:24:10 PAGE 10  
+
+ 542   3                  strcat(info_string, str);
+ 543   3                  sprintf(str, "Mag values %f, %f, %f\r\n", (float)g_imu[i].mag_value[0], (float)g_imu[i].mag_va
+             -lue[1], (float)g_imu[i].mag_value[2]);
+ 544   3                  strcat(info_string, str);
+ 545   3       */           
+ 546   3                  strcat(info_string, "\r\n");
+ 547   3              }       
+ 548   2          
+ 549   2              //sprintf(str, "Last RX buffer: %s\r\n", g_rx.buffer);
+ 550   2              //strcat(info_string, str);
+ 551   2              strcat(info_string, "\r\n");
+ 552   2              //strcat(info_string, "\r\n");
+ 553   2          }
+ 554   1      }
+ 555          
+ 556          //==============================================================================
+ 557          //                                                      WRITE FUNCTION FOR RS485
+ 558          //==============================================================================
+ 559          
+ 560          void commWrite(uint8 *packet_data, const uint8 packet_lenght)
+ 561          {
+ 562   1          uint16 CYDATA index;
+ 563   1      
+ 564   1          // frame - start
+ 565   1          UART_RS485_PutChar(':');
+ 566   1          UART_RS485_PutChar(':');
+ 567   1          
+ 568   1          // frame - ID
+ 569   1          UART_RS485_PutChar(g_mem.id);
+ 570   1          
+ 571   1          // frame - length
+ 572   1          UART_RS485_PutChar(packet_lenght);
+ 573   1          
+ 574   1          // frame - packet data
+ 575   1          for(index = 0; index < packet_lenght; ++index)
+ 576   1              UART_RS485_PutChar(packet_data[index]);
+ 577   1          
+ 578   1          index = 0;
+ 579   1      
+ 580   1          while(!(UART_RS485_ReadTxStatus() & UART_RS485_TX_STS_COMPLETE) && index++ <= 1000){}
+ 581   1      
+ 582   1          RS485_CTS_Write(1);
+ 583   1          RS485_CTS_Write(0);
+ 584   1      }
+ 585          
+ 586          
+ 587          //==============================================================================
+ 588          //                                                             CHECKSUM FUNCTION
+ 589          //==============================================================================
+ 590          
+ 591          // Performs a XOR byte by byte on the entire vector
+ 592          
+ 593          uint8 LCRChecksum(uint8 *data_array, uint8 data_length) {
+ 594   1          
+ 595   1          uint8 CYDATA i;
+ 596   1          uint8 CYDATA checksum = 0x00;
+ 597   1          
+ 598   1          for(i = 0; i < data_length; ++i)
+ 599   1             checksum ^= data_array[i];
+ 600   1        
+ 601   1          return checksum;
+ 602   1      }
+C51 COMPILER V9.51   COMMAND_PROCESSING                                                    09/22/2016 17:24:10 PAGE 11  
+
+ 603          
+ 604          //==============================================================================
+ 605          //                                                       ACKNOWLEDGMENT FUNCTION
+ 606          //==============================================================================
+ 607          
+ 608          void sendAcknowledgment(const uint8 value) {
+ 609   1          int packet_lenght = 2;
+ 610   1          uint8 packet_data[2];
+ 611   1      
+ 612   1          packet_data[0] = value;
+ 613   1          packet_data[1] = value;
+ 614   1      
+ 615   1          commWrite(packet_data, packet_lenght);
+ 616   1      }
+ 617          
+ 618          //==============================================================================
+ 619          //                                                                  STORE MEMORY
+ 620          //==============================================================================
+ 621          
+ 622          /**
+ 623          * This function stores current memory settings on the eeprom with the specified
+ 624          * displacement
+ 625          **/
+ 626          
+ 627          uint8 memStore(int displacement)
+ 628          {
+ 629   1          int i;  // iterator
+ 630   1          uint8 writeStatus;
+ 631   1          int pages;
+ 632   1          uint8 ret_val = 1;
+ 633   1      
+ 634   1          // Disable Interrupt
+ 635   1          ISR_RS485_RX_Disable();
+ 636   1      
+ 637   1      
+ 638   1          // Retrieve temperature for better writing performance
+ 639   1          CySetTemp();
+ 640   1      
+ 641   1          memcpy( &c_mem, &g_mem, sizeof(g_mem) );
+ 642   1      
+ 643   1          pages = sizeof(g_mem) / 16 + (sizeof(g_mem) % 16 > 0);
+ 644   1      
+ 645   1          for(i = 0; i < pages; ++i) {
+ 646   2              writeStatus = EEPROM_Write(&g_mem.flag + 16 * i, i + displacement);
+ 647   2              if(writeStatus != CYRET_SUCCESS) {
+ 648   3                  ret_val = 0;
+ 649   3                  break;
+ 650   3              }
+ 651   2          }
+ 652   1      
+ 653   1          memcpy( &g_mem, &c_mem, sizeof(g_mem) );
+ 654   1      
+ 655   1          // Re-Enable Interrupt
+ 656   1          ISR_RS485_RX_Enable();
+ 657   1      
+ 658   1          return ret_val;
+ 659   1      }
+ 660          
+ 661          
+ 662          //==============================================================================
+ 663          //                                                                 RECALL MEMORY
+ 664          //==============================================================================
+C51 COMPILER V9.51   COMMAND_PROCESSING                                                    09/22/2016 17:24:10 PAGE 12  
+
+ 665          
+ 666          /**
+ 667          * This function loads user settings from the eeprom.
+ 668          **/
+ 669          
+ 670          void memRecall()
+ 671          {
+ 672   1          uint16 i;
+ 673   1      
+ 674   1          for (i = 0; i < sizeof(g_mem); i++) {
+ 675   2              ((reg8 *) &g_mem.flag)[i] = EEPROM_ADDR[i];
+ 676   2          }
+ 677   1      
+ 678   1          //check for initialization
+ 679   1          if (g_mem.flag == FALSE) {
+ 680   2              memRestore();
+ 681   2          } else {
+ 682   2              memcpy( &c_mem, &g_mem, sizeof(g_mem) );
+ 683   2          }
+ 684   1      }
+ 685          
+ 686          
+ 687          //==============================================================================
+ 688          //                                                                RESTORE MEMORY
+ 689          //==============================================================================
+ 690          
+ 691          /**
+ 692          * This function loads default settings from the eeprom.
+ 693          **/
+ 694          
+ 695          uint8 memRestore() {
+ 696   1          uint16 i;
+ 697   1      
+ 698   1          for (i = 0; i < sizeof(g_mem); i++) {
+ 699   2              ((reg8 *) &g_mem.flag)[i] = EEPROM_ADDR[i + (DEFAULT_EEPROM_DISPLACEMENT * 16)];
+ 700   2          }
+ 701   1      
+ 702   1          //check for initialization
+ 703   1          if (g_mem.flag == FALSE) {
+ 704   2              return memInit();
+ 705   2          } else {
+ 706   2              return memStore(0);
+ 707   2          }
+ 708   1      }
+ 709          
+ 710          //==============================================================================
+ 711          //                                                                   MEMORY INIT
+ 712          //==============================================================================
+ 713          
+ 714          /**
+ 715          * This function initialize memory when eeprom is compromised.
+ 716          **/
+ 717          
+ 718          uint8 memInit()
+ 719          {
+ 720   1          uint8 i;
+ 721   1      
+ 722   1          //initialize memory settings
+ 723   1          g_mem.id            = 1;
+ 724   1      
+ 725   1       
+ 726   1          // set the initialized flag to show EEPROM has been populated
+C51 COMPILER V9.51   COMMAND_PROCESSING                                                    09/22/2016 17:24:10 PAGE 13  
+
+ 727   1          g_mem.flag = TRUE;
+ 728   1          
+ 729   1          //write that configuration to EEPROM
+ 730   1          return ( memStore(0) && memStore(DEFAULT_EEPROM_DISPLACEMENT) );
+ 731   1      }
+*** WARNING C280 IN LINE 720 OF .\command_processing.c: 'i': unreferenced local variable
+ 732          
+ 733          //==============================================================================
+ 734          //                                                    ROUTINE INTERRUPT FUNCTION
+ 735          //==============================================================================
+ 736          /**
+ 737          * Bunch of functions used on request from UART communication
+ 738          **/
+ 739          
+ 740          void cmd_get_measurements(){
+ 741   1         //nothing to do and nothing to say 
+ 742   1      }
+ 743          
+ 744          void cmd_set_inputs(){
+ 745   1         //nothing to do and nothing to say
+ 746   1      }
+ 747          
+ 748          void cmd_activate(){
+ 749   1          //nothing to do and nothing to say
+ 750   1      }
+ 751          
+ 752          void cmd_get_activate(){
+ 753   1          //nothing to do and nothing to say
+ 754   1      }
+ 755          
+ 756          void cmd_get_curr_and_meas(){
+ 757   1          //nothing to do and nothing to say   
+ 758   1      }
+ 759          
+ 760          void cmd_get_currents(){
+ 761   1          //nothing to do and nothing to say
+ 762   1      }
+ 763          
+ 764          void cmd_set_baudrate(){
+ 765   1          
+ 766   1          // Set BaudRate
+ 767   1          c_mem.baud_rate = g_rx.buffer[1];
+ 768   1          
+ 769   1          switch(g_rx.buffer[1]){
+ 770   2              case 13:
+ 771   2                  CLOCK_UART_SetDividerValue(13);
+ 772   2                  break;
+ 773   2              default:
+ 774   2                  CLOCK_UART_SetDividerValue(3);
+ 775   2          }
+ 776   1      }
+ 777          
+ 778          void cmd_ping(){
+ 779   1      
+ 780   1          uint8 packet_data[2];
+ 781   1      
+ 782   1          // Header
+ 783   1          packet_data[0] = CMD_PING;
+ 784   1          
+ 785   1          // Load Payload
+ 786   1          packet_data[1] = CMD_PING;
+ 787   1      
+C51 COMPILER V9.51   COMMAND_PROCESSING                                                    09/22/2016 17:24:10 PAGE 14  
+
+ 788   1          // Send Package to uart
+ 789   1          commWrite(packet_data, 2);
+ 790   1      }
+ 791          
+ 792          void cmd_set_watchdog(){
+ 793   1            
+ 794   1          if (g_rx.buffer[1] <= 0){
+ 795   2              // Deactivate Watchdog
+ 796   2              WATCHDOG_ENABLER_Write(1); 
+ 797   2              g_mem.watchdog_period = 0;   
+ 798   2          }
+ 799   1          else{
+ 800   2              // Activate Watchdog        
+ 801   2              if (g_rx.buffer[1] > MAX_WATCHDOG_TIMER)
+ 802   2                  g_rx.buffer[1] = MAX_WATCHDOG_TIMER;
+ 803   2                  
+ 804   2              // Period * Time_CLK = WDT
+ 805   2              // Period = WTD / Time_CLK =     (WTD    )  / ( ( 1 / Freq_CLK ) )
+ 806   2              // Set request watchdog period - (WTD * 2)  * (250 / 1024        )
+ 807   2              g_mem.watchdog_period = (uint8) (((uint32) g_rx.buffer[1] * 2 * 250 ) >> 10);   
+ 808   2              WATCHDOG_COUNTER_WritePeriod(g_mem.watchdog_period); 
+ 809   2              WATCHDOG_ENABLER_Write(0); 
+ 810   2          }
+ 811   1      }
+ 812          
+ 813          void cmd_get_inputs(){
+ 814   1          //nothing to do and nothing to say
+ 815   1      }
+ 816          
+ 817          void cmd_store_params(){
+ 818   1         
+ 819   1          if(memStore(0))
+ 820   1              sendAcknowledgment(ACK_OK);
+ 821   1          else
+ 822   1              sendAcknowledgment(ACK_ERROR);
+ 823   1      }
+ 824          
+ 825          void cmd_get_emg(){
+ 826   1          //nothing to do and nothing to say
+ 827   1      }
+ 828          
+ 829          void cmd_get_n_imu(){
+ 830   1          //Get number of IMUs connected to board
+ 831   1          
+ 832   1          uint8 packet_data[3];
+ 833   1      
+ 834   1          // Header        
+ 835   1          packet_data[0] = CMD_GET_N_IMU;
+ 836   1          
+ 837   1          // Fill payload
+ 838   1          packet_data[1] = (uint8) N_IMU_Connected;
+ 839   1          
+ 840   1          // Calculate checksum
+ 841   1          packet_data[2] = LCRChecksum(packet_data, 2);
+ 842   1          
+ 843   1          // Send package to UART
+ 844   1          commWrite(packet_data, 3);
+ 845   1      }
+ 846          
+ 847          
+ 848          void cmd_get_mag_param(){
+ 849   1          
+C51 COMPILER V9.51   COMMAND_PROCESSING                                                    09/22/2016 17:24:10 PAGE 15  
+
+ 850   1          // Retrieve a summary of what we are reading from all imus
+ 851   1          uint8 CYDATA k_imu = 0;
+ 852   1          uint8 flags;
+ 853   1          uint8 sz = 1 + 4*N_IMU_Connected + 1;
+ 854   1          
+ 855   1          // Packet: header + imu id(uint8) + imu flags(uint8) + crc  
+ 856   1          uint8 packet_data[50];
+ 857   1      
+ 858   1          //Header package 
+ 859   1          packet_data[0] = CMD_GET_MAG_PARAM;
+ 860   1      
+ 861   1          for (k_imu=0; k_imu < N_IMU_Connected; k_imu++) 
+ 862   1          {   
+ 863   2                  packet_data[1 + 4*k_imu]     = (uint8) IMU_connected[k_imu];                // IMU id
+ 864   2              packet_data[1 + 4*k_imu + 1] = (uint8) MagCal[IMU_connected[k_imu]][0];     // IMU MagCal X
+ 865   2              packet_data[1 + 4*k_imu + 2] = (uint8) MagCal[IMU_connected[k_imu]][1];     // IMU MagCal Y
+ 866   2              packet_data[1 + 4*k_imu + 3] = (uint8) MagCal[IMU_connected[k_imu]][2];     // IMU MagCal X
+ 867   2              }
+ 868   1      
+ 869   1          // Calculate Checksum and send message to UART 
+ 870   1          packet_data[sz-1] = LCRChecksum (packet_data, sz-1);
+ 871   1          commWrite(packet_data, sz);
+ 872   1          
+ 873   1      }
+*** WARNING C280 IN LINE 852 OF .\command_processing.c: 'flags': unreferenced local variable
+ 874          
+ 875          void cmd_get_imu_readings(){
+ 876   1          //Retrieve accelerometers, gyroscopes and magnetometers readings
+ 877   1          
+ 878   1          // Packet to send is handled by isr_imu interrupt routine (in this way you work with consistent data a
+             -nd no other imu interrupt disturbs data sending)
+ 879   1          imu_send_flag = 1;
+ 880   1      }
+ 881          
+ 882          void cmd_set_imu_mode(){
+ 883   1          uint8 k_imu = 0;
+ 884   1          
+ 885   1          // Set sensors to read for each IMU
+ 886   1          uint8 id = (uint8) g_rx.buffer[1];
+ 887   1          uint8 flags = (uint8) g_rx.buffer[2];
+ 888   1          
+ 889   1          IMU_conf[id][0] = (flags & 0x04) >> 2;
+ 890   1          IMU_conf[id][1] = (flags & 0x02) >> 1;
+ 891   1          IMU_conf[id][2] = flags & 0x01;
+ 892   1          
+ 893   1          imus_data_size = 1; //header
+ 894   1          
+ 895   1          for (k_imu = 0; k_imu < N_IMU_Connected; k_imu++)
+ 896   1          {
+ 897   2              single_imu_size[IMU_connected[k_imu]] = 1 + 6*IMU_conf[IMU_connected[k_imu]][0] + 6*IMU_conf[IMU_c
+             -onnected[k_imu]][1] + 6*IMU_conf[IMU_connected[k_imu]][2] + 1;
+ 898   2              imus_data_size = imus_data_size + single_imu_size[IMU_connected[k_imu]];
+ 899   2          }
+ 900   1          imus_data_size = imus_data_size + 1;    //checksum
+ 901   1      }
+ 902          
+ 903          void cmd_get_imus_mode(){
+ 904   1          // Retrieve a summary of what we are reading from all imus
+ 905   1          uint8 CYDATA k_imu = 0;
+ 906   1          uint8 flags;
+ 907   1          uint8 sz = 1 + 2*N_IMU_Connected + 1;
+ 908   1          
+C51 COMPILER V9.51   COMMAND_PROCESSING                                                    09/22/2016 17:24:10 PAGE 16  
+
+ 909   1          // Packet: header + imu id(uint8) + imu flags(uint8) + crc  
+ 910   1          uint8 packet_data[50];
+ 911   1      
+ 912   1          //Header package 
+ 913   1          packet_data[0] = CMD_GET_IMUS_MODE;
+ 914   1      
+ 915   1          for (k_imu=0; k_imu < N_IMU_Connected; k_imu++) 
+ 916   1          {   
+ 917   2                  packet_data[1 + 2*k_imu] = (uint8) IMU_connected[k_imu];        // IMU id
+ 918   2              packet_data[1 + 2*k_imu + 1] = (uint8) ((IMU_conf[IMU_connected[k_imu]][0]<<2) | (IMU_conf[IMU_con
+             -nected[k_imu]][1]<<1) | (IMU_conf[IMU_connected[k_imu]][2]));      // IMU reading flags
+ 919   2              }
+ 920   1      
+ 921   1          // Calculate Checksum and send message to UART 
+ 922   1          packet_data[sz-1] = LCRChecksum (packet_data, sz-1);
+ 923   1          commWrite(packet_data, sz);
+ 924   1      
+ 925   1      }
+*** WARNING C280 IN LINE 906 OF .\command_processing.c: 'flags': unreferenced local variable
+ 926          /* [] END OF FILE */
+C51 COMPILER V9.51   COMMAND_PROCESSING                                                    09/22/2016 17:24:10 PAGE 17  
+
+ASSEMBLY LISTING OF GENERATED OBJECT CODE
+
+
+             ; FUNCTION commProcess (BEGIN)
+                                           ; SOURCE LINE # 39
+                                           ; SOURCE LINE # 43
+0000 900000      E     MOV     DPTR,#g_rx
+0003 E0                MOVX    A,@DPTR
+0004 F500        R     MOV     rx_cmd,A
+                                           ; SOURCE LINE # 47
+0006 7B01              MOV     R3,#01H
+0008 7A00        E     MOV     R2,#HIGH g_rx
+000A 7900        E     MOV     R1,#LOW g_rx
+000C 900000      E     MOV     DPTR,#g_rx+080H
+000F E0                MOVX    A,@DPTR
+0010 A3                INC     DPTR
+0011 E0                MOVX    A,@DPTR
+0012 14                DEC     A
+0013 FD                MOV     R5,A
+0014 120000      R     LCALL   _LCRChecksum
+0017 900000      E     MOV     DPTR,#g_rx+080H
+001A E0                MOVX    A,@DPTR
+001B FC                MOV     R4,A
+001C A3                INC     DPTR
+001D E0                MOVX    A,@DPTR
+001E 2400        E     ADD     A,#LOW g_rx+0FFFFH
+0020 F582              MOV     DPL,A
+0022 7400        E     MOV     A,#HIGH g_rx+0FFFFH
+0024 3C                ADDC    A,R4
+0025 F583              MOV     DPH,A
+0027 E0                MOVX    A,@DPTR
+0028 B50703            CJNE    A,AR7,?C0002
+002B D3                SETB    C
+002C 8001              SJMP    ?C0003
+002E         ?C0002:
+002E C3                CLR     C
+002F         ?C0003:
+002F 4006              JC      ?C0001
+                                           ; SOURCE LINE # 49
+0031 E4                CLR     A
+0032 900000      E     MOV     DPTR,#g_rx+084H
+0035 F0                MOVX    @DPTR,A
+0036 22                RET     
+                                           ; SOURCE LINE # 51
+0037         ?C0001:
+                                           ; SOURCE LINE # 54
+0037 E500        R     MOV     A,rx_cmd
+0039 120000      E     LCALL   ?C?CCASE
+003C 0000        R     DW      ?C0018
+003E 00                DB      00H
+003F 0000        R     DW      ?C0016
+0041 01                DB      01H
+0042 0000        R     DW      ?C0017
+0044 02                DB      02H
+0045 0000        R     DW      ?C0019
+0047 03                DB      03H
+0048 0000        R     DW      ?C0020
+004A 04                DB      04H
+004B 0000        R     DW      ?C0023
+004D 05                DB      05H
+004E 0000        R     DW      ?C0015
+0050 06                DB      06H
+C51 COMPILER V9.51   COMMAND_PROCESSING                                                    09/22/2016 17:24:10 PAGE 18  
+
+0051 0000        R     DW      ?C0029
+0053 09                DB      09H
+0054 0000        R     DW      ?C0026
+0056 0A                DB      0AH
+0057 0000        R     DW      ?C0006
+0059 80                DB      080H
+005A 0000        R     DW      ?C0012
+005C 81                DB      081H
+005D 0000        R     DW      ?C0007
+005F 82                DB      082H
+0060 0000        R     DW      ?C0014
+0062 83                DB      083H
+0063 0000        R     DW      ?C0008
+0065 84                DB      084H
+0066 0000        R     DW      ?C0009
+0068 85                DB      085H
+0069 0000        R     DW      ?C0010
+006B 88                DB      088H
+006C 0000        R     DW      ?C0011
+006E 8A                DB      08AH
+006F 0000        R     DW      ?C0013
+0071 8B                DB      08BH
+0072 0000        R     DW      ?C0031
+0074 8C                DB      08CH
+0075 0000        R     DW      ?C0032
+0077 8D                DB      08DH
+0078 0000        R     DW      ?C0033
+007A 8E                DB      08EH
+007B 0000        R     DW      ?C0034
+007D 8F                DB      08FH
+007E 0000        R     DW      ?C0035
+0080 90                DB      090H
+0081 0000              DW      00H
+0083 0000        R     DW      ?C0004
+                                           ; SOURCE LINE # 57
+0085         ?C0006:
+                                           ; SOURCE LINE # 58
+0085 120000      R     LCALL   cmd_activate
+                                           ; SOURCE LINE # 59
+0088 22                RET     
+                                           ; SOURCE LINE # 63
+0089         ?C0007:
+                                           ; SOURCE LINE # 64
+0089 120000      R     LCALL   cmd_set_inputs
+                                           ; SOURCE LINE # 65
+008C 22                RET     
+                                           ; SOURCE LINE # 69
+008D         ?C0008:
+                                           ; SOURCE LINE # 70
+008D 120000      R     LCALL   cmd_get_measurements
+                                           ; SOURCE LINE # 71
+0090 22                RET     
+                                           ; SOURCE LINE # 75
+0091         ?C0009:
+                                           ; SOURCE LINE # 76
+0091 120000      R     LCALL   cmd_get_currents
+                                           ; SOURCE LINE # 77
+0094 22                RET     
+                                           ; SOURCE LINE # 82
+0095         ?C0010:
+                                           ; SOURCE LINE # 83
+0095 120000      R     LCALL   cmd_get_emg
+C51 COMPILER V9.51   COMMAND_PROCESSING                                                    09/22/2016 17:24:10 PAGE 19  
+
+                                           ; SOURCE LINE # 84
+0098 22                RET     
+                                           ; SOURCE LINE # 88
+0099         ?C0011:
+                                           ; SOURCE LINE # 89
+0099 120000      R     LCALL   cmd_set_watchdog
+                                           ; SOURCE LINE # 90
+009C 22                RET     
+                                           ; SOURCE LINE # 94
+009D         ?C0012:
+                                           ; SOURCE LINE # 95
+009D 120000      R     LCALL   cmd_get_activate
+                                           ; SOURCE LINE # 96
+00A0 22                RET     
+                                           ; SOURCE LINE # 100
+00A1         ?C0013:
+                                           ; SOURCE LINE # 101
+00A1 120000      R     LCALL   cmd_set_baudrate
+                                           ; SOURCE LINE # 102
+00A4 22                RET     
+                                           ; SOURCE LINE # 106
+00A5         ?C0014:
+                                           ; SOURCE LINE # 107
+00A5 120000      R     LCALL   cmd_get_inputs
+                                           ; SOURCE LINE # 108
+00A8 22                RET     
+                                           ; SOURCE LINE # 112
+00A9         ?C0015:
+                                           ; SOURCE LINE # 113
+00A9 900000      E     MOV     DPTR,#g_rx+01H
+00AC E0                MOVX    A,@DPTR
+00AD FE                MOV     R6,A
+00AE A3                INC     DPTR
+00AF E0                MOVX    A,@DPTR
+00B0 FF                MOV     R7,A
+00B1 120000      R     LCALL   _infoGet
+                                           ; SOURCE LINE # 114
+00B4 22                RET     
+                                           ; SOURCE LINE # 118
+00B5         ?C0016:
+                                           ; SOURCE LINE # 119
+00B5 900000      E     MOV     DPTR,#g_rx+01H
+00B8 E0                MOVX    A,@DPTR
+00B9 FE                MOV     R6,A
+00BA A3                INC     DPTR
+00BB E0                MOVX    A,@DPTR
+00BC FF                MOV     R7,A
+00BD 120000      R     LCALL   _paramSet
+                                           ; SOURCE LINE # 120
+00C0 22                RET     
+                                           ; SOURCE LINE # 124
+00C1         ?C0017:
+                                           ; SOURCE LINE # 125
+00C1 900000      E     MOV     DPTR,#g_rx+01H
+00C4 E0                MOVX    A,@DPTR
+00C5 FE                MOV     R6,A
+00C6 A3                INC     DPTR
+00C7 E0                MOVX    A,@DPTR
+00C8 FF                MOV     R7,A
+00C9 120000      R     LCALL   _paramGet
+                                           ; SOURCE LINE # 126
+00CC 22                RET     
+C51 COMPILER V9.51   COMMAND_PROCESSING                                                    09/22/2016 17:24:10 PAGE 20  
+
+                                           ; SOURCE LINE # 130
+00CD         ?C0018:
+                                           ; SOURCE LINE # 131
+00CD 120000      R     LCALL   cmd_ping
+                                           ; SOURCE LINE # 132
+00D0 22                RET     
+                                           ; SOURCE LINE # 136
+00D1         ?C0019:
+                                           ; SOURCE LINE # 137
+00D1 120000      R     LCALL   cmd_store_params
+                                           ; SOURCE LINE # 138
+00D4 22                RET     
+                                           ; SOURCE LINE # 142
+00D5         ?C0020:
+                                           ; SOURCE LINE # 143
+00D5 7F08              MOV     R7,#08H
+00D7 7E00              MOV     R6,#00H
+00D9 120000      R     LCALL   _memStore
+00DC EF                MOV     A,R7
+00DD 6006              JZ      ?C0021
+                                           ; SOURCE LINE # 144
+00DF 7F01              MOV     R7,#01H
+00E1 120000      R     LCALL   _sendAcknowledgment
+00E4 22                RET     
+00E5         ?C0021:
+                                           ; SOURCE LINE # 146
+00E5 E4                CLR     A
+00E6 FF                MOV     R7,A
+00E7 120000      R     LCALL   _sendAcknowledgment
+                                           ; SOURCE LINE # 147
+00EA 22                RET     
+                                           ; SOURCE LINE # 151
+00EB         ?C0023:
+                                           ; SOURCE LINE # 152
+00EB 120000      R     LCALL   memRestore
+00EE EF                MOV     A,R7
+00EF 6006              JZ      ?C0024
+                                           ; SOURCE LINE # 153
+00F1 7F01              MOV     R7,#01H
+00F3 120000      R     LCALL   _sendAcknowledgment
+00F6 22                RET     
+00F7         ?C0024:
+                                           ; SOURCE LINE # 155
+00F7 E4                CLR     A
+00F8 FF                MOV     R7,A
+00F9 120000      R     LCALL   _sendAcknowledgment
+                                           ; SOURCE LINE # 156
+00FC 22                RET     
+                                           ; SOURCE LINE # 160
+00FD         ?C0026:
+                                           ; SOURCE LINE # 161
+00FD 120000      R     LCALL   memInit
+0100 EF                MOV     A,R7
+0101 6006              JZ      ?C0027
+                                           ; SOURCE LINE # 162
+0103 7F01              MOV     R7,#01H
+0105 120000      R     LCALL   _sendAcknowledgment
+0108 22                RET     
+0109         ?C0027:
+                                           ; SOURCE LINE # 164
+0109 E4                CLR     A
+010A FF                MOV     R7,A
+C51 COMPILER V9.51   COMMAND_PROCESSING                                                    09/22/2016 17:24:10 PAGE 21  
+
+010B 120000      R     LCALL   _sendAcknowledgment
+                                           ; SOURCE LINE # 165
+010E 22                RET     
+                                           ; SOURCE LINE # 169
+010F         ?C0029:
+                                           ; SOURCE LINE # 171
+010F 7F01              MOV     R7,#01H
+0111 120000      R     LCALL   _sendAcknowledgment
+                                           ; SOURCE LINE # 172
+0114 E4                CLR     A
+0115 7FE8              MOV     R7,#0E8H
+0117 7E03              MOV     R6,#03H
+0119 FD                MOV     R5,A
+011A FC                MOV     R4,A
+011B 120000      E     LCALL   _?CyDelay
+                                           ; SOURCE LINE # 173
+011E E4                CLR     A
+011F FF                MOV     R7,A
+0120 120000      E     LCALL   _FTDI_ENABLE_REG_Write
+                                           ; SOURCE LINE # 174
+0123 E4                CLR     A
+0124 7FE8              MOV     R7,#0E8H
+0126 7E03              MOV     R6,#03H
+0128 FD                MOV     R5,A
+0129 FC                MOV     R4,A
+012A 120000      E     LCALL   _?CyDelay
+                                           ; SOURCE LINE # 175
+012D 120000      E     LCALL   Bootloadable_Load
+                                           ; SOURCE LINE # 176
+0130 22                RET     
+                                           ; SOURCE LINE # 180
+                                           ; SOURCE LINE # 181
+                                           ; SOURCE LINE # 185
+0131         ?C0031:
+                                           ; SOURCE LINE # 186
+0131 120000      R     LCALL   cmd_get_n_imu
+                                           ; SOURCE LINE # 187
+0134 22                RET     
+                                           ; SOURCE LINE # 191
+0135         ?C0032:
+                                           ; SOURCE LINE # 192
+0135 120000      R     LCALL   cmd_get_mag_param
+                                           ; SOURCE LINE # 193
+0138 22                RET     
+                                           ; SOURCE LINE # 197
+0139         ?C0033:
+                                           ; SOURCE LINE # 198
+0139 120000      R     LCALL   cmd_get_imu_readings
+                                           ; SOURCE LINE # 199
+013C 22                RET     
+                                           ; SOURCE LINE # 203
+013D         ?C0034:
+                                           ; SOURCE LINE # 204
+013D 120000      R     LCALL   cmd_set_imu_mode
+                                           ; SOURCE LINE # 205
+0140 22                RET     
+                                           ; SOURCE LINE # 209
+0141         ?C0035:
+                                           ; SOURCE LINE # 210
+0141 120000      R     LCALL   cmd_get_imus_mode
+                                           ; SOURCE LINE # 211
+                                           ; SOURCE LINE # 213
+C51 COMPILER V9.51   COMMAND_PROCESSING                                                    09/22/2016 17:24:10 PAGE 22  
+
+                                           ; SOURCE LINE # 215
+0144         ?C0004:
+0144 22                RET     
+             ; FUNCTION commProcess (END)
+
+             ; FUNCTION infoSend (BEGIN)
+                                           ; SOURCE LINE # 222
+                                           ; SOURCE LINE # 224
+0000 7B01              MOV     R3,#01H
+0002 7A00        R     MOV     R2,#HIGH packet_string
+0004 7900        R     MOV     R1,#LOW packet_string
+0006 120000      R     LCALL   _infoPrepare
+                                           ; SOURCE LINE # 225
+0009 7B01              MOV     R3,#01H
+000B 7A00        R     MOV     R2,#HIGH packet_string
+000D 7900        R     MOV     R1,#LOW packet_string
+000F 120000      E     LCALL   _UART_RS485_PutString
+                                           ; SOURCE LINE # 226
+0012 22                RET     
+             ; FUNCTION infoSend (END)
+
+             ; FUNCTION _infoGet (BEGIN)
+                                           ; SOURCE LINE # 233
+;---- Variable 'info_type' assigned to Register 'R6/R7' ----
+                                           ; SOURCE LINE # 238
+0000 EF                MOV     A,R7
+0001 7015              JNZ     ?C0040
+0003 EE                MOV     A,R6
+0004 7012              JNZ     ?C0040
+                                           ; SOURCE LINE # 239
+0006         ?C0038:
+                                           ; SOURCE LINE # 240
+0006 7B01              MOV     R3,#01H
+0008 7A00        R     MOV     R2,#HIGH packet_string
+000A 7900        R     MOV     R1,#LOW packet_string
+000C 120000      R     LCALL   _infoPrepare
+                                           ; SOURCE LINE # 241
+000F 7B01              MOV     R3,#01H
+0011 7A00        R     MOV     R2,#HIGH packet_string
+0013 7900        R     MOV     R1,#LOW packet_string
+0015 120000      E     LCALL   _UART_RS485_PutString
+                                           ; SOURCE LINE # 242
+                                           ; SOURCE LINE # 244
+                                           ; SOURCE LINE # 245
+                                           ; SOURCE LINE # 246
+                                           ; SOURCE LINE # 247
+0018         ?C0040:
+0018 22                RET     
+             ; FUNCTION _infoGet (END)
+
+             ; FUNCTION _paramSet (BEGIN)
+                                           ; SOURCE LINE # 254
+;---- Variable 'param_type' assigned to Register 'R6/R7' ----
+                                           ; SOURCE LINE # 255
+                                           ; SOURCE LINE # 260
+0000 EF                MOV     A,R7
+0001 700B              JNZ     ?C0041
+0003 EE                MOV     A,R6
+0004 7008              JNZ     ?C0041
+                                           ; SOURCE LINE # 264
+0006         ?C0042:
+                                           ; SOURCE LINE # 265
+C51 COMPILER V9.51   COMMAND_PROCESSING                                                    09/22/2016 17:24:10 PAGE 23  
+
+0006 900000      E     MOV     DPTR,#g_rx+03H
+0009 E0                MOVX    A,@DPTR
+000A 900000      E     MOV     DPTR,#g_mem+01H
+000D F0                MOVX    @DPTR,A
+                                           ; SOURCE LINE # 266
+                                           ; SOURCE LINE # 270
+                                           ; SOURCE LINE # 271
+                                           ; SOURCE LINE # 275
+                                           ; SOURCE LINE # 276
+                                           ; SOURCE LINE # 280
+                                           ; SOURCE LINE # 281
+                                           ; SOURCE LINE # 285
+                                           ; SOURCE LINE # 286
+                                           ; SOURCE LINE # 290
+                                           ; SOURCE LINE # 291
+                                           ; SOURCE LINE # 295
+                                           ; SOURCE LINE # 296
+                                           ; SOURCE LINE # 300
+                                           ; SOURCE LINE # 301
+                                           ; SOURCE LINE # 305
+                                           ; SOURCE LINE # 306
+                                           ; SOURCE LINE # 310
+                                           ; SOURCE LINE # 311
+                                           ; SOURCE LINE # 315
+                                           ; SOURCE LINE # 316
+                                           ; SOURCE LINE # 320
+                                           ; SOURCE LINE # 321
+                                           ; SOURCE LINE # 325
+                                           ; SOURCE LINE # 326
+                                           ; SOURCE LINE # 330
+                                           ; SOURCE LINE # 331
+                                           ; SOURCE LINE # 335
+                                           ; SOURCE LINE # 336
+                                           ; SOURCE LINE # 340
+                                           ; SOURCE LINE # 341
+                                           ; SOURCE LINE # 345
+                                           ; SOURCE LINE # 346
+                                           ; SOURCE LINE # 350
+                                           ; SOURCE LINE # 351
+                                           ; SOURCE LINE # 354
+                                           ; SOURCE LINE # 355
+                                           ; SOURCE LINE # 358
+                                           ; SOURCE LINE # 359
+                                           ; SOURCE LINE # 362
+                                           ; SOURCE LINE # 363
+                                           ; SOURCE LINE # 365
+000E         ?C0041:
+                                           ; SOURCE LINE # 367
+000E 7F01              MOV     R7,#01H
+0010 120000      R     LCALL   _sendAcknowledgment
+                                           ; SOURCE LINE # 368
+0013 22                RET     
+             ; FUNCTION _paramSet (END)
+
+             ; FUNCTION _paramGet (BEGIN)
+                                           ; SOURCE LINE # 375
+;---- Variable 'param_type' assigned to Register 'R6/R7' ----
+                                           ; SOURCE LINE # 376
+                                           ; SOURCE LINE # 381
+0000 900000      R     MOV     DPTR,#packet_data
+0003 7402              MOV     A,#02H
+0005 F0                MOVX    @DPTR,A
+C51 COMPILER V9.51   COMMAND_PROCESSING                                                    09/22/2016 17:24:10 PAGE 24  
+
+                                           ; SOURCE LINE # 383
+0006 EF                MOV     A,R7
+0007 7014              JNZ     ?C0064
+0009 EE                MOV     A,R6
+000A 7011              JNZ     ?C0064
+                                           ; SOURCE LINE # 387
+000C         ?C0065:
+                                           ; SOURCE LINE # 388
+000C 900000      E     MOV     DPTR,#c_mem+01H
+000F E0                MOVX    A,@DPTR
+0010 900000      R     MOV     DPTR,#packet_data+01H
+0013 F0                MOVX    @DPTR,A
+                                           ; SOURCE LINE # 389
+0014 900000      R     MOV     DPTR,#packet_lenght
+0017 E4                CLR     A
+0018 F0                MOVX    @DPTR,A
+0019 A3                INC     DPTR
+001A 7403              MOV     A,#03H
+001C F0                MOVX    @DPTR,A
+                                           ; SOURCE LINE # 390
+                                           ; SOURCE LINE # 394
+                                           ; SOURCE LINE # 395
+                                           ; SOURCE LINE # 399
+                                           ; SOURCE LINE # 400
+                                           ; SOURCE LINE # 404
+                                           ; SOURCE LINE # 405
+                                           ; SOURCE LINE # 409
+                                           ; SOURCE LINE # 410
+                                           ; SOURCE LINE # 414
+                                           ; SOURCE LINE # 415
+                                           ; SOURCE LINE # 419
+                                           ; SOURCE LINE # 420
+                                           ; SOURCE LINE # 424
+                                           ; SOURCE LINE # 425
+                                           ; SOURCE LINE # 429
+                                           ; SOURCE LINE # 430
+                                           ; SOURCE LINE # 434
+                                           ; SOURCE LINE # 435
+                                           ; SOURCE LINE # 439
+                                           ; SOURCE LINE # 440
+                                           ; SOURCE LINE # 444
+                                           ; SOURCE LINE # 445
+                                           ; SOURCE LINE # 449
+                                           ; SOURCE LINE # 450
+                                           ; SOURCE LINE # 454
+                                           ; SOURCE LINE # 455
+                                           ; SOURCE LINE # 459
+                                           ; SOURCE LINE # 460
+                                           ; SOURCE LINE # 464
+                                           ; SOURCE LINE # 465
+                                           ; SOURCE LINE # 469
+                                           ; SOURCE LINE # 470
+                                           ; SOURCE LINE # 474
+                                           ; SOURCE LINE # 475
+                                           ; SOURCE LINE # 478
+                                           ; SOURCE LINE # 479
+                                           ; SOURCE LINE # 482
+                                           ; SOURCE LINE # 483
+                                           ; SOURCE LINE # 486
+                                           ; SOURCE LINE # 487
+                                           ; SOURCE LINE # 490
+                                           ; SOURCE LINE # 491
+C51 COMPILER V9.51   COMMAND_PROCESSING                                                    09/22/2016 17:24:10 PAGE 25  
+
+                                           ; SOURCE LINE # 492
+001D         ?C0064:
+                                           ; SOURCE LINE # 494
+001D 7B01              MOV     R3,#01H
+001F 7A00        R     MOV     R2,#HIGH packet_data
+0021 7900        R     MOV     R1,#LOW packet_data
+0023 900000      R     MOV     DPTR,#packet_lenght
+0026 E0                MOVX    A,@DPTR
+0027 A3                INC     DPTR
+0028 E0                MOVX    A,@DPTR
+0029 14                DEC     A
+002A FD                MOV     R5,A
+002B 120000      R     LCALL   _LCRChecksum
+002E 900000      R     MOV     DPTR,#packet_lenght
+0031 E0                MOVX    A,@DPTR
+0032 FC                MOV     R4,A
+0033 A3                INC     DPTR
+0034 E0                MOVX    A,@DPTR
+0035 FD                MOV     R5,A
+0036 2400        R     ADD     A,#LOW packet_data+0FFFFH
+0038 F582              MOV     DPL,A
+003A 7400        R     MOV     A,#HIGH packet_data+0FFFFH
+003C 3C                ADDC    A,R4
+003D F583              MOV     DPH,A
+003F EF                MOV     A,R7
+0040 F0                MOVX    @DPTR,A
+                                           ; SOURCE LINE # 495
+0041 7B01              MOV     R3,#01H
+0043 7A00        R     MOV     R2,#HIGH packet_data
+0045 7900        R     MOV     R1,#LOW packet_data
+0047 120000      R     LCALL   _commWrite
+                                           ; SOURCE LINE # 496
+004A 22                RET     
+             ; FUNCTION _paramGet (END)
+
+             ; FUNCTION _infoPrepare (BEGIN)
+                                           ; SOURCE LINE # 502
+0000 900000      R     MOV     DPTR,#info_string
+0003 EB                MOV     A,R3
+0004 F0                MOVX    @DPTR,A
+0005 A3                INC     DPTR
+0006 EA                MOV     A,R2
+0007 F0                MOVX    @DPTR,A
+0008 A3                INC     DPTR
+0009 E9                MOV     A,R1
+000A F0                MOVX    @DPTR,A
+                                           ; SOURCE LINE # 503
+                                           ; SOURCE LINE # 505
+000B 900000      E     MOV     DPTR,#c_mem+01H
+000E E0                MOVX    A,@DPTR
+000F 64FA              XRL     A,#0FAH
+0011 7003              JNZ     $ + 5H
+0013 020000      R     LJMP    ?C0092
+                                           ; SOURCE LINE # 507
+0016 900000      R     MOV     DPTR,#info_string
+0019 E0                MOVX    A,@DPTR
+001A FB                MOV     R3,A
+001B A3                INC     DPTR
+001C E0                MOVX    A,@DPTR
+001D FA                MOV     R2,A
+001E A3                INC     DPTR
+001F E0                MOVX    A,@DPTR
+C51 COMPILER V9.51   COMMAND_PROCESSING                                                    09/22/2016 17:24:10 PAGE 26  
+
+0020 F8                MOV     R0,A
+0021 AC02              MOV     R4,AR2
+0023 AD03              MOV     R5,AR3
+0025 7BFF              MOV     R3,#0FFH
+0027 7A00        R     MOV     R2,#HIGH ?SC_0
+0029 7900        R     MOV     R1,#LOW ?SC_0
+002B 120000      E     LCALL   ?C?STRCPYAMD
+                                           ; SOURCE LINE # 508
+002E 900000      E     MOV     DPTR,#?_strcat?BYTE+03H
+0031 74FF              MOV     A,#0FFH
+0033 F0                MOVX    @DPTR,A
+0034 A3                INC     DPTR
+0035 7400        R     MOV     A,#HIGH ?SC_1
+0037 F0                MOVX    @DPTR,A
+0038 A3                INC     DPTR
+0039 7400        R     MOV     A,#LOW ?SC_1
+003B F0                MOVX    @DPTR,A
+003C 900000      R     MOV     DPTR,#info_string
+003F E0                MOVX    A,@DPTR
+0040 FB                MOV     R3,A
+0041 A3                INC     DPTR
+0042 E0                MOVX    A,@DPTR
+0043 FA                MOV     R2,A
+0044 A3                INC     DPTR
+0045 E0                MOVX    A,@DPTR
+0046 F9                MOV     R1,A
+0047 120000      E     LCALL   _strcat
+                                           ; SOURCE LINE # 509
+004A 900000      E     MOV     DPTR,#?_strcat?BYTE+03H
+004D 74FF              MOV     A,#0FFH
+004F F0                MOVX    @DPTR,A
+0050 A3                INC     DPTR
+0051 7400        R     MOV     A,#HIGH ?SC_4
+0053 F0                MOVX    @DPTR,A
+0054 A3                INC     DPTR
+0055 7400        R     MOV     A,#LOW ?SC_4
+0057 F0                MOVX    @DPTR,A
+0058 900000      R     MOV     DPTR,#info_string
+005B E0                MOVX    A,@DPTR
+005C FB                MOV     R3,A
+005D A3                INC     DPTR
+005E E0                MOVX    A,@DPTR
+005F FA                MOV     R2,A
+0060 A3                INC     DPTR
+0061 E0                MOVX    A,@DPTR
+0062 F9                MOV     R1,A
+0063 120000      E     LCALL   _strcat
+                                           ; SOURCE LINE # 510
+0066 900000      E     MOV     DPTR,#?_strcat?BYTE+03H
+0069 74FF              MOV     A,#0FFH
+006B F0                MOVX    @DPTR,A
+006C A3                INC     DPTR
+006D 7400        R     MOV     A,#HIGH ?SC_23
+006F F0                MOVX    @DPTR,A
+0070 A3                INC     DPTR
+0071 7400        R     MOV     A,#LOW ?SC_23
+0073 F0                MOVX    @DPTR,A
+0074 900000      R     MOV     DPTR,#info_string
+0077 E0                MOVX    A,@DPTR
+0078 FB                MOV     R3,A
+0079 A3                INC     DPTR
+007A E0                MOVX    A,@DPTR
+C51 COMPILER V9.51   COMMAND_PROCESSING                                                    09/22/2016 17:24:10 PAGE 27  
+
+007B FA                MOV     R2,A
+007C A3                INC     DPTR
+007D E0                MOVX    A,@DPTR
+007E F9                MOV     R1,A
+007F 120000      E     LCALL   _strcat
+                                           ; SOURCE LINE # 511
+0082 900000      E     MOV     DPTR,#?_strcat?BYTE+03H
+0085 74FF              MOV     A,#0FFH
+0087 F0                MOVX    @DPTR,A
+0088 A3                INC     DPTR
+0089 7400        R     MOV     A,#HIGH ?SC_39
+008B F0                MOVX    @DPTR,A
+008C A3                INC     DPTR
+008D 7400        R     MOV     A,#LOW ?SC_39
+008F F0                MOVX    @DPTR,A
+0090 900000      R     MOV     DPTR,#info_string
+0093 E0                MOVX    A,@DPTR
+0094 FB                MOV     R3,A
+0095 A3                INC     DPTR
+0096 E0                MOVX    A,@DPTR
+0097 FA                MOV     R2,A
+0098 A3                INC     DPTR
+0099 E0                MOVX    A,@DPTR
+009A F9                MOV     R1,A
+009B 120000      E     LCALL   _strcat
+                                           ; SOURCE LINE # 513
+009E 900000      E     MOV     DPTR,#?_strcat?BYTE+03H
+00A1 74FF              MOV     A,#0FFH
+00A3 F0                MOVX    @DPTR,A
+00A4 A3                INC     DPTR
+00A5 7400        R     MOV     A,#HIGH ?SC_44
+00A7 F0                MOVX    @DPTR,A
+00A8 A3                INC     DPTR
+00A9 7400        R     MOV     A,#LOW ?SC_44
+00AB F0                MOVX    @DPTR,A
+00AC 900000      R     MOV     DPTR,#info_string
+00AF E0                MOVX    A,@DPTR
+00B0 FB                MOV     R3,A
+00B1 A3                INC     DPTR
+00B2 E0                MOVX    A,@DPTR
+00B3 FA                MOV     R2,A
+00B4 A3                INC     DPTR
+00B5 E0                MOVX    A,@DPTR
+00B6 F9                MOV     R1,A
+00B7 120000      E     LCALL   _strcat
+                                           ; SOURCE LINE # 514
+00BA 900000      E     MOV     DPTR,#?_sprintf?BYTE+03H
+00BD 74FF              MOV     A,#0FFH
+00BF F0                MOVX    @DPTR,A
+00C0 A3                INC     DPTR
+00C1 7400        R     MOV     A,#HIGH ?SC_58
+00C3 F0                MOVX    @DPTR,A
+00C4 A3                INC     DPTR
+00C5 7400        R     MOV     A,#LOW ?SC_58
+00C7 F0                MOVX    @DPTR,A
+00C8 900000      E     MOV     DPTR,#c_mem+01H
+00CB E0                MOVX    A,@DPTR
+00CC FF                MOV     R7,A
+00CD 900000      E     MOV     DPTR,#?_sprintf?BYTE+06H
+00D0 E4                CLR     A
+00D1 F0                MOVX    @DPTR,A
+00D2 A3                INC     DPTR
+C51 COMPILER V9.51   COMMAND_PROCESSING                                                    09/22/2016 17:24:10 PAGE 28  
+
+00D3 EF                MOV     A,R7
+00D4 F0                MOVX    @DPTR,A
+00D5 7B01              MOV     R3,#01H
+00D7 7A00        R     MOV     R2,#HIGH str
+00D9 7900        R     MOV     R1,#LOW str
+00DB 120000      E     LCALL   _sprintf
+                                           ; SOURCE LINE # 515
+00DE 900000      E     MOV     DPTR,#?_strcat?BYTE+03H
+00E1 7401              MOV     A,#01H
+00E3 F0                MOVX    @DPTR,A
+00E4 A3                INC     DPTR
+00E5 7400        R     MOV     A,#HIGH str
+00E7 F0                MOVX    @DPTR,A
+00E8 A3                INC     DPTR
+00E9 7400        R     MOV     A,#LOW str
+00EB F0                MOVX    @DPTR,A
+00EC 900000      R     MOV     DPTR,#info_string
+00EF E0                MOVX    A,@DPTR
+00F0 FB                MOV     R3,A
+00F1 A3                INC     DPTR
+00F2 E0                MOVX    A,@DPTR
+00F3 FA                MOV     R2,A
+00F4 A3                INC     DPTR
+00F5 E0                MOVX    A,@DPTR
+00F6 F9                MOV     R1,A
+00F7 120000      E     LCALL   _strcat
+                                           ; SOURCE LINE # 527
+00FA 900000      E     MOV     DPTR,#?_strcat?BYTE+03H
+00FD 74FF              MOV     A,#0FFH
+00FF F0                MOVX    @DPTR,A
+0100 A3                INC     DPTR
+0101 7400        R     MOV     A,#HIGH ?SC_67
+0103 F0                MOVX    @DPTR,A
+0104 A3                INC     DPTR
+0105 7400        R     MOV     A,#LOW ?SC_67
+0107 F0                MOVX    @DPTR,A
+0108 900000      R     MOV     DPTR,#info_string
+010B E0                MOVX    A,@DPTR
+010C FB                MOV     R3,A
+010D A3                INC     DPTR
+010E E0                MOVX    A,@DPTR
+010F FA                MOV     R2,A
+0110 A3                INC     DPTR
+0111 E0                MOVX    A,@DPTR
+0112 F9                MOV     R1,A
+0113 120000      E     LCALL   _strcat
+                                           ; SOURCE LINE # 528
+0116 900000      E     MOV     DPTR,#?_sprintf?BYTE+03H
+0119 74FF              MOV     A,#0FFH
+011B F0                MOVX    @DPTR,A
+011C A3                INC     DPTR
+011D 7400        R     MOV     A,#HIGH ?SC_83
+011F F0                MOVX    @DPTR,A
+0120 A3                INC     DPTR
+0121 7400        R     MOV     A,#LOW ?SC_83
+0123 F0                MOVX    @DPTR,A
+0124 900000      E     MOV     DPTR,#N_IMU_Connected
+0127 E0                MOVX    A,@DPTR
+0128 FF                MOV     R7,A
+0129 900000      E     MOV     DPTR,#?_sprintf?BYTE+06H
+012C E4                CLR     A
+012D F0                MOVX    @DPTR,A
+C51 COMPILER V9.51   COMMAND_PROCESSING                                                    09/22/2016 17:24:10 PAGE 29  
+
+012E A3                INC     DPTR
+012F EF                MOV     A,R7
+0130 F0                MOVX    @DPTR,A
+0131 7B01              MOV     R3,#01H
+0133 7A00        R     MOV     R2,#HIGH str
+0135 7900        R     MOV     R1,#LOW str
+0137 120000      E     LCALL   _sprintf
+                                           ; SOURCE LINE # 529
+013A 900000      E     MOV     DPTR,#?_strcat?BYTE+03H
+013D 7401              MOV     A,#01H
+013F F0                MOVX    @DPTR,A
+0140 A3                INC     DPTR
+0141 7400        R     MOV     A,#HIGH str
+0143 F0                MOVX    @DPTR,A
+0144 A3                INC     DPTR
+0145 7400        R     MOV     A,#LOW str
+0147 F0                MOVX    @DPTR,A
+0148 900000      R     MOV     DPTR,#info_string
+014B E0                MOVX    A,@DPTR
+014C FB                MOV     R3,A
+014D A3                INC     DPTR
+014E E0                MOVX    A,@DPTR
+014F FA                MOV     R2,A
+0150 A3                INC     DPTR
+0151 E0                MOVX    A,@DPTR
+0152 F9                MOV     R1,A
+0153 120000      E     LCALL   _strcat
+                                           ; SOURCE LINE # 531
+0156 E4                CLR     A
+0157 900000      R     MOV     DPTR,#i
+015A F0                MOVX    @DPTR,A
+015B A3                INC     DPTR
+015C F0                MOVX    @DPTR,A
+015D         ?C0089:
+015D 900000      E     MOV     DPTR,#N_IMU_Connected
+0160 E0                MOVX    A,@DPTR
+0161 FF                MOV     R7,A
+0162 C3                CLR     C
+0163 900000      R     MOV     DPTR,#i+01H
+0166 E0                MOVX    A,@DPTR
+0167 9F                SUBB    A,R7
+0168 7480              MOV     A,#080H
+016A F8                MOV     R0,A
+016B 900000      R     MOV     DPTR,#i
+016E E0                MOVX    A,@DPTR
+016F 6480              XRL     A,#080H
+0171 98                SUBB    A,R0
+0172 4003              JC      $ + 5H
+0174 020000      R     LJMP    ?C0090
+                                           ; SOURCE LINE # 532
+0177 900000      E     MOV     DPTR,#?_sprintf?BYTE+03H
+017A 74FF              MOV     A,#0FFH
+017C F0                MOVX    @DPTR,A
+017D A3                INC     DPTR
+017E 7400        R     MOV     A,#HIGH ?SC_96
+0180 F0                MOVX    @DPTR,A
+0181 A3                INC     DPTR
+0182 7400        R     MOV     A,#LOW ?SC_96
+0184 F0                MOVX    @DPTR,A
+0185 900000      R     MOV     DPTR,#i
+0188 E0                MOVX    A,@DPTR
+0189 FE                MOV     R6,A
+C51 COMPILER V9.51   COMMAND_PROCESSING                                                    09/22/2016 17:24:10 PAGE 30  
+
+018A A3                INC     DPTR
+018B E0                MOVX    A,@DPTR
+018C FF                MOV     R7,A
+018D 900000      E     MOV     DPTR,#?_sprintf?BYTE+06H
+0190 EE                MOV     A,R6
+0191 F0                MOVX    @DPTR,A
+0192 A3                INC     DPTR
+0193 EF                MOV     A,R7
+0194 F0                MOVX    @DPTR,A
+0195 2400        E     ADD     A,#LOW IMU_connected
+0197 F582              MOV     DPL,A
+0199 7400        E     MOV     A,#HIGH IMU_connected
+019B 3E                ADDC    A,R6
+019C F583              MOV     DPH,A
+019E E0                MOVX    A,@DPTR
+019F FF                MOV     R7,A
+01A0 900000      E     MOV     DPTR,#?_sprintf?BYTE+08H
+01A3 E4                CLR     A
+01A4 F0                MOVX    @DPTR,A
+01A5 A3                INC     DPTR
+01A6 EF                MOV     A,R7
+01A7 F0                MOVX    @DPTR,A
+01A8 7B01              MOV     R3,#01H
+01AA 7A00        R     MOV     R2,#HIGH str
+01AC 7900        R     MOV     R1,#LOW str
+01AE 120000      E     LCALL   _sprintf
+                                           ; SOURCE LINE # 533
+01B1 900000      E     MOV     DPTR,#?_strcat?BYTE+03H
+01B4 7401              MOV     A,#01H
+01B6 F0                MOVX    @DPTR,A
+01B7 A3                INC     DPTR
+01B8 7400        R     MOV     A,#HIGH str
+01BA F0                MOVX    @DPTR,A
+01BB A3                INC     DPTR
+01BC 7400        R     MOV     A,#LOW str
+01BE F0                MOVX    @DPTR,A
+01BF 900000      R     MOV     DPTR,#info_string
+01C2 E0                MOVX    A,@DPTR
+01C3 FB                MOV     R3,A
+01C4 A3                INC     DPTR
+01C5 E0                MOVX    A,@DPTR
+01C6 FA                MOV     R2,A
+01C7 A3                INC     DPTR
+01C8 E0                MOVX    A,@DPTR
+01C9 F9                MOV     R1,A
+01CA 120000      E     LCALL   _strcat
+                                           ; SOURCE LINE # 534
+01CD 900000      E     MOV     DPTR,#?_sprintf?BYTE+03H
+01D0 74FF              MOV     A,#0FFH
+01D2 F0                MOVX    @DPTR,A
+01D3 A3                INC     DPTR
+01D4 7400        R     MOV     A,#HIGH ?SC_109
+01D6 F0                MOVX    @DPTR,A
+01D7 A3                INC     DPTR
+01D8 7400        R     MOV     A,#LOW ?SC_109
+01DA F0                MOVX    @DPTR,A
+01DB 900000      R     MOV     DPTR,#i
+01DE E0                MOVX    A,@DPTR
+01DF FE                MOV     R6,A
+01E0 A3                INC     DPTR
+01E1 E0                MOVX    A,@DPTR
+01E2 FF                MOV     R7,A
+C51 COMPILER V9.51   COMMAND_PROCESSING                                                    09/22/2016 17:24:10 PAGE 31  
+
+01E3 2400        E     ADD     A,#LOW IMU_connected
+01E5 F582              MOV     DPL,A
+01E7 7400        E     MOV     A,#HIGH IMU_connected
+01E9 3E                ADDC    A,R6
+01EA F583              MOV     DPH,A
+01EC E0                MOVX    A,@DPTR
+01ED FD                MOV     R5,A
+01EE 75F003            MOV     B,#03H
+01F1 A4                MUL     AB
+01F2 2400        E     ADD     A,#LOW IMU_conf
+01F4 F582              MOV     DPL,A
+01F6 E4                CLR     A
+01F7 3400        E     ADDC    A,#HIGH IMU_conf
+01F9 F583              MOV     DPH,A
+01FB E0                MOVX    A,@DPTR
+01FC FB                MOV     R3,A
+01FD 900000      E     MOV     DPTR,#?_sprintf?BYTE+06H
+0200 E4                CLR     A
+0201 F0                MOVX    @DPTR,A
+0202 A3                INC     DPTR
+0203 EB                MOV     A,R3
+0204 F0                MOVX    @DPTR,A
+0205 ED                MOV     A,R5
+0206 75F003            MOV     B,#03H
+0209 A4                MUL     AB
+020A 2400        E     ADD     A,#LOW IMU_conf+01H
+020C F582              MOV     DPL,A
+020E E4                CLR     A
+020F 3400        E     ADDC    A,#HIGH IMU_conf+01H
+0211 F583              MOV     DPH,A
+0213 E0                MOVX    A,@DPTR
+0214 FD                MOV     R5,A
+0215 900000      E     MOV     DPTR,#?_sprintf?BYTE+08H
+0218 E4                CLR     A
+0219 F0                MOVX    @DPTR,A
+021A A3                INC     DPTR
+021B ED                MOV     A,R5
+021C F0                MOVX    @DPTR,A
+021D 7400        E     MOV     A,#LOW IMU_connected
+021F 2F                ADD     A,R7
+0220 F582              MOV     DPL,A
+0222 7400        E     MOV     A,#HIGH IMU_connected
+0224 3E                ADDC    A,R6
+0225 F583              MOV     DPH,A
+0227 E0                MOVX    A,@DPTR
+0228 75F003            MOV     B,#03H
+022B A4                MUL     AB
+022C 2400        E     ADD     A,#LOW IMU_conf+02H
+022E F582              MOV     DPL,A
+0230 E4                CLR     A
+0231 3400        E     ADDC    A,#HIGH IMU_conf+02H
+0233 F583              MOV     DPH,A
+0235 E0                MOVX    A,@DPTR
+0236 FF                MOV     R7,A
+0237 900000      E     MOV     DPTR,#?_sprintf?BYTE+0AH
+023A E4                CLR     A
+023B F0                MOVX    @DPTR,A
+023C A3                INC     DPTR
+023D EF                MOV     A,R7
+023E F0                MOVX    @DPTR,A
+023F 7B01              MOV     R3,#01H
+0241 7A00        R     MOV     R2,#HIGH str
+C51 COMPILER V9.51   COMMAND_PROCESSING                                                    09/22/2016 17:24:10 PAGE 32  
+
+0243 7900        R     MOV     R1,#LOW str
+0245 120000      E     LCALL   _sprintf
+                                           ; SOURCE LINE # 535
+0248 900000      E     MOV     DPTR,#?_strcat?BYTE+03H
+024B 7401              MOV     A,#01H
+024D F0                MOVX    @DPTR,A
+024E A3                INC     DPTR
+024F 7400        R     MOV     A,#HIGH str
+0251 F0                MOVX    @DPTR,A
+0252 A3                INC     DPTR
+0253 7400        R     MOV     A,#LOW str
+0255 F0                MOVX    @DPTR,A
+0256 900000      R     MOV     DPTR,#info_string
+0259 E0                MOVX    A,@DPTR
+025A FB                MOV     R3,A
+025B A3                INC     DPTR
+025C E0                MOVX    A,@DPTR
+025D FA                MOV     R2,A
+025E A3                INC     DPTR
+025F E0                MOVX    A,@DPTR
+0260 F9                MOV     R1,A
+0261 120000      E     LCALL   _strcat
+                                           ; SOURCE LINE # 546
+0264 900000      E     MOV     DPTR,#?_strcat?BYTE+03H
+0267 74FF              MOV     A,#0FFH
+0269 F0                MOVX    @DPTR,A
+026A A3                INC     DPTR
+026B 7400        R     MOV     A,#HIGH ?SC_1
+026D F0                MOVX    @DPTR,A
+026E A3                INC     DPTR
+026F 7400        R     MOV     A,#LOW ?SC_1
+0271 F0                MOVX    @DPTR,A
+0272 900000      R     MOV     DPTR,#info_string
+0275 E0                MOVX    A,@DPTR
+0276 FB                MOV     R3,A
+0277 A3                INC     DPTR
+0278 E0                MOVX    A,@DPTR
+0279 FA                MOV     R2,A
+027A A3                INC     DPTR
+027B E0                MOVX    A,@DPTR
+027C F9                MOV     R1,A
+027D 120000      E     LCALL   _strcat
+                                           ; SOURCE LINE # 547
+0280 900000      R     MOV     DPTR,#i+01H
+0283 E0                MOVX    A,@DPTR
+0284 04                INC     A
+0285 F0                MOVX    @DPTR,A
+0286 7006              JNZ     ?C0158
+0288 900000      R     MOV     DPTR,#i
+028B E0                MOVX    A,@DPTR
+028C 04                INC     A
+028D F0                MOVX    @DPTR,A
+028E         ?C0158:
+028E 020000      R     LJMP    ?C0089
+0291         ?C0090:
+                                           ; SOURCE LINE # 551
+0291 900000      E     MOV     DPTR,#?_strcat?BYTE+03H
+0294 74FF              MOV     A,#0FFH
+0296 F0                MOVX    @DPTR,A
+0297 A3                INC     DPTR
+0298 7400        R     MOV     A,#HIGH ?SC_1
+029A F0                MOVX    @DPTR,A
+C51 COMPILER V9.51   COMMAND_PROCESSING                                                    09/22/2016 17:24:10 PAGE 33  
+
+029B A3                INC     DPTR
+029C 7400        R     MOV     A,#LOW ?SC_1
+029E F0                MOVX    @DPTR,A
+029F 900000      R     MOV     DPTR,#info_string
+02A2 E0                MOVX    A,@DPTR
+02A3 FB                MOV     R3,A
+02A4 A3                INC     DPTR
+02A5 E0                MOVX    A,@DPTR
+02A6 FA                MOV     R2,A
+02A7 A3                INC     DPTR
+02A8 E0                MOVX    A,@DPTR
+02A9 F9                MOV     R1,A
+02AA 120000      E     LCALL   _strcat
+                                           ; SOURCE LINE # 553
+                                           ; SOURCE LINE # 554
+02AD         ?C0092:
+02AD 22                RET     
+             ; FUNCTION _infoPrepare (END)
+
+             ; FUNCTION _commWrite (BEGIN)
+                                           ; SOURCE LINE # 560
+0000 900000      R     MOV     DPTR,#packet_data
+0003 EB                MOV     A,R3
+0004 F0                MOVX    @DPTR,A
+0005 A3                INC     DPTR
+0006 EA                MOV     A,R2
+0007 F0                MOVX    @DPTR,A
+0008 A3                INC     DPTR
+0009 E9                MOV     A,R1
+000A F0                MOVX    @DPTR,A
+000B A3                INC     DPTR
+000C ED                MOV     A,R5
+000D F0                MOVX    @DPTR,A
+                                           ; SOURCE LINE # 561
+                                           ; SOURCE LINE # 565
+000E 7F3A              MOV     R7,#03AH
+0010 120000      E     LCALL   _UART_RS485_PutChar
+                                           ; SOURCE LINE # 566
+0013 7F3A              MOV     R7,#03AH
+0015 120000      E     LCALL   _UART_RS485_PutChar
+                                           ; SOURCE LINE # 569
+0018 900000      E     MOV     DPTR,#g_mem+01H
+001B E0                MOVX    A,@DPTR
+001C FF                MOV     R7,A
+001D 120000      E     LCALL   _UART_RS485_PutChar
+                                           ; SOURCE LINE # 572
+0020 900000      R     MOV     DPTR,#packet_lenght
+0023 E0                MOVX    A,@DPTR
+0024 FF                MOV     R7,A
+0025 120000      E     LCALL   _UART_RS485_PutChar
+                                           ; SOURCE LINE # 575
+0028 E4                CLR     A
+0029 F500        R     MOV     index,A
+002B F500        R     MOV     index+01H,A
+002D         ?C0093:
+002D 900000      R     MOV     DPTR,#packet_lenght
+0030 E0                MOVX    A,@DPTR
+0031 FF                MOV     R7,A
+0032 C3                CLR     C
+0033 E500        R     MOV     A,index+01H
+0035 9F                SUBB    A,R7
+0036 E500        R     MOV     A,index
+C51 COMPILER V9.51   COMMAND_PROCESSING                                                    09/22/2016 17:24:10 PAGE 34  
+
+0038 9400              SUBB    A,#00H
+003A 5022              JNC     ?C0094
+                                           ; SOURCE LINE # 576
+003C 900000      R     MOV     DPTR,#packet_data
+003F E0                MOVX    A,@DPTR
+0040 FB                MOV     R3,A
+0041 A3                INC     DPTR
+0042 E0                MOVX    A,@DPTR
+0043 FA                MOV     R2,A
+0044 A3                INC     DPTR
+0045 E0                MOVX    A,@DPTR
+0046 2500        R     ADD     A,index+01H
+0048 F9                MOV     R1,A
+0049 EA                MOV     A,R2
+004A 3500        R     ADDC    A,index
+004C FA                MOV     R2,A
+004D 120000      E     LCALL   ?C?CLDPTR
+0050 FF                MOV     R7,A
+0051 120000      E     LCALL   _UART_RS485_PutChar
+0054 0500        R     INC     index+01H
+0056 E500        R     MOV     A,index+01H
+0058 7002              JNZ     ?C0159
+005A 0500        R     INC     index
+005C         ?C0159:
+005C 80CF              SJMP    ?C0093
+005E         ?C0094:
+                                           ; SOURCE LINE # 578
+005E E4                CLR     A
+005F F500        R     MOV     index,A
+0061 F500        R     MOV     index+01H,A
+0063         ?C0096:
+                                           ; SOURCE LINE # 580
+0063 120000      E     LCALL   UART_RS485_ReadTxStatus
+0066 EF                MOV     A,R7
+0067 20E013            JB      ACC.0,?C0097
+006A 0500        R     INC     index+01H
+006C E500        R     MOV     A,index+01H
+006E AE00        R     MOV     R6,index
+0070 7002              JNZ     ?C0160
+0072 0500        R     INC     index
+0074         ?C0160:
+0074 14                DEC     A
+0075 D3                SETB    C
+0076 94E8              SUBB    A,#0E8H
+0078 EE                MOV     A,R6
+0079 9403              SUBB    A,#03H
+007B 40E6              JC      ?C0096
+007D         ?C0097:
+                                           ; SOURCE LINE # 582
+007D 7F01              MOV     R7,#01H
+007F 120000      E     LCALL   _RS485_CTS_Write
+                                           ; SOURCE LINE # 583
+0082 E4                CLR     A
+0083 FF                MOV     R7,A
+0084 120000      E     LCALL   _RS485_CTS_Write
+                                           ; SOURCE LINE # 584
+0087 22                RET     
+             ; FUNCTION _commWrite (END)
+
+             ; FUNCTION _LCRChecksum (BEGIN)
+                                           ; SOURCE LINE # 593
+0000 900000      R     MOV     DPTR,#data_array
+C51 COMPILER V9.51   COMMAND_PROCESSING                                                    09/22/2016 17:24:10 PAGE 35  
+
+0003 EB                MOV     A,R3
+0004 F0                MOVX    @DPTR,A
+0005 A3                INC     DPTR
+0006 EA                MOV     A,R2
+0007 F0                MOVX    @DPTR,A
+0008 A3                INC     DPTR
+0009 E9                MOV     A,R1
+000A F0                MOVX    @DPTR,A
+;---- Variable 'data_length' assigned to Register 'R5' ----
+                                           ; SOURCE LINE # 596
+000B E4                CLR     A
+000C F500        R     MOV     checksum,A
+                                           ; SOURCE LINE # 598
+000E F500        R     MOV     i,A
+0010         ?C0099:
+0010 E500        R     MOV     A,i
+0012 C3                CLR     C
+0013 9D                SUBB    A,R5
+0014 5019              JNC     ?C0100
+                                           ; SOURCE LINE # 599
+0016 900000      R     MOV     DPTR,#data_array
+0019 E0                MOVX    A,@DPTR
+001A FB                MOV     R3,A
+001B A3                INC     DPTR
+001C E0                MOVX    A,@DPTR
+001D FA                MOV     R2,A
+001E A3                INC     DPTR
+001F E0                MOVX    A,@DPTR
+0020 2500        R     ADD     A,i
+0022 F9                MOV     R1,A
+0023 E4                CLR     A
+0024 3A                ADDC    A,R2
+0025 FA                MOV     R2,A
+0026 120000      E     LCALL   ?C?CLDPTR
+0029 6200        R     XRL     checksum,A
+002B 0500        R     INC     i
+002D 80E1              SJMP    ?C0099
+002F         ?C0100:
+                                           ; SOURCE LINE # 601
+002F AF00        R     MOV     R7,checksum
+                                           ; SOURCE LINE # 602
+0031         ?C0102:
+0031 22                RET     
+             ; FUNCTION _LCRChecksum (END)
+
+             ; FUNCTION _sendAcknowledgment (BEGIN)
+                                           ; SOURCE LINE # 608
+;---- Variable 'value' assigned to Register 'R7' ----
+                                           ; SOURCE LINE # 609
+;---- Variable 'packet_lenght' assigned to Register 'R4/R5' ----
+0000 7D02              MOV     R5,#02H
+0002 7C00              MOV     R4,#00H
+                                           ; SOURCE LINE # 612
+0004 900000      R     MOV     DPTR,#packet_data
+0007 EF                MOV     A,R7
+0008 F0                MOVX    @DPTR,A
+                                           ; SOURCE LINE # 613
+0009 A3                INC     DPTR
+000A F0                MOVX    @DPTR,A
+                                           ; SOURCE LINE # 615
+000B 7B01              MOV     R3,#01H
+000D 7A00        R     MOV     R2,#HIGH packet_data
+C51 COMPILER V9.51   COMMAND_PROCESSING                                                    09/22/2016 17:24:10 PAGE 36  
+
+000F 7900        R     MOV     R1,#LOW packet_data
+0011 120000      R     LCALL   _commWrite
+                                           ; SOURCE LINE # 616
+0014 22                RET     
+             ; FUNCTION _sendAcknowledgment (END)
+
+             ; FUNCTION _memStore (BEGIN)
+                                           ; SOURCE LINE # 627
+0000 900000      R     MOV     DPTR,#displacement
+0003 EE                MOV     A,R6
+0004 F0                MOVX    @DPTR,A
+0005 A3                INC     DPTR
+0006 EF                MOV     A,R7
+0007 F0                MOVX    @DPTR,A
+                                           ; SOURCE LINE # 628
+                                           ; SOURCE LINE # 632
+0008 900000      R     MOV     DPTR,#ret_val
+000B 7401              MOV     A,#01H
+000D F0                MOVX    @DPTR,A
+                                           ; SOURCE LINE # 635
+000E 120000      E     LCALL   ISR_RS485_RX_Disable
+                                           ; SOURCE LINE # 639
+0011 120000      E     LCALL   CySetTemp
+                                           ; SOURCE LINE # 641
+0014 7800        E     MOV     R0,#LOW c_mem
+0016 7C00        E     MOV     R4,#HIGH c_mem
+0018 7D01              MOV     R5,#01H
+001A 7B01              MOV     R3,#01H
+001C 7A00        E     MOV     R2,#HIGH g_mem
+001E 7900        E     MOV     R1,#LOW g_mem
+0020 7E00              MOV     R6,#00H
+0022 7F04              MOV     R7,#04H
+0024 120000      E     LCALL   ?C?COPYAMD
+                                           ; SOURCE LINE # 643
+0027 900000      R     MOV     DPTR,#pages
+002A E4                CLR     A
+002B F0                MOVX    @DPTR,A
+002C A3                INC     DPTR
+002D 04                INC     A
+002E F0                MOVX    @DPTR,A
+                                           ; SOURCE LINE # 645
+002F E4                CLR     A
+0030 900000      R     MOV     DPTR,#i
+0033 F0                MOVX    @DPTR,A
+0034 A3                INC     DPTR
+0035 F0                MOVX    @DPTR,A
+0036         ?C0104:
+0036 900000      R     MOV     DPTR,#pages
+0039 E0                MOVX    A,@DPTR
+003A FE                MOV     R6,A
+003B A3                INC     DPTR
+003C E0                MOVX    A,@DPTR
+003D FF                MOV     R7,A
+003E 900000      R     MOV     DPTR,#i
+0041 E0                MOVX    A,@DPTR
+0042 FC                MOV     R4,A
+0043 A3                INC     DPTR
+0044 E0                MOVX    A,@DPTR
+0045 FD                MOV     R5,A
+0046 C3                CLR     C
+0047 9F                SUBB    A,R7
+0048 EE                MOV     A,R6
+C51 COMPILER V9.51   COMMAND_PROCESSING                                                    09/22/2016 17:24:10 PAGE 37  
+
+0049 6480              XRL     A,#080H
+004B F8                MOV     R0,A
+004C EC                MOV     A,R4
+004D 6480              XRL     A,#080H
+004F 98                SUBB    A,R0
+0050 503F              JNC     ?C0105
+                                           ; SOURCE LINE # 646
+0052 ED                MOV     A,R5
+0053 C4                SWAP    A
+0054 F8                MOV     R0,A
+0055 540F              ANL     A,#0FH
+0057 C8                XCH     A,R0
+0058 68                XRL     A,R0
+0059 FF                MOV     R7,A
+005A EC                MOV     A,R4
+005B C4                SWAP    A
+005C 54F0              ANL     A,#0F0H
+005E 48                ORL     A,R0
+005F FE                MOV     R6,A
+0060 7B01              MOV     R3,#01H
+0062 7400        E     MOV     A,#LOW g_mem
+0064 2F                ADD     A,R7
+0065 F9                MOV     R1,A
+0066 7400        E     MOV     A,#HIGH g_mem
+0068 3E                ADDC    A,R6
+0069 FA                MOV     R2,A
+006A 900000      R     MOV     DPTR,#displacement
+006D E0                MOVX    A,@DPTR
+006E A3                INC     DPTR
+006F E0                MOVX    A,@DPTR
+0070 FF                MOV     R7,A
+0071 ED                MOV     A,R5
+0072 2F                ADD     A,R7
+0073 FD                MOV     R5,A
+0074 120000      E     LCALL   _EEPROM_Write
+;---- Variable 'writeStatus' assigned to Register 'R7' ----
+                                           ; SOURCE LINE # 647
+0077 EF                MOV     A,R7
+0078 6007              JZ      ?C0106
+                                           ; SOURCE LINE # 648
+007A E4                CLR     A
+007B 900000      R     MOV     DPTR,#ret_val
+007E F0                MOVX    @DPTR,A
+                                           ; SOURCE LINE # 649
+007F 8010              SJMP    ?C0105
+                                           ; SOURCE LINE # 650
+                                           ; SOURCE LINE # 651
+0081         ?C0106:
+0081 900000      R     MOV     DPTR,#i+01H
+0084 E0                MOVX    A,@DPTR
+0085 04                INC     A
+0086 F0                MOVX    @DPTR,A
+0087 7006              JNZ     ?C0161
+0089 900000      R     MOV     DPTR,#i
+008C E0                MOVX    A,@DPTR
+008D 04                INC     A
+008E F0                MOVX    @DPTR,A
+008F         ?C0161:
+008F 80A5              SJMP    ?C0104
+0091         ?C0105:
+                                           ; SOURCE LINE # 653
+0091 7800        E     MOV     R0,#LOW g_mem
+C51 COMPILER V9.51   COMMAND_PROCESSING                                                    09/22/2016 17:24:10 PAGE 38  
+
+0093 7C00        E     MOV     R4,#HIGH g_mem
+0095 7D01              MOV     R5,#01H
+0097 7B01              MOV     R3,#01H
+0099 7A00        E     MOV     R2,#HIGH c_mem
+009B 7900        E     MOV     R1,#LOW c_mem
+009D 7E00              MOV     R6,#00H
+009F 7F04              MOV     R7,#04H
+00A1 120000      E     LCALL   ?C?COPYAMD
+                                           ; SOURCE LINE # 656
+00A4 120000      E     LCALL   ISR_RS485_RX_Enable
+                                           ; SOURCE LINE # 658
+00A7 900000      R     MOV     DPTR,#ret_val
+00AA E0                MOVX    A,@DPTR
+00AB FF                MOV     R7,A
+                                           ; SOURCE LINE # 659
+00AC         ?C0108:
+00AC 22                RET     
+             ; FUNCTION _memStore (END)
+
+             ; FUNCTION memRecall (BEGIN)
+                                           ; SOURCE LINE # 670
+                                           ; SOURCE LINE # 671
+                                           ; SOURCE LINE # 674
+;---- Variable 'i' assigned to Register 'R6/R7' ----
+0000 E4                CLR     A
+0001 FF                MOV     R7,A
+0002 FE                MOV     R6,A
+0003         ?C0109:
+0003 C3                CLR     C
+0004 EF                MOV     A,R7
+0005 9404              SUBB    A,#04H
+0007 EE                MOV     A,R6
+0008 9400              SUBB    A,#00H
+000A 5023              JNC     ?C0110
+                                           ; SOURCE LINE # 675
+000C 900000      R     MOV     DPTR,#EEPROM_ADDR
+000F E0                MOVX    A,@DPTR
+0010 FC                MOV     R4,A
+0011 A3                INC     DPTR
+0012 E0                MOVX    A,@DPTR
+0013 2F                ADD     A,R7
+0014 F582              MOV     DPL,A
+0016 EC                MOV     A,R4
+0017 3E                ADDC    A,R6
+0018 F583              MOV     DPH,A
+001A E0                MOVX    A,@DPTR
+001B FD                MOV     R5,A
+001C 7400        E     MOV     A,#LOW g_mem
+001E 2F                ADD     A,R7
+001F F582              MOV     DPL,A
+0021 7400        E     MOV     A,#HIGH g_mem
+0023 3E                ADDC    A,R6
+0024 F583              MOV     DPH,A
+0026 ED                MOV     A,R5
+0027 F0                MOVX    @DPTR,A
+                                           ; SOURCE LINE # 676
+0028 0F                INC     R7
+0029 EF                MOV     A,R7
+002A 7001              JNZ     ?C0162
+002C 0E                INC     R6
+002D         ?C0162:
+002D 80D4              SJMP    ?C0109
+C51 COMPILER V9.51   COMMAND_PROCESSING                                                    09/22/2016 17:24:10 PAGE 39  
+
+002F         ?C0110:
+                                           ; SOURCE LINE # 679
+002F 900000      E     MOV     DPTR,#g_mem
+0032 E0                MOVX    A,@DPTR
+0033 7004              JNZ     ?C0112
+                                           ; SOURCE LINE # 680
+0035 120000      R     LCALL   memRestore
+                                           ; SOURCE LINE # 681
+0038 22                RET     
+0039         ?C0112:
+                                           ; SOURCE LINE # 682
+0039 7800        E     MOV     R0,#LOW c_mem
+003B 7C00        E     MOV     R4,#HIGH c_mem
+003D 7D01              MOV     R5,#01H
+003F 7B01              MOV     R3,#01H
+0041 7A00        E     MOV     R2,#HIGH g_mem
+0043 7900        E     MOV     R1,#LOW g_mem
+0045 7E00              MOV     R6,#00H
+0047 7F04              MOV     R7,#04H
+0049 120000      E     LCALL   ?C?COPYAMD
+                                           ; SOURCE LINE # 683
+                                           ; SOURCE LINE # 684
+004C         ?C0114:
+004C 22                RET     
+             ; FUNCTION memRecall (END)
+
+             ; FUNCTION memRestore (BEGIN)
+                                           ; SOURCE LINE # 695
+                                           ; SOURCE LINE # 698
+;---- Variable 'i' assigned to Register 'R6/R7' ----
+0000 E4                CLR     A
+0001 FF                MOV     R7,A
+0002 FE                MOV     R6,A
+0003         ?C0115:
+0003 C3                CLR     C
+0004 EF                MOV     A,R7
+0005 9404              SUBB    A,#04H
+0007 EE                MOV     A,R6
+0008 9400              SUBB    A,#00H
+000A 502A              JNC     ?C0116
+                                           ; SOURCE LINE # 699
+000C EF                MOV     A,R7
+000D 2480              ADD     A,#080H
+000F FD                MOV     R5,A
+0010 E4                CLR     A
+0011 3E                ADDC    A,R6
+0012 FC                MOV     R4,A
+0013 900000      R     MOV     DPTR,#EEPROM_ADDR
+0016 E0                MOVX    A,@DPTR
+0017 FA                MOV     R2,A
+0018 A3                INC     DPTR
+0019 E0                MOVX    A,@DPTR
+001A 2D                ADD     A,R5
+001B F582              MOV     DPL,A
+001D EA                MOV     A,R2
+001E 3C                ADDC    A,R4
+001F F583              MOV     DPH,A
+0021 E0                MOVX    A,@DPTR
+0022 FD                MOV     R5,A
+0023 7400        E     MOV     A,#LOW g_mem
+0025 2F                ADD     A,R7
+0026 F582              MOV     DPL,A
+C51 COMPILER V9.51   COMMAND_PROCESSING                                                    09/22/2016 17:24:10 PAGE 40  
+
+0028 7400        E     MOV     A,#HIGH g_mem
+002A 3E                ADDC    A,R6
+002B F583              MOV     DPH,A
+002D ED                MOV     A,R5
+002E F0                MOVX    @DPTR,A
+                                           ; SOURCE LINE # 700
+002F 0F                INC     R7
+0030 EF                MOV     A,R7
+0031 7001              JNZ     ?C0163
+0033 0E                INC     R6
+0034         ?C0163:
+0034 80CD              SJMP    ?C0115
+0036         ?C0116:
+                                           ; SOURCE LINE # 703
+0036 900000      E     MOV     DPTR,#g_mem
+0039 E0                MOVX    A,@DPTR
+003A 7004              JNZ     ?C0118
+                                           ; SOURCE LINE # 704
+003C 120000      R     LCALL   memInit
+003F 22                RET     
+                                           ; SOURCE LINE # 705
+0040         ?C0118:
+                                           ; SOURCE LINE # 706
+0040 E4                CLR     A
+0041 FF                MOV     R7,A
+0042 FE                MOV     R6,A
+0043 120000      R     LCALL   _memStore
+                                           ; SOURCE LINE # 707
+                                           ; SOURCE LINE # 708
+0046         ?C0119:
+0046 22                RET     
+             ; FUNCTION memRestore (END)
+
+             ; FUNCTION memInit (BEGIN)
+                                           ; SOURCE LINE # 718
+                                           ; SOURCE LINE # 719
+                                           ; SOURCE LINE # 723
+0000 900000      E     MOV     DPTR,#g_mem+01H
+0003 7401              MOV     A,#01H
+0005 F0                MOVX    @DPTR,A
+                                           ; SOURCE LINE # 727
+0006 900000      E     MOV     DPTR,#g_mem
+0009 F0                MOVX    @DPTR,A
+                                           ; SOURCE LINE # 730
+000A E4                CLR     A
+000B FF                MOV     R7,A
+000C FE                MOV     R6,A
+000D 120000      R     LCALL   _memStore
+0010 EF                MOV     A,R7
+0011 600E              JZ      ?C0121
+0013 7F08              MOV     R7,#08H
+0015 7E00              MOV     R6,#00H
+0017 120000      R     LCALL   _memStore
+001A EF                MOV     A,R7
+001B 6004              JZ      ?C0121
+001D 7F01              MOV     R7,#01H
+001F 8002              SJMP    ?C0122
+0021         ?C0121:
+0021 7F00              MOV     R7,#00H
+0023         ?C0122:
+                                           ; SOURCE LINE # 731
+0023         ?C0123:
+C51 COMPILER V9.51   COMMAND_PROCESSING                                                    09/22/2016 17:24:10 PAGE 41  
+
+0023 22                RET     
+             ; FUNCTION memInit (END)
+
+             ; FUNCTION cmd_get_measurements (BEGIN)
+                                           ; SOURCE LINE # 740
+                                           ; SOURCE LINE # 742
+0000 22                RET     
+             ; FUNCTION cmd_get_measurements (END)
+
+             ; FUNCTION cmd_set_inputs (BEGIN)
+                                           ; SOURCE LINE # 744
+                                           ; SOURCE LINE # 746
+0000 22                RET     
+             ; FUNCTION cmd_set_inputs (END)
+
+             ; FUNCTION cmd_activate (BEGIN)
+                                           ; SOURCE LINE # 748
+                                           ; SOURCE LINE # 750
+0000 22                RET     
+             ; FUNCTION cmd_activate (END)
+
+             ; FUNCTION cmd_get_activate (BEGIN)
+                                           ; SOURCE LINE # 752
+                                           ; SOURCE LINE # 754
+0000 22                RET     
+             ; FUNCTION cmd_get_activate (END)
+
+             ; FUNCTION cmd_get_curr_and_meas (BEGIN)
+                                           ; SOURCE LINE # 756
+                                           ; SOURCE LINE # 758
+0000 22                RET     
+             ; FUNCTION cmd_get_curr_and_meas (END)
+
+             ; FUNCTION cmd_get_currents (BEGIN)
+                                           ; SOURCE LINE # 760
+                                           ; SOURCE LINE # 762
+0000 22                RET     
+             ; FUNCTION cmd_get_currents (END)
+
+             ; FUNCTION cmd_set_baudrate (BEGIN)
+                                           ; SOURCE LINE # 764
+                                           ; SOURCE LINE # 767
+0000 900000      E     MOV     DPTR,#g_rx+01H
+0003 E0                MOVX    A,@DPTR
+0004 900000      E     MOV     DPTR,#c_mem+02H
+0007 F0                MOVX    @DPTR,A
+                                           ; SOURCE LINE # 769
+0008 24F3              ADD     A,#0F3H
+000A 700A              JNZ     ?C0132
+                                           ; SOURCE LINE # 770
+000C         ?C0131:
+                                           ; SOURCE LINE # 771
+000C 7D01              MOV     R5,#01H
+000E 7F0C              MOV     R7,#0CH
+0010 7E00              MOV     R6,#00H
+0012 120000      E     LCALL   _CLOCK_UART_SetDividerRegister
+                                           ; SOURCE LINE # 772
+0015 22                RET     
+                                           ; SOURCE LINE # 773
+0016         ?C0132:
+                                           ; SOURCE LINE # 774
+0016 7D01              MOV     R5,#01H
+C51 COMPILER V9.51   COMMAND_PROCESSING                                                    09/22/2016 17:24:10 PAGE 42  
+
+0018 7F02              MOV     R7,#02H
+001A 7E00              MOV     R6,#00H
+001C 120000      E     LCALL   _CLOCK_UART_SetDividerRegister
+                                           ; SOURCE LINE # 775
+                                           ; SOURCE LINE # 776
+001F         ?C0133:
+001F 22                RET     
+             ; FUNCTION cmd_set_baudrate (END)
+
+             ; FUNCTION cmd_ping (BEGIN)
+                                           ; SOURCE LINE # 778
+                                           ; SOURCE LINE # 783
+0000 E4                CLR     A
+0001 900000      R     MOV     DPTR,#packet_data
+0004 F0                MOVX    @DPTR,A
+                                           ; SOURCE LINE # 786
+0005 A3                INC     DPTR
+0006 F0                MOVX    @DPTR,A
+                                           ; SOURCE LINE # 789
+0007 7B01              MOV     R3,#01H
+0009 7A00        R     MOV     R2,#HIGH packet_data
+000B 7900        R     MOV     R1,#LOW packet_data
+000D 7D02              MOV     R5,#02H
+000F 120000      R     LCALL   _commWrite
+                                           ; SOURCE LINE # 790
+0012 22                RET     
+             ; FUNCTION cmd_ping (END)
+
+             ; FUNCTION cmd_set_watchdog (BEGIN)
+                                           ; SOURCE LINE # 792
+                                           ; SOURCE LINE # 794
+0000 900000      E     MOV     DPTR,#g_rx+01H
+0003 E0                MOVX    A,@DPTR
+0004 D3                SETB    C
+0005 9400              SUBB    A,#00H
+0007 500B              JNC     ?C0135
+                                           ; SOURCE LINE # 796
+0009 7F01              MOV     R7,#01H
+000B 120000      E     LCALL   _WATCHDOG_ENABLER_Write
+                                           ; SOURCE LINE # 797
+000E E4                CLR     A
+000F 900000      E     MOV     DPTR,#g_mem+03H
+0012 F0                MOVX    @DPTR,A
+                                           ; SOURCE LINE # 798
+0013 22                RET     
+0014         ?C0135:
+                                           ; SOURCE LINE # 799
+                                           ; SOURCE LINE # 801
+0014 900000      E     MOV     DPTR,#g_rx+01H
+0017 E0                MOVX    A,@DPTR
+0018 D3                SETB    C
+0019 94FA              SUBB    A,#0FAH
+001B 4003              JC      ?C0137
+                                           ; SOURCE LINE # 802
+001D 74FA              MOV     A,#0FAH
+001F F0                MOVX    @DPTR,A
+0020         ?C0137:
+                                           ; SOURCE LINE # 807
+0020 900000      E     MOV     DPTR,#g_rx+01H
+0023 E0                MOVX    A,@DPTR
+0024 FF                MOV     R7,A
+0025 7E00              MOV     R6,#00H
+C51 COMPILER V9.51   COMMAND_PROCESSING                                                    09/22/2016 17:24:10 PAGE 43  
+
+0027 7C01              MOV     R4,#01H
+0029 7DF4              MOV     R5,#0F4H
+002B 120000      E     LCALL   ?C?LIMUL
+002E 780A              MOV     R0,#0AH
+0030 120000      E     LCALL   ?C?ULSHR
+0033 900000      E     MOV     DPTR,#g_mem+03H
+0036 EF                MOV     A,R7
+0037 F0                MOVX    @DPTR,A
+                                           ; SOURCE LINE # 808
+0038 120000      E     LCALL   _WATCHDOG_COUNTER_WritePeriod
+                                           ; SOURCE LINE # 809
+003B E4                CLR     A
+003C FF                MOV     R7,A
+003D 120000      E     LCALL   _WATCHDOG_ENABLER_Write
+                                           ; SOURCE LINE # 810
+                                           ; SOURCE LINE # 811
+0040         ?C0138:
+0040 22                RET     
+             ; FUNCTION cmd_set_watchdog (END)
+
+             ; FUNCTION cmd_get_inputs (BEGIN)
+                                           ; SOURCE LINE # 813
+                                           ; SOURCE LINE # 815
+0000 22                RET     
+             ; FUNCTION cmd_get_inputs (END)
+
+             ; FUNCTION cmd_store_params (BEGIN)
+                                           ; SOURCE LINE # 817
+                                           ; SOURCE LINE # 819
+0000 E4                CLR     A
+0001 FF                MOV     R7,A
+0002 FE                MOV     R6,A
+0003 120000      R     LCALL   _memStore
+0006 EF                MOV     A,R7
+0007 6006              JZ      ?C0140
+                                           ; SOURCE LINE # 820
+0009 7F01              MOV     R7,#01H
+000B 120000      R     LCALL   _sendAcknowledgment
+000E 22                RET     
+000F         ?C0140:
+                                           ; SOURCE LINE # 822
+000F E4                CLR     A
+0010 FF                MOV     R7,A
+0011 120000      R     LCALL   _sendAcknowledgment
+                                           ; SOURCE LINE # 823
+0014         ?C0142:
+0014 22                RET     
+             ; FUNCTION cmd_store_params (END)
+
+             ; FUNCTION cmd_get_emg (BEGIN)
+                                           ; SOURCE LINE # 825
+                                           ; SOURCE LINE # 827
+0000 22                RET     
+             ; FUNCTION cmd_get_emg (END)
+
+             ; FUNCTION cmd_get_n_imu (BEGIN)
+                                           ; SOURCE LINE # 829
+                                           ; SOURCE LINE # 835
+0000 900000      R     MOV     DPTR,#packet_data
+0003 748C              MOV     A,#08CH
+0005 F0                MOVX    @DPTR,A
+                                           ; SOURCE LINE # 838
+C51 COMPILER V9.51   COMMAND_PROCESSING                                                    09/22/2016 17:24:10 PAGE 44  
+
+0006 900000      E     MOV     DPTR,#N_IMU_Connected
+0009 E0                MOVX    A,@DPTR
+000A 900000      R     MOV     DPTR,#packet_data+01H
+000D F0                MOVX    @DPTR,A
+                                           ; SOURCE LINE # 841
+000E 7B01              MOV     R3,#01H
+0010 7A00        R     MOV     R2,#HIGH packet_data
+0012 7900        R     MOV     R1,#LOW packet_data
+0014 7D02              MOV     R5,#02H
+0016 120000      R     LCALL   _LCRChecksum
+0019 900000      R     MOV     DPTR,#packet_data+02H
+001C EF                MOV     A,R7
+001D F0                MOVX    @DPTR,A
+                                           ; SOURCE LINE # 844
+001E 7B01              MOV     R3,#01H
+0020 7A00        R     MOV     R2,#HIGH packet_data
+0022 7900        R     MOV     R1,#LOW packet_data
+0024 0D                INC     R5
+0025 120000      R     LCALL   _commWrite
+                                           ; SOURCE LINE # 845
+0028 22                RET     
+             ; FUNCTION cmd_get_n_imu (END)
+
+             ; FUNCTION cmd_get_mag_param (BEGIN)
+                                           ; SOURCE LINE # 848
+                                           ; SOURCE LINE # 851
+0000 E4                CLR     A
+0001 F500        R     MOV     k_imu,A
+                                           ; SOURCE LINE # 853
+0003 900000      E     MOV     DPTR,#N_IMU_Connected
+0006 E0                MOVX    A,@DPTR
+0007 25E0              ADD     A,ACC
+0009 25E0              ADD     A,ACC
+000B 2402              ADD     A,#02H
+;---- Variable 'sz' assigned to Register 'R6' ----
+000D FE                MOV     R6,A
+                                           ; SOURCE LINE # 859
+000E 900000      R     MOV     DPTR,#packet_data
+0011 748D              MOV     A,#08DH
+0013 F0                MOVX    @DPTR,A
+                                           ; SOURCE LINE # 861
+0014 E4                CLR     A
+0015 F500        R     MOV     k_imu,A
+0017         ?C0145:
+0017 900000      E     MOV     DPTR,#N_IMU_Connected
+001A E0                MOVX    A,@DPTR
+001B FF                MOV     R7,A
+001C E500        R     MOV     A,k_imu
+001E C3                CLR     C
+001F 9F                SUBB    A,R7
+0020 4003              JC      $ + 5H
+0022 020000      R     LJMP    ?C0146
+                                           ; SOURCE LINE # 862
+                                           ; SOURCE LINE # 863
+0025 7400        E     MOV     A,#LOW IMU_connected
+0027 2500        R     ADD     A,k_imu
+0029 F582              MOV     DPL,A
+002B E4                CLR     A
+002C 3400        E     ADDC    A,#HIGH IMU_connected
+002E F583              MOV     DPH,A
+0030 E0                MOVX    A,@DPTR
+0031 FF                MOV     R7,A
+C51 COMPILER V9.51   COMMAND_PROCESSING                                                    09/22/2016 17:24:10 PAGE 45  
+
+0032 E500        R     MOV     A,k_imu
+0034 25E0              ADD     A,ACC
+0036 25E0              ADD     A,ACC
+0038 2400        R     ADD     A,#LOW packet_data+01H
+003A F582              MOV     DPL,A
+003C E4                CLR     A
+003D 3400        R     ADDC    A,#HIGH packet_data+01H
+003F F583              MOV     DPH,A
+0041 EF                MOV     A,R7
+0042 F0                MOVX    @DPTR,A
+                                           ; SOURCE LINE # 864
+0043 7400        E     MOV     A,#LOW IMU_connected
+0045 2500        R     ADD     A,k_imu
+0047 F582              MOV     DPL,A
+0049 E4                CLR     A
+004A 3400        E     ADDC    A,#HIGH IMU_connected
+004C F583              MOV     DPH,A
+004E E0                MOVX    A,@DPTR
+004F 75F003            MOV     B,#03H
+0052 A4                MUL     AB
+0053 2400        E     ADD     A,#LOW MagCal
+0055 F582              MOV     DPL,A
+0057 E4                CLR     A
+0058 3400        E     ADDC    A,#HIGH MagCal
+005A F583              MOV     DPH,A
+005C E0                MOVX    A,@DPTR
+005D FF                MOV     R7,A
+005E E500        R     MOV     A,k_imu
+0060 25E0              ADD     A,ACC
+0062 25E0              ADD     A,ACC
+0064 2400        R     ADD     A,#LOW packet_data+02H
+0066 F582              MOV     DPL,A
+0068 E4                CLR     A
+0069 3400        R     ADDC    A,#HIGH packet_data+02H
+006B F583              MOV     DPH,A
+006D EF                MOV     A,R7
+006E F0                MOVX    @DPTR,A
+                                           ; SOURCE LINE # 865
+006F 7400        E     MOV     A,#LOW IMU_connected
+0071 2500        R     ADD     A,k_imu
+0073 F582              MOV     DPL,A
+0075 E4                CLR     A
+0076 3400        E     ADDC    A,#HIGH IMU_connected
+0078 F583              MOV     DPH,A
+007A E0                MOVX    A,@DPTR
+007B 75F003            MOV     B,#03H
+007E A4                MUL     AB
+007F 2400        E     ADD     A,#LOW MagCal+01H
+0081 F582              MOV     DPL,A
+0083 E4                CLR     A
+0084 3400        E     ADDC    A,#HIGH MagCal+01H
+0086 F583              MOV     DPH,A
+0088 E0                MOVX    A,@DPTR
+0089 FF                MOV     R7,A
+008A E500        R     MOV     A,k_imu
+008C 25E0              ADD     A,ACC
+008E 25E0              ADD     A,ACC
+0090 2400        R     ADD     A,#LOW packet_data+03H
+0092 F582              MOV     DPL,A
+0094 E4                CLR     A
+0095 3400        R     ADDC    A,#HIGH packet_data+03H
+0097 F583              MOV     DPH,A
+C51 COMPILER V9.51   COMMAND_PROCESSING                                                    09/22/2016 17:24:10 PAGE 46  
+
+0099 EF                MOV     A,R7
+009A F0                MOVX    @DPTR,A
+                                           ; SOURCE LINE # 866
+009B 7400        E     MOV     A,#LOW IMU_connected
+009D 2500        R     ADD     A,k_imu
+009F F582              MOV     DPL,A
+00A1 E4                CLR     A
+00A2 3400        E     ADDC    A,#HIGH IMU_connected
+00A4 F583              MOV     DPH,A
+00A6 E0                MOVX    A,@DPTR
+00A7 75F003            MOV     B,#03H
+00AA A4                MUL     AB
+00AB 2400        E     ADD     A,#LOW MagCal+02H
+00AD F582              MOV     DPL,A
+00AF E4                CLR     A
+00B0 3400        E     ADDC    A,#HIGH MagCal+02H
+00B2 F583              MOV     DPH,A
+00B4 E0                MOVX    A,@DPTR
+00B5 FF                MOV     R7,A
+00B6 E500        R     MOV     A,k_imu
+00B8 25E0              ADD     A,ACC
+00BA 25E0              ADD     A,ACC
+00BC 2400        R     ADD     A,#LOW packet_data+04H
+00BE F582              MOV     DPL,A
+00C0 E4                CLR     A
+00C1 3400        R     ADDC    A,#HIGH packet_data+04H
+00C3 F583              MOV     DPH,A
+00C5 EF                MOV     A,R7
+00C6 F0                MOVX    @DPTR,A
+                                           ; SOURCE LINE # 867
+00C7 0500        R     INC     k_imu
+00C9 020000      R     LJMP    ?C0145
+00CC         ?C0146:
+                                           ; SOURCE LINE # 870
+00CC 7B01              MOV     R3,#01H
+00CE 7A00        R     MOV     R2,#HIGH packet_data
+00D0 7900        R     MOV     R1,#LOW packet_data
+00D2 EE                MOV     A,R6
+00D3 14                DEC     A
+00D4 FD                MOV     R5,A
+00D5 120000      R     LCALL   _LCRChecksum
+00D8 7400        R     MOV     A,#LOW packet_data+0FFFFH
+00DA 2E                ADD     A,R6
+00DB F582              MOV     DPL,A
+00DD E4                CLR     A
+00DE 3400        R     ADDC    A,#HIGH packet_data+0FFFFH
+00E0 F583              MOV     DPH,A
+00E2 EF                MOV     A,R7
+00E3 F0                MOVX    @DPTR,A
+                                           ; SOURCE LINE # 871
+00E4 7B01              MOV     R3,#01H
+00E6 7A00        R     MOV     R2,#HIGH packet_data
+00E8 7900        R     MOV     R1,#LOW packet_data
+00EA AF06              MOV     R7,AR6
+00EC AD07              MOV     R5,AR7
+00EE 120000      R     LCALL   _commWrite
+                                           ; SOURCE LINE # 873
+00F1 22                RET     
+             ; FUNCTION cmd_get_mag_param (END)
+
+             ; FUNCTION cmd_get_imu_readings (BEGIN)
+                                           ; SOURCE LINE # 875
+C51 COMPILER V9.51   COMMAND_PROCESSING                                                    09/22/2016 17:24:10 PAGE 47  
+
+                                           ; SOURCE LINE # 879
+0000 900000      E     MOV     DPTR,#imu_send_flag
+0003 7401              MOV     A,#01H
+0005 F0                MOVX    @DPTR,A
+                                           ; SOURCE LINE # 880
+0006 22                RET     
+             ; FUNCTION cmd_get_imu_readings (END)
+
+             ; FUNCTION cmd_set_imu_mode (BEGIN)
+                                           ; SOURCE LINE # 882
+                                           ; SOURCE LINE # 883
+;---- Variable 'k_imu' assigned to Register 'R7' ----
+0000 E4                CLR     A
+0001 FF                MOV     R7,A
+                                           ; SOURCE LINE # 886
+0002 900000      E     MOV     DPTR,#g_rx+01H
+0005 E0                MOVX    A,@DPTR
+0006 FE                MOV     R6,A
+;---- Variable 'id' assigned to Register 'R6' ----
+                                           ; SOURCE LINE # 887
+0007 A3                INC     DPTR
+0008 E0                MOVX    A,@DPTR
+0009 FD                MOV     R5,A
+;---- Variable 'flags' assigned to Register 'R5' ----
+                                           ; SOURCE LINE # 889
+000A 5404              ANL     A,#04H
+000C FC                MOV     R4,A
+000D 13                RRC     A
+000E 13                RRC     A
+000F 543F              ANL     A,#03FH
+0011 FC                MOV     R4,A
+0012 EE                MOV     A,R6
+0013 75F003            MOV     B,#03H
+0016 A4                MUL     AB
+0017 2400        E     ADD     A,#LOW IMU_conf
+0019 F582              MOV     DPL,A
+001B E4                CLR     A
+001C 3400        E     ADDC    A,#HIGH IMU_conf
+001E F583              MOV     DPH,A
+0020 EC                MOV     A,R4
+0021 F0                MOVX    @DPTR,A
+                                           ; SOURCE LINE # 890
+0022 ED                MOV     A,R5
+0023 5402              ANL     A,#02H
+0025 FC                MOV     R4,A
+0026 C3                CLR     C
+0027 13                RRC     A
+0028 FC                MOV     R4,A
+0029 EE                MOV     A,R6
+002A 75F003            MOV     B,#03H
+002D A4                MUL     AB
+002E 2400        E     ADD     A,#LOW IMU_conf+01H
+0030 F582              MOV     DPL,A
+0032 E4                CLR     A
+0033 3400        E     ADDC    A,#HIGH IMU_conf+01H
+0035 F583              MOV     DPH,A
+0037 EC                MOV     A,R4
+0038 F0                MOVX    @DPTR,A
+                                           ; SOURCE LINE # 891
+0039 ED                MOV     A,R5
+003A 5401              ANL     A,#01H
+003C FD                MOV     R5,A
+C51 COMPILER V9.51   COMMAND_PROCESSING                                                    09/22/2016 17:24:10 PAGE 48  
+
+003D EE                MOV     A,R6
+003E 75F003            MOV     B,#03H
+0041 A4                MUL     AB
+0042 2400        E     ADD     A,#LOW IMU_conf+02H
+0044 F582              MOV     DPL,A
+0046 E4                CLR     A
+0047 3400        E     ADDC    A,#HIGH IMU_conf+02H
+0049 F583              MOV     DPH,A
+004B ED                MOV     A,R5
+004C F0                MOVX    @DPTR,A
+                                           ; SOURCE LINE # 893
+004D 900000      E     MOV     DPTR,#imus_data_size
+0050 E4                CLR     A
+0051 F0                MOVX    @DPTR,A
+0052 A3                INC     DPTR
+0053 04                INC     A
+0054 F0                MOVX    @DPTR,A
+                                           ; SOURCE LINE # 895
+0055 E4                CLR     A
+0056         ?C0150:
+0056 900000      E     MOV     DPTR,#N_IMU_Connected
+0059 E0                MOVX    A,@DPTR
+005A FE                MOV     R6,A
+005B EF                MOV     A,R7
+005C C3                CLR     C
+005D 9E                SUBB    A,R6
+005E 4003              JC      $ + 5H
+0060 020000      R     LJMP    ?C0151
+                                           ; SOURCE LINE # 896
+                                           ; SOURCE LINE # 897
+0063 7400        E     MOV     A,#LOW IMU_connected
+0065 2F                ADD     A,R7
+0066 F582              MOV     DPL,A
+0068 E4                CLR     A
+0069 3400        E     ADDC    A,#HIGH IMU_connected
+006B F583              MOV     DPH,A
+006D E0                MOVX    A,@DPTR
+006E FE                MOV     R6,A
+006F 75F003            MOV     B,#03H
+0072 A4                MUL     AB
+0073 2400        E     ADD     A,#LOW IMU_conf+01H
+0075 F582              MOV     DPL,A
+0077 E4                CLR     A
+0078 3400        E     ADDC    A,#HIGH IMU_conf+01H
+007A F583              MOV     DPH,A
+007C E0                MOVX    A,@DPTR
+007D 75F006            MOV     B,#06H
+0080 A4                MUL     AB
+0081 FD                MOV     R5,A
+0082 EE                MOV     A,R6
+0083 75F003            MOV     B,#03H
+0086 A4                MUL     AB
+0087 2400        E     ADD     A,#LOW IMU_conf
+0089 F582              MOV     DPL,A
+008B E4                CLR     A
+008C 3400        E     ADDC    A,#HIGH IMU_conf
+008E F583              MOV     DPH,A
+0090 E0                MOVX    A,@DPTR
+0091 75F006            MOV     B,#06H
+0094 A4                MUL     AB
+0095 2D                ADD     A,R5
+0096 FE                MOV     R6,A
+C51 COMPILER V9.51   COMMAND_PROCESSING                                                    09/22/2016 17:24:10 PAGE 49  
+
+0097 7400        E     MOV     A,#LOW IMU_connected
+0099 2F                ADD     A,R7
+009A F582              MOV     DPL,A
+009C E4                CLR     A
+009D 3400        E     ADDC    A,#HIGH IMU_connected
+009F F583              MOV     DPH,A
+00A1 E0                MOVX    A,@DPTR
+00A2 FD                MOV     R5,A
+00A3 75F003            MOV     B,#03H
+00A6 A4                MUL     AB
+00A7 2400        E     ADD     A,#LOW IMU_conf+02H
+00A9 F582              MOV     DPL,A
+00AB E4                CLR     A
+00AC 3400        E     ADDC    A,#HIGH IMU_conf+02H
+00AE F583              MOV     DPH,A
+00B0 E0                MOVX    A,@DPTR
+00B1 75F006            MOV     B,#06H
+00B4 A4                MUL     AB
+00B5 2E                ADD     A,R6
+00B6 2402              ADD     A,#02H
+00B8 FB                MOV     R3,A
+00B9 ED                MOV     A,R5
+00BA 25E0              ADD     A,ACC
+00BC 2400        E     ADD     A,#LOW single_imu_size
+00BE F582              MOV     DPL,A
+00C0 E4                CLR     A
+00C1 3400        E     ADDC    A,#HIGH single_imu_size
+00C3 F583              MOV     DPH,A
+00C5 E4                CLR     A
+00C6 F0                MOVX    @DPTR,A
+00C7 A3                INC     DPTR
+00C8 EB                MOV     A,R3
+00C9 F0                MOVX    @DPTR,A
+                                           ; SOURCE LINE # 898
+00CA 7400        E     MOV     A,#LOW IMU_connected
+00CC 2F                ADD     A,R7
+00CD F582              MOV     DPL,A
+00CF E4                CLR     A
+00D0 3400        E     ADDC    A,#HIGH IMU_connected
+00D2 F583              MOV     DPH,A
+00D4 E0                MOVX    A,@DPTR
+00D5 25E0              ADD     A,ACC
+00D7 2400        E     ADD     A,#LOW single_imu_size
+00D9 F582              MOV     DPL,A
+00DB E4                CLR     A
+00DC 3400        E     ADDC    A,#HIGH single_imu_size
+00DE F583              MOV     DPH,A
+00E0 E0                MOVX    A,@DPTR
+00E1 FC                MOV     R4,A
+00E2 A3                INC     DPTR
+00E3 E0                MOVX    A,@DPTR
+00E4 FD                MOV     R5,A
+00E5 900000      E     MOV     DPTR,#imus_data_size+01H
+00E8 E0                MOVX    A,@DPTR
+00E9 2D                ADD     A,R5
+00EA F0                MOVX    @DPTR,A
+00EB 900000      E     MOV     DPTR,#imus_data_size
+00EE E0                MOVX    A,@DPTR
+00EF 3C                ADDC    A,R4
+00F0 F0                MOVX    @DPTR,A
+                                           ; SOURCE LINE # 899
+00F1 0F                INC     R7
+C51 COMPILER V9.51   COMMAND_PROCESSING                                                    09/22/2016 17:24:10 PAGE 50  
+
+00F2 020000      R     LJMP    ?C0150
+00F5         ?C0151:
+                                           ; SOURCE LINE # 900
+00F5 900000      E     MOV     DPTR,#imus_data_size+01H
+00F8 E0                MOVX    A,@DPTR
+00F9 04                INC     A
+00FA F0                MOVX    @DPTR,A
+00FB 7006              JNZ     ?C0164
+00FD 900000      E     MOV     DPTR,#imus_data_size
+0100 E0                MOVX    A,@DPTR
+0101 04                INC     A
+0102 F0                MOVX    @DPTR,A
+0103         ?C0164:
+                                           ; SOURCE LINE # 901
+0103 22                RET     
+             ; FUNCTION cmd_set_imu_mode (END)
+
+             ; FUNCTION cmd_get_imus_mode (BEGIN)
+                                           ; SOURCE LINE # 903
+                                           ; SOURCE LINE # 905
+0000 E4                CLR     A
+0001 F500        R     MOV     k_imu,A
+                                           ; SOURCE LINE # 907
+0003 900000      E     MOV     DPTR,#N_IMU_Connected
+0006 E0                MOVX    A,@DPTR
+0007 25E0              ADD     A,ACC
+0009 2402              ADD     A,#02H
+;---- Variable 'sz' assigned to Register 'R6' ----
+000B FE                MOV     R6,A
+                                           ; SOURCE LINE # 913
+000C 900000      R     MOV     DPTR,#packet_data
+000F 7490              MOV     A,#090H
+0011 F0                MOVX    @DPTR,A
+                                           ; SOURCE LINE # 915
+0012 E4                CLR     A
+0013 F500        R     MOV     k_imu,A
+0015         ?C0154:
+0015 900000      E     MOV     DPTR,#N_IMU_Connected
+0018 E0                MOVX    A,@DPTR
+0019 FF                MOV     R7,A
+001A E500        R     MOV     A,k_imu
+001C C3                CLR     C
+001D 9F                SUBB    A,R7
+001E 4003              JC      $ + 5H
+0020 020000      R     LJMP    ?C0155
+                                           ; SOURCE LINE # 916
+                                           ; SOURCE LINE # 917
+0023 7400        E     MOV     A,#LOW IMU_connected
+0025 2500        R     ADD     A,k_imu
+0027 F582              MOV     DPL,A
+0029 E4                CLR     A
+002A 3400        E     ADDC    A,#HIGH IMU_connected
+002C F583              MOV     DPH,A
+002E E0                MOVX    A,@DPTR
+002F FF                MOV     R7,A
+0030 E500        R     MOV     A,k_imu
+0032 25E0              ADD     A,ACC
+0034 2400        R     ADD     A,#LOW packet_data+01H
+0036 F582              MOV     DPL,A
+0038 E4                CLR     A
+0039 3400        R     ADDC    A,#HIGH packet_data+01H
+003B F583              MOV     DPH,A
+C51 COMPILER V9.51   COMMAND_PROCESSING                                                    09/22/2016 17:24:10 PAGE 51  
+
+003D EF                MOV     A,R7
+003E F0                MOVX    @DPTR,A
+                                           ; SOURCE LINE # 918
+003F 7400        E     MOV     A,#LOW IMU_connected
+0041 2500        R     ADD     A,k_imu
+0043 F582              MOV     DPL,A
+0045 E4                CLR     A
+0046 3400        E     ADDC    A,#HIGH IMU_connected
+0048 F583              MOV     DPH,A
+004A E0                MOVX    A,@DPTR
+004B FF                MOV     R7,A
+004C 75F003            MOV     B,#03H
+004F A4                MUL     AB
+0050 2400        E     ADD     A,#LOW IMU_conf+01H
+0052 F582              MOV     DPL,A
+0054 E4                CLR     A
+0055 3400        E     ADDC    A,#HIGH IMU_conf+01H
+0057 F583              MOV     DPH,A
+0059 E0                MOVX    A,@DPTR
+005A FD                MOV     R5,A
+005B 25E0              ADD     A,ACC
+005D FD                MOV     R5,A
+005E EF                MOV     A,R7
+005F 75F003            MOV     B,#03H
+0062 A4                MUL     AB
+0063 2400        E     ADD     A,#LOW IMU_conf
+0065 F582              MOV     DPL,A
+0067 E4                CLR     A
+0068 3400        E     ADDC    A,#HIGH IMU_conf
+006A F583              MOV     DPH,A
+006C E0                MOVX    A,@DPTR
+006D FF                MOV     R7,A
+006E 25E0              ADD     A,ACC
+0070 25E0              ADD     A,ACC
+0072 4D                ORL     A,R5
+0073 FF                MOV     R7,A
+0074 7400        E     MOV     A,#LOW IMU_connected
+0076 2500        R     ADD     A,k_imu
+0078 F582              MOV     DPL,A
+007A E4                CLR     A
+007B 3400        E     ADDC    A,#HIGH IMU_connected
+007D F583              MOV     DPH,A
+007F E0                MOVX    A,@DPTR
+0080 75F003            MOV     B,#03H
+0083 A4                MUL     AB
+0084 2400        E     ADD     A,#LOW IMU_conf+02H
+0086 F582              MOV     DPL,A
+0088 E4                CLR     A
+0089 3400        E     ADDC    A,#HIGH IMU_conf+02H
+008B F583              MOV     DPH,A
+008D E0                MOVX    A,@DPTR
+008E 4F                ORL     A,R7
+008F FF                MOV     R7,A
+0090 E500        R     MOV     A,k_imu
+0092 25E0              ADD     A,ACC
+0094 2400        R     ADD     A,#LOW packet_data+02H
+0096 F582              MOV     DPL,A
+0098 E4                CLR     A
+0099 3400        R     ADDC    A,#HIGH packet_data+02H
+009B F583              MOV     DPH,A
+009D EF                MOV     A,R7
+009E F0                MOVX    @DPTR,A
+C51 COMPILER V9.51   COMMAND_PROCESSING                                                    09/22/2016 17:24:10 PAGE 52  
+
+                                           ; SOURCE LINE # 919
+009F 0500        R     INC     k_imu
+00A1 020000      R     LJMP    ?C0154
+00A4         ?C0155:
+                                           ; SOURCE LINE # 922
+00A4 7B01              MOV     R3,#01H
+00A6 7A00        R     MOV     R2,#HIGH packet_data
+00A8 7900        R     MOV     R1,#LOW packet_data
+00AA EE                MOV     A,R6
+00AB 14                DEC     A
+00AC FD                MOV     R5,A
+00AD 120000      R     LCALL   _LCRChecksum
+00B0 7400        R     MOV     A,#LOW packet_data+0FFFFH
+00B2 2E                ADD     A,R6
+00B3 F582              MOV     DPL,A
+00B5 E4                CLR     A
+00B6 3400        R     ADDC    A,#HIGH packet_data+0FFFFH
+00B8 F583              MOV     DPH,A
+00BA EF                MOV     A,R7
+00BB F0                MOVX    @DPTR,A
+                                           ; SOURCE LINE # 923
+00BC 7B01              MOV     R3,#01H
+00BE 7A00        R     MOV     R2,#HIGH packet_data
+00C0 7900        R     MOV     R1,#LOW packet_data
+00C2 AF06              MOV     R7,AR6
+00C4 AD07              MOV     R5,AR7
+00C6 120000      R     LCALL   _commWrite
+                                           ; SOURCE LINE # 925
+00C9 22                RET     
+             ; FUNCTION cmd_get_imus_mode (END)
+
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =   2611    ----
+   CONSTANT SIZE    =    129    ----
+   XDATA SIZE       =   1102    1357
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----       8
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+   EDATA SIZE       =   ----    ----
+   HDATA SIZE       =   ----    ----
+   XDATA CONST SIZE =   ----    ----
+   FAR CONST SIZE   =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  7 WARNING(S),  0 ERROR(S)

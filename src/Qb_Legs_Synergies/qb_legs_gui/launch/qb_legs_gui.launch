@@ -1,0 +1,5 @@
+<launch>
+
+    <node pkg="qb_legs_gui" name="qt_example_main" type="qb_legs_gui" output="screen"/>
+    
+</launch>
