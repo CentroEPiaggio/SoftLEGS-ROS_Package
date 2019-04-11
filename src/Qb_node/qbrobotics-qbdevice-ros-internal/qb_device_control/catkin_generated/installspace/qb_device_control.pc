@@ -1,0 +1,8 @@
+prefix=/home/riccardo/catkin_ws/install
+
+Name: qb_device_control
+Description: Description of qb_device_control
+Version: 0.11.3
+Cflags: -I/home/riccardo/catkin_ws/install/include
+Libs: -L/home/riccardo/catkin_ws/install/lib -llibqb_device_control
+Requires: roscpp actionlib control_msgs controller_manager qb_device_hardware_interface

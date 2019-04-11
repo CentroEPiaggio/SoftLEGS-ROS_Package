@@ -1,0 +1,38 @@
+<launch>
+
+    <!-- `saving_dir` directory where the bags are saved -->
+    <!-- `bag_name`   prefix name of the bag file -->
+    <!-- `topic`      topic to be saved -->
+    <arg name="saving_dir" default="/home/gian/ROS/softlegs_ws/src/bagfiles/" />
+    <arg name="sub_folder" default="" />
+
+    <arg name="imu_record"       default="false" />
+    <arg name="ctrl_data_record" default="true" />
+    <arg name="qb_meas_record"   default="false" />
+
+    <!-- register IMU -->
+    <group if="$(arg imu_record)">
+        <include file="$(find qblegs-ros)/launch/register_imu_data.launch" >
+            <arg name="saving_dir" value="$(arg saving_dir)" />
+            <arg name="sub_folder" value="$(arg sub_folder)" />
+        </include>
+    </group>
+
+    <!-- register values from PUSH RECOVERY control -->
+    <group if="$(arg ctrl_data_record)">
+        <include file="$(find qblegs-ros)/launch/register_PR_ctrl_data.launch" >
+            <arg name="saving_dir" value="$(arg saving_dir)" />
+            <arg name="sub_folder" value="$(arg sub_folder)" />
+        </include>
+    </group>
+
+    <!-- register LINK POSITION  -->
+    <group if="$(arg qb_meas_record)">
+        <include file="$(find qblegs-ros)/launch/register_qb_measurement.launch" >
+            <arg name="saving_dir" value="$(arg saving_dir)" />
+            <arg name="sub_folder" value="$(arg sub_folder)" />
+        </include>   
+    </group>
+</launch>
+
+

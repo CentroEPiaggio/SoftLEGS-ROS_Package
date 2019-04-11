@@ -1,0 +1,7 @@
+<launch>
+<node pkg="save_qb_leg_results" name="Save_Robot_Signals" type="save_qb_leg_results"/>
+</launch>
+
+<!--<launch>
+<node pkg="synergies" name="synergies" type="synergies" output="screen"/>
+</launch>-->

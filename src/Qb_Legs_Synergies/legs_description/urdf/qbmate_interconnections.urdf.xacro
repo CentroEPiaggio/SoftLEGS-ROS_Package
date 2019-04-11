@@ -1,0 +1,115 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://ros.org/wiki/xacro">
+
+	<xacro:include filename="$(find qblegs-ros)/urdf/common.urdf.xacro" />
+
+	<xacro:macro name="rotating_c_shaft" params="parent name position orientation">
+		<joint name="${name}_fixed_joint" type="fixed">
+			<origin xyz="${position}" rpy="${orientation}" />
+			<parent link="${parent}"/>
+			<child link="${name}_link"/>
+		</joint>
+
+		<link name="${name}_link">
+			<inertial>
+				<origin xyz="0 0 ${-(c_flange_com_z)/scale_f}" rpy="0 0 0" />
+				<mass value="${c_flange_mass}"/>
+				<inertia ixx="${c_flange_mass * negligible_inertia_multiplier}" ixy="0.0" ixz="0.0" iyy="${c_flange_mass * negligible_inertia_multiplier}" iyz="0.0" izz="${c_flange_mass * negligible_inertia_multiplier}"/>
+			</inertial>
+			<visual>
+				<origin xyz="0 ${cube_size/scale_f/2.0} ${-c_flange/scale_f/2.0}" rpy="0 0 0" />
+				<geometry>
+					<box size="${cube_size/scale_f/2.0} ${c_flange/scale_f/10.0} ${c_flange/scale_f}"/>
+				</geometry>
+			</visual>
+			<visual>
+				<origin xyz="0 ${-cube_size/scale_f/2.0} ${-c_flange/scale_f/2.0}" rpy="0 0 0" />
+				<geometry>
+					<box size="${cube_size/scale_f/2.0} ${c_flange/scale_f/10.0} ${c_flange/scale_f}"/>
+				</geometry>
+			</visual>
+		</link>
+
+		<joint name="${name}_fixed_joint2" type="fixed">
+			<origin xyz="0 0 ${-c_flange/scale_f}" rpy="0 0 0" />
+			<parent link="${name}_link"/>
+			<child link="${name}"/>
+		</joint>
+
+		<link name="${name}"/>
+	</xacro:macro>
+
+	<!-- this just differs from the above one because of the CoM position and mesh orientation -->
+	<xacro:macro name="fixed_c_shaft" params="parent name position orientation">
+		<joint name="${name}_fixed_joint" type="fixed">
+			<origin xyz="${position}" rpy="${orientation}" />
+			<parent link="${parent}"/>
+			<child link="${name}_link"/>
+		</joint>
+
+		<link name="${name}_link">
+			<inertial>
+				<origin xyz="0 0 ${(-c_flange+c_flange_com_z)/scale_f}" rpy="0 0 0" />
+				<mass value="${c_flange_mass}"/>
+				<inertia ixx="${c_flange_mass * negligible_inertia_multiplier}" ixy="0.0" ixz="0.0" iyy="${c_flange_mass * negligible_inertia_multiplier}" iyz="0.0" izz="${c_flange_mass * negligible_inertia_multiplier}"/>
+			</inertial>
+			<visual>
+				<origin xyz="0 ${cube_size/scale_f/2.0} ${-c_flange/scale_f/2.0}" rpy="0 0 0" />
+				<geometry>
+					<box size="${cube_size/scale_f/2.0} ${c_flange/scale_f/10.0} ${c_flange/scale_f}"/>
+				</geometry>
+			</visual>
+			<visual>
+				<origin xyz="0 ${-cube_size/scale_f/2.0} ${-c_flange/scale_f/2.0}" rpy="0 0 0" />
+				<geometry>
+					<box size="${cube_size/scale_f/2.0} ${c_flange/scale_f/10.0} ${c_flange/scale_f}"/>
+				</geometry>
+			</visual>
+		</link>
+
+		<joint name="${name}_fixed_joint2" type="fixed">
+			<origin xyz="0 0 ${-c_flange/scale_f}" rpy="0 0 0" />
+			<parent link="${name}_link"/>
+			<child link="${name}"/>
+		</joint>
+
+		<link name="${name}"/>
+	</xacro:macro>
+
+	<xacro:macro name="rotating_c2_shaft" params="parent name position orientation">
+		<joint name="${name}_fixed_joint" type="fixed">
+			<origin xyz="${position}" rpy="${orientation}" />
+			<parent link="${parent}"/>
+			<child link="${name}_link"/>
+		</joint>
+
+		<link name="${name}_link">
+			<inertial>
+				<origin xyz="0 0 ${-(c2_flange_com_z)/scale_f}" rpy="0 0 0" />
+				<mass value="${c_flange_mass}"/>
+				<inertia ixx="${c_flange_mass * negligible_inertia_multiplier}" ixy="0.0" ixz="0.0" iyy="${c_flange_mass * negligible_inertia_multiplier}" iyz="0.0" izz="${c_flange_mass * negligible_inertia_multiplier}"/>
+			</inertial>
+			<visual>
+				<origin xyz="0 ${cube_size/scale_f/2.0} ${-c2_flange/scale_f/2.0}" rpy="0 0 0" />
+				<geometry>
+					<box size="${cube_size/scale_f/2.0} ${c2_flange/scale_f/10.0} ${c2_flange/scale_f}"/>
+				</geometry>
+			</visual>
+			<visual>
+				<origin xyz="0 ${-cube_size/scale_f/2.0} ${-c2_flange/scale_f/2.0}" rpy="0 0 0" />
+				<geometry>
+					<box size="${cube_size/scale_f/2.0} ${c2_flange/scale_f/10.0} ${c2_flange/scale_f}"/>
+				</geometry>
+			</visual>
+		</link>
+
+		<joint name="${name}_fixed_joint2" type="fixed">
+			<origin xyz="0 0 ${-c2_flange/scale_f}" rpy="0 0 0" />
+			<parent link="${name}_link"/>
+			<child link="${name}"/>
+		</joint>
+
+		<link name="${name}"/>
+	</xacro:macro>
+
+</robot>

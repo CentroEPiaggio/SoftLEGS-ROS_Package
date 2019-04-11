@@ -1,0 +1,6 @@
+C:\Users\MattiaCP\Google Drive\QB\IMU\imu_board_firmware_version6\hand_firmware_micro-hand_firmware_micro_adv\firmware.cydsn\firmware.cyprj|4ecdd114-4b99-4e54-8fa3-3993b5ef5af7
+C:\Program Files (x86)\Cypress\PSoC Creator\3.3\PSoC Creator\psoc\content\default\CyAnnotationLibrary\CyAnnotationLibrary.cylib\CyAnnotationLibrary.cyprj|f976cb3f-ed9c-466a-bc55-1da588a5b91e
+C:\Program Files (x86)\Cypress\PSoC Creator\3.3\PSoC Creator\psoc\content\default\CyReferenceLibrary\CyReferenceLibrary.cylib\CyReferenceLibrary.cyprj|a7fbe4a7-7761-4f53-9169-dfb6c4386aad
+C:\Program Files (x86)\Cypress\PSoC Creator\3.3\PSoC Creator\psoc\content\cycomponentlibraryupdates\CyComponentLibraryUpdates.cylib\CyComponentLibraryUpdates.cyprj|648e4bbd-5e03-4c0d-8814-4c5fa57c3fd1
+C:\Program Files (x86)\Cypress\PSoC Creator\3.3\PSoC Creator\psoc\content\cycomponentlibrary\CyComponentLibrary.cylib\CyComponentLibrary.cyprj|01529113-b3c7-428c-bedc-75b4de8fb1fd
+C:\Program Files (x86)\Cypress\PSoC Creator\3.3\PSoC Creator\psoc\content\cyprimitives\CyPrimitives.cylib\CyPrimitives.cyprj|259d43fc-a901-4fd4-810e-c0ef35a025b2

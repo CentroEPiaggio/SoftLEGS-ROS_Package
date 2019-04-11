@@ -1,0 +1,25 @@
+<launch>
+  <include file="$(find qb_device_driver)/launch/communication_handler.launch"/>
+
+  <!-- robot namspace -->
+  <group ns="1dof_chain">
+    <include file="$(find qb_device_bringup)/launch/component_bringup.launch">
+      <arg name="control_action" value="position_and_preset"/>
+      <arg name="control_duration" value="0.001"/>
+      <arg name="controllers" value="cube6_joint_state_controller
+                                     cube6_position_and_preset_trajectory_controller
+                                     cube6_motor_positions_trajectory_controller"/>
+      <arg name="controllers_namespace" value="1dof_chain"/>
+      <arg name="controllers_settings" value="qb_chain"/>
+      <arg name="device_id" value="6"/>
+      <arg name="device_control" value="qb_move"/>
+      <arg name="device_description" value="qb_move"/>
+      <arg name="device_namespace" value="cube6"/>
+      <arg name="device_urdf" value="qb_move"/>
+      <arg name="use_controller_gui" value="true"/>
+      <arg name="use_waypoints" value="false"/>
+      <arg name="waypoint_namespace" value="1dof_chain"/>
+      <arg name="waypoint_settings" value="qb_chain"/>
+    </include>
+  </group>
+</launch>

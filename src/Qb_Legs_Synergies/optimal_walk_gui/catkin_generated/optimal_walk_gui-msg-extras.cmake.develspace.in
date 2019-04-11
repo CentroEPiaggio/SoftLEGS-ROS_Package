@@ -1,0 +1,2 @@
+set(optimal_walk_gui_MESSAGE_FILES "/home/riccardo/catkin_ws/src/Qb_Legs_Synergies/optimal_walk_gui/msg/bias.msg;/home/riccardo/catkin_ws/src/Qb_Legs_Synergies/optimal_walk_gui/msg/data_msg.msg;/home/riccardo/catkin_ws/src/Qb_Legs_Synergies/optimal_walk_gui/msg/data_corr_AT.msg;/home/riccardo/catkin_ws/src/Qb_Legs_Synergies/optimal_walk_gui/msg/gain_bias_err.msg;/home/riccardo/catkin_ws/src/Qb_Legs_Synergies/optimal_walk_gui/msg/GG_msg.msg;/home/riccardo/catkin_ws/src/Qb_Legs_Synergies/optimal_walk_gui/msg/dataset_name.msg")
+set(optimal_walk_gui_SERVICE_FILES "")

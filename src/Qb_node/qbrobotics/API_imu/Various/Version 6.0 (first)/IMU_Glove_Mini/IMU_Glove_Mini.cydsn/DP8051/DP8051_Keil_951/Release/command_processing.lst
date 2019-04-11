@@ -1,0 +1,1248 @@
+C51 COMPILER V9.51   COMMAND_PROCESSING                                                    04/30/2016 17:24:42 PAGE 1   
+
+
+C51 COMPILER V9.51, COMPILATION OF MODULE COMMAND_PROCESSING
+OBJECT MODULE PLACED IN .\DP8051\DP8051_Keil_951\Release\command_processing.obj
+COMPILER INVOKED BY: C:\Program Files (x86)\Cypress\PSoC Creator\3.3\PSoC Creator\import\keil\pk51\9.51\C51\BIN\c51.exe 
+                    -.\command_processing.c NOIV LARGE MODDP2 OMF2 VB(1) NOIP INCDIR(.,Generated_Source\PSoC3) FF(3) DB DF(NDEBUG) WL(2) PR(.
+                    -\DP8051\DP8051_Keil_951\Release/command_processing.lst) CD OT(8,SIZE) OJ(.\DP8051\DP8051_Keil_951\Release\command_proces
+                    -sing.obj)
+
+line level    source
+
+*** MESSAGE C286 IN LINE 0 OF (null): license limits optimization to level 5
+   1          ////=================================================================     includes
+   2          #include <command_processing.h>
+   3          #include <interruptions.h>
+   4          #include <stdio.h>
+   5          //
+   6          #include "commands.h"
+   7          //
+   8          ////================================================================     variables
+   9          //
+  10          //reg8 * EEPROM_ADDR = (reg8 *) CYDEV_EE_BASE;
+  11          //
+  12          ////==============================================================================
+  13          ////                                                            RX DATA PROCESSING
+  14          ////==============================================================================
+  15          ////  This function checks for the availability of a data packet and process it:
+  16          ////      - Verify checksum;
+  17          ////      - Process commands;
+  18          ////==============================================================================
+  19          //
+  20          void commProcess(void){
+  21   1      //    static int i;                   // iterator
+  22   1          static uint8 rx_cmd;            // received command
+  23   1          static uint8 aux_checksum;      // received packet checksum
+  24   1      //
+  25   1      //    static uint8 packet_data[16];   // output packet
+  26   1      //    static uint8 packet_lenght;     // output packet length
+  27   1      //
+  28   1      //    // auxiliary variables
+  29   1      //    static uint32 off_1, off_2;
+  30   1      //    static float mult_1, mult_2;
+  31   1      //
+  32   1      //    // retrieve command
+  33   1          rx_cmd = g_rx.buffer[0]; 
+  34   1      //
+  35   1      ////==========================================================     verify checksum
+  36   1          aux_checksum = LCRChecksum(g_rx.buffer, (g_rx.length - 1));
+  37   1      
+  38   1          if (aux_checksum != g_rx.buffer[g_rx.length-1]) { // wrong checksum
+  39   2             return;
+  40   2          }
+  41   1      
+  42   1          switch(rx_cmd) {
+  43   2      //
+  44   2      ////=============================================================     CMD_ACTIVATE
+  45   2      //        case CMD_ACTIVATE:
+  46   2      //            g_ref.onoff = g_rx.buffer[1];
+  47   2      //
+  48   2      //            if ((g_mem.control_mode == CONTROL_ANGLE) || (g_mem.control_mode == CURR_AND_POS_CONTROL)) {
+  49   2      //                g_ref.pos[0] = g_meas.pos[0];
+  50   2      //                g_ref.pos[1] = g_meas.pos[1];
+  51   2      //            }
+C51 COMPILER V9.51   COMMAND_PROCESSING                                                    04/30/2016 17:24:42 PAGE 2   
+
+  52   2      //            //MOTOR_ON_OFF_Write(g_ref.onoff);
+  53   2      //
+  54   2      //            break;
+  55   2      ////===========================================================     CMD_SET_INPUTS
+  56   2      //
+  57   2      //        case CMD_SET_INPUTS:
+  58   2      //            g_ref.pos[0] = *((int16 *) &g_rx.buffer[1]);   // motor 1
+  59   2      //            g_ref.pos[0] = g_ref.pos[0] << g_mem.res[0];
+  60   2      //
+  61   2      //            g_ref.pos[1] = *((int16 *) &g_rx.buffer[3]);   // motor 2
+  62   2      //            g_ref.pos[1] = g_ref.pos[1] << g_mem.res[1];
+  63   2      //
+  64   2      //            if (c_mem.pos_lim_flag) {                      // pos limiting
+  65   2      //                if (g_ref.pos[0] < c_mem.pos_lim_inf[0]) g_ref.pos[0] = c_mem.pos_lim_inf[0];
+  66   2      //                if (g_ref.pos[1] < c_mem.pos_lim_inf[1]) g_ref.pos[1] = c_mem.pos_lim_inf[1];
+  67   2      //
+  68   2      //                if (g_ref.pos[0] > c_mem.pos_lim_sup[0]) g_ref.pos[0] = c_mem.pos_lim_sup[0];
+  69   2      //                if (g_ref.pos[1] > c_mem.pos_lim_sup[1]) g_ref.pos[1] = c_mem.pos_lim_sup[1];
+  70   2      //            }
+  71   2      //
+  72   2      //            break;
+  73   2      //
+  74   2      ////========================================================     CMD_SET_POS_STIFF
+  75   2      //
+  76   2      //        case CMD_SET_POS_STIFF:
+  77   2      //            break;
+  78   2      //
+  79   2      ////=====================================================     CMD_GET_MEASUREMENTS
+  80   2      //
+  81   2      //        case CMD_GET_MEASUREMENTS:
+  82   2      //            // Packet: header + measure(int16) + crc
+  83   2      //            packet_lenght = 1 + (NUM_OF_SENSORS * 2) + 1;
+  84   2      //
+  85   2      //            packet_data[0] = CMD_GET_MEASUREMENTS;   //header
+  86   2      //
+  87   2      //            for (i = 0; i < NUM_OF_SENSORS; i++) {
+  88   2      //              *((int16 *) &packet_data[(i*2) + 1]) = (int16) (g_meas.pos[i] >> g_mem.res[i]);
+  89   2      //            }
+  90   2      //
+  91   2      //            packet_data[packet_lenght - 1] = LCRChecksum (packet_data, packet_lenght - 1);
+  92   2      //
+  93   2      //            commWrite(packet_data, packet_lenght);
+  94   2      //
+  95   2      //            break;
+  96   2      //
+  97   2      ////=========================================================     CMD_GET_CURRENTS
+  98   2      //
+  99   2      //        case CMD_GET_CURRENTS:
+ 100   2      //            //Packet: header + measure(int16) + CRC
+ 101   2      //            packet_lenght = 6;
+ 102   2      //
+ 103   2      //            packet_data[0] = CMD_GET_CURRENTS;
+ 104   2      //
+ 105   2      //            *((int16 *) &packet_data[1]) = (int16) g_meas.curr[0];
+ 106   2      //            *((int16 *) &packet_data[3]) = (int16) g_meas.curr[1];
+ 107   2      //
+ 108   2      //            packet_data[packet_lenght - 1] = LCRChecksum (packet_data, packet_lenght - 1);
+ 109   2      //
+ 110   2      //            commWrite(packet_data, packet_lenght);
+ 111   2      //            break;
+ 112   2      //
+ 113   2      ////=========================================================     CMD_GET_EMG
+C51 COMPILER V9.51   COMMAND_PROCESSING                                                    04/30/2016 17:24:42 PAGE 3   
+
+ 114   2      //
+ 115   2      //        case CMD_GET_EMG:
+ 116   2      //            //Packet: header + measure(int16) + CRC
+ 117   2      //            packet_lenght = 6;
+ 118   2      //
+ 119   2      //            packet_data[0] = CMD_GET_EMG;
+ 120   2      //
+ 121   2      //            *((int16 *) &packet_data[1]) = (int16) g_meas.emg[0];
+ 122   2      //            *((int16 *) &packet_data[3]) = (int16) g_meas.emg[1];
+ 123   2      //
+ 124   2      //            packet_data[packet_lenght - 1] = LCRChecksum (packet_data, packet_lenght - 1);
+ 125   2      //
+ 126   2      //            commWrite(packet_data, packet_lenght);
+ 127   2      //            break;
+ 128   2      //
+ 129   2      ////====================================================     CMD_GET_CURR_AND_MEAS
+ 130   2      //
+ 131   2      //        case CMD_GET_CURR_AND_MEAS:
+ 132   2      //            // Packet: header + curr_meas(int16) + pos_meas(int16) + CRC
+ 133   2      //            // packet_lenght = 1 + 2 * 2 + (NUM_OF_SENSORS * 2) + 1;
+ 134   2      //            packet_lenght = 6 + (NUM_OF_SENSORS * 2);
+ 135   2      //
+ 136   2      //            packet_data[0] = CMD_GET_CURR_AND_MEAS;
+ 137   2      //
+ 138   2      //            // Currents
+ 139   2      //            *((int16 *) &packet_data[1]) = (int16) g_meas.curr[0];
+ 140   2      //            *((int16 *) &packet_data[3]) = (int16) g_meas.curr[1];
+ 141   2      //
+ 142   2      //            // Positions
+ 143   2      //            for (i = 0; i < NUM_OF_SENSORS; i++) {
+ 144   2      //                *((int16 *) &packet_data[(i*2) + 5]) =
+ 145   2      //                        (int16)(g_meas.pos[i] >> g_mem.res[i]);
+ 146   2      //            }
+ 147   2      //
+ 148   2      //            packet_data[packet_lenght - 1] = LCRChecksum (packet_data,packet_lenght - 1);
+ 149   2      //
+ 150   2      //            commWrite(packet_data, packet_lenght);
+ 151   2      //
+ 152   2      //        break;
+ 153   2      //
+ 154   2      ////=========================================================     CMD_GET_ACTIVATE
+ 155   2      //
+ 156   2      //        case CMD_GET_ACTIVATE:
+ 157   2      //            packet_lenght = 3;
+ 158   2      //
+ 159   2      //            packet_data[0] = CMD_GET_ACTIVATE;
+ 160   2      //            packet_data[1] = g_ref.onoff;
+ 161   2      //            packet_data[packet_lenght - 1] = LCRChecksum(packet_data,packet_lenght - 1);
+ 162   2      //
+ 163   2      //            commWrite(packet_data, packet_lenght);
+ 164   2      //
+ 165   2      //            break;
+ 166   2      //
+ 167   2      ////============================================================     CMD_GET_INPUT
+ 168   2      //
+ 169   2      //        case CMD_GET_INPUTS:
+ 170   2      //            packet_lenght = 6;
+ 171   2      //
+ 172   2      //            *((int16 *) &packet_data[1]) = (int16)(g_ref.pos[0] >> g_mem.res[0]);
+ 173   2      //            *((int16 *) &packet_data[3]) = (int16)(g_ref.pos[1] >> g_mem.res[1]);
+ 174   2      //
+ 175   2      //            packet_data[packet_lenght - 1] = LCRChecksum(packet_data,packet_lenght - 1);
+C51 COMPILER V9.51   COMMAND_PROCESSING                                                    04/30/2016 17:24:42 PAGE 4   
+
+ 176   2      //
+ 177   2      //            commWrite(packet_data, packet_lenght);
+ 178   2      //            break;
+ 179   2      //
+ 180   2      ////=============================================================     CMD_GET_INFO
+ 181   2      //
+ 182   2      //        case CMD_GET_INFO:
+ 183   2      //            infoGet( *((uint16 *) &g_rx.buffer[1]));
+ 184   2      //            break;
+ 185   2      //
+ 186   2      ////============================================================     CMD_SET_PARAM
+ 187   2      //
+ 188   2      //        case CMD_SET_PARAM:
+ 189   2      //            paramSet( *((uint16 *) &g_rx.buffer[1]) );
+ 190   2      //            break;
+ 191   2      //
+ 192   2      ////============================================================     CMD_GET_PARAM
+ 193   2      //
+ 194   2      //        case CMD_GET_PARAM:
+ 195   2      //            paramGet( *((uint16 *) &g_rx.buffer[1]) );
+ 196   2      //            break;
+ 197   2      //
+ 198   2      ////=================================================================     CMD_PING
+ 199   2      //
+ 200   2      //        case CMD_PING:
+ 201   2      //            packet_lenght = 2;
+ 202   2      //
+ 203   2      //            packet_data[0] = CMD_PING;
+ 204   2      //            packet_data[1] = CMD_PING;
+ 205   2      //
+ 206   2      //            commWrite(packet_data, packet_lenght);
+ 207   2      //            break;
+ 208   2      //
+ 209   2      ////=========================================================     CMD_STORE_PARAMS
+ 210   2      //
+ 211   2      //        case CMD_STORE_PARAMS:
+ 212   2      //            if( c_mem.input_mode == INPUT_MODE_EXTERNAL ) {
+ 213   2      //                off_1 = c_mem.m_off[0];
+ 214   2      //                off_2 = c_mem.m_off[1];
+ 215   2      //                mult_1 = c_mem.m_mult[0];
+ 216   2      //                mult_2 = c_mem.m_mult[1];
+ 217   2      //
+ 218   2      //                g_ref.pos[0] = (int32)((float)g_ref.pos[0] / mult_1);
+ 219   2      //                g_ref.pos[1] = (int32)((float)g_ref.pos[1] / mult_2);
+ 220   2      //
+ 221   2      //                g_ref.pos[0] = (int32)((float)g_ref.pos[0] * g_mem.m_mult[0]);
+ 222   2      //                g_ref.pos[1] = (int32)((float)g_ref.pos[1] * g_mem.m_mult[1]);
+ 223   2      //
+ 224   2      //                g_ref.pos[0] += (g_mem.m_off[0] - off_1);
+ 225   2      //                g_ref.pos[1] += (g_mem.m_off[1] - off_2);
+ 226   2      //
+ 227   2      //                if (c_mem.pos_lim_flag) {                   // position limiting
+ 228   2      //                    if (g_ref.pos[0] < c_mem.pos_lim_inf[0]) g_ref.pos[0] = c_mem.pos_lim_inf[0];
+ 229   2      //                    if (g_ref.pos[1] < c_mem.pos_lim_inf[1]) g_ref.pos[1] = c_mem.pos_lim_inf[1];
+ 230   2      //
+ 231   2      //                    if (g_ref.pos[0] > c_mem.pos_lim_sup[0]) g_ref.pos[0] = c_mem.pos_lim_sup[0];
+ 232   2      //                    if (g_ref.pos[1] > c_mem.pos_lim_sup[1]) g_ref.pos[1] = c_mem.pos_lim_sup[1];
+ 233   2      //                }
+ 234   2      //            }
+ 235   2      //            if(memStore(0))
+ 236   2      //                sendAcknowledgment(ACK_OK);
+ 237   2      //            else
+C51 COMPILER V9.51   COMMAND_PROCESSING                                                    04/30/2016 17:24:42 PAGE 5   
+
+ 238   2      //                sendAcknowledgment(ACK_ERROR);
+ 239   2      //            break;
+ 240   2      //
+ 241   2      ////=================================================     CMD_STORE_DEFAULT_PARAMS
+ 242   2      //
+ 243   2      //        case CMD_STORE_DEFAULT_PARAMS:
+ 244   2      //            if(memStore(DEFAULT_EEPROM_DISPLACEMENT))
+ 245   2      //                sendAcknowledgment(ACK_OK);
+ 246   2      //            else
+ 247   2      //                sendAcknowledgment(ACK_ERROR);
+ 248   2      //            break;
+ 249   2      //
+ 250   2      ////=======================================================     CMD_RESTORE_PARAMS
+ 251   2      //
+ 252   2      //        case CMD_RESTORE_PARAMS:
+ 253   2      //            if(memRestore())
+ 254   2      //                sendAcknowledgment(ACK_OK);
+ 255   2      //            else
+ 256   2      //                sendAcknowledgment(ACK_ERROR);
+ 257   2      //            break;
+ 258   2      //
+ 259   2      ////=============================================================     CMD_INIT_MEM
+ 260   2      //
+ 261   2      //        case CMD_INIT_MEM:
+ 262   2      //            if(memInit())
+ 263   2      //                sendAcknowledgment(ACK_OK);
+ 264   2      //            else
+ 265   2      //                sendAcknowledgment(ACK_ERROR);
+ 266   2      //            break;
+ 267   2      //
+ 268   2      ////===========================================================     CMD_BOOTLOADER
+ 269   2      //
+ 270   2      //        case CMD_BOOTLOADER:
+ 271   2      //            //Not sure if ACK_OK is correct, should check
+ 272   2      //            sendAcknowledgment(ACK_OK);
+ 273   2      //            CyDelay(1000);
+ 274   2      //            FTDI_ENABLE_REG_Write(0x00);
+ 275   2      //            CyDelay(1000);
+ 276   2      //            Bootloadable_Load();
+ 277   2      //            break;
+ 278   2      //
+ 279   2      ////============================================================     CMD_CALIBRATE
+ 280   2      //
+ 281   2      //        case CMD_CALIBRATE:
+ 282   2      //            calib.speed = *((int16 *) &g_rx.buffer[1]);
+ 283   2      //            calib.repetitions = *((int16 *) &g_rx.buffer[3]);
+ 284   2      //            
+ 285   2      //            // Speed & repetitions saturations
+ 286   2      //            if (calib.speed < 0) {
+ 287   2      //                calib.speed = 0;
+ 288   2      //            } else if (calib.speed > 200) {
+ 289   2      //                calib.speed = 200;
+ 290   2      //            }
+ 291   2      //            if (calib.repetitions < 0) {
+ 292   2      //                calib.repetitions = 0;
+ 293   2      //            } else if (calib.repetitions > 32767) {
+ 294   2      //                calib.repetitions = 32767;
+ 295   2      //            }
+ 296   2      //            
+ 297   2      //            g_ref.pos[0] = 0;
+ 298   2      //            calib.enabled = TRUE;
+ 299   2      //            break;
+C51 COMPILER V9.51   COMMAND_PROCESSING                                                    04/30/2016 17:24:42 PAGE 6   
+
+ 300   2          }
+ 301   1      }
+ 302          //
+ 303          //
+ 304          ////==============================================================================
+ 305          ////                                                                     INFO SEND
+ 306          ////==============================================================================
+ 307          //
+ 308          void infoSend(void){
+ 309   1          unsigned char packet_string[1100];
+ 310   1          infoPrepare(packet_string);
+ 311   1          UART_RS485_PutString(packet_string);
+ 312   1      }
+ 313          //
+ 314          //
+ 315          ////==============================================================================
+ 316          ////                                                              COMMAND GET INFO
+ 317          ////==============================================================================
+ 318          //
+ 319          //void infoGet(uint16 info_type) {
+ 320          //    static unsigned char packet_string[1100];
+ 321          //
+ 322          //    //==================================     choose info type and prepare string
+ 323          //
+ 324          //    switch (info_type) {
+ 325          //        case INFO_ALL:
+ 326          //            infoPrepare(packet_string);
+ 327          //            UART_RS485_PutString(packet_string);
+ 328          //            break;
+ 329          //
+ 330          //        default:
+ 331          //            break;
+ 332          //    }
+ 333          //}
+ 334          //
+ 335          ////==============================================================================
+ 336          ////                                                        COMMAND SET PARAMETER
+ 337          ////==============================================================================
+ 338          //
+ 339          //
+ 340          //void paramSet(uint16 param_type)
+ 341          //{
+ 342          //    uint8 i;        // iterator
+ 343          //    int32 aux_int;  // auxiliary variable
+ 344          //    uint8 aux_uchar;
+ 345          //
+ 346          //    switch(param_type) {
+ 347          //
+ 348          ////===================================================================     set_id
+ 349          //
+ 350          //        case PARAM_ID:
+ 351          //            g_mem.id = g_rx.buffer[3];
+ 352          //            break;
+ 353          //
+ 354          ////=======================================================     set_pid_parameters
+ 355          //
+ 356          //        case PARAM_PID_CONTROL:
+ 357          //            g_mem.k_p = *((double *) &g_rx.buffer[3]) * 65536;
+ 358          //            g_mem.k_i = *((double *) &g_rx.buffer[3 + 4]) * 65536;
+ 359          //            g_mem.k_d = *((double *) &g_rx.buffer[3 + 8]) * 65536;
+ 360          //            break;
+ 361          //
+C51 COMPILER V9.51   COMMAND_PROCESSING                                                    04/30/2016 17:24:42 PAGE 7   
+
+ 362          ////==================================================     set_curr_pid_parameters
+ 363          //
+ 364          //        case PARAM_PID_CURR_CONTROL:
+ 365          //            g_mem.k_p_c = *((double *) &g_rx.buffer[3]) * 65536;
+ 366          //            g_mem.k_i_c = *((double *) &g_rx.buffer[3 + 4]) * 65536;
+ 367          //            g_mem.k_d_c = *((double *) &g_rx.buffer[3 + 8]) * 65536;
+ 368          //            break;
+ 369          //
+ 370          ////===================================================     set_startup_activation
+ 371          //
+ 372          //        case PARAM_STARTUP_ACTIVATION:
+ 373          //            g_mem.activ = g_rx.buffer[3];
+ 374          //            break;
+ 375          //
+ 376          ////===========================================================     set_input_mode
+ 377          //
+ 378          //        case PARAM_INPUT_MODE:
+ 379          //            g_mem.input_mode = g_rx.buffer[3];
+ 380          //            break;
+ 381          //
+ 382          ////=========================================================     set_control_mode
+ 383          //
+ 384          //        case PARAM_CONTROL_MODE:
+ 385          //            g_mem.control_mode = g_rx.buffer[3];
+ 386          //            break;
+ 387          //
+ 388          ////===========================================================     set_resolution
+ 389          //
+ 390          //        case PARAM_POS_RESOLUTION:
+ 391          //            for (i =0; i < NUM_OF_SENSORS; i++) {
+ 392          //                g_mem.res[i] = g_rx.buffer[i+3];
+ 393          //            }
+ 394          //            break;
+ 395          //
+ 396          ////===============================================================     set_offset
+ 397          //
+ 398          //        case PARAM_MEASUREMENT_OFFSET:
+ 399          //            for(i = 0; i < NUM_OF_SENSORS; ++i) {
+ 400          //                g_mem.m_off[i] = *((int16 *) &g_rx.buffer[3 + i * 2]);
+ 401          //                g_mem.m_off[i] = g_mem.m_off[i] << g_mem.res[i];
+ 402          //
+ 403          //                g_meas.rot[i] = 0;
+ 404          //            }
+ 405          //            reset_last_value_flag = 1;
+ 406          //            break;
+ 407          //
+ 408          ////===========================================================     set_multiplier
+ 409          //
+ 410          //        case PARAM_MEASUREMENT_MULTIPLIER:
+ 411          //            for(i = 0; i < NUM_OF_SENSORS; ++i) {
+ 412          //                g_mem.m_mult[i] = *((double *) &g_rx.buffer[3 + i * 4]);
+ 413          //            }
+ 414          //            break;
+ 415          //
+ 416          ////=====================================================     set_pos_limit_enable
+ 417          //
+ 418          //        case PARAM_POS_LIMIT_FLAG:
+ 419          //            g_mem.pos_lim_flag = *((uint8 *) &g_rx.buffer[3]);
+ 420          //            break;
+ 421          //
+ 422          ////============================================================     set_pos_limit
+ 423          //
+C51 COMPILER V9.51   COMMAND_PROCESSING                                                    04/30/2016 17:24:42 PAGE 8   
+
+ 424          //        case PARAM_POS_LIMIT:
+ 425          //            for (i = 0; i < NUM_OF_MOTORS; i++) {
+ 426          //                g_mem.pos_lim_inf[i] = *((int32 *) &g_rx.buffer[3 + (i * 2 * 4)]);
+ 427          //                g_mem.pos_lim_sup[i] = *((int32 *) &g_rx.buffer[3 + (i * 2 * 4) + 4]);
+ 428          //
+ 429          //                g_mem.pos_lim_inf[i] = g_mem.pos_lim_inf[i] << g_mem.res[i];
+ 430          //                g_mem.pos_lim_sup[i] = g_mem.pos_lim_sup[i] << g_mem.res[i];
+ 431          //
+ 432          //                if (g_mem.pos_lim_inf[0] == 0) {
+ 433          //                    closed_hand_pos = g_mem.pos_lim_sup[0];
+ 434          //                    opened_hand_pos = 0;
+ 435          //                    dx_sx_hand = 1;   //sx hand
+ 436          //                } else {
+ 437          //                    closed_hand_pos = -g_mem.pos_lim_inf[0];
+ 438          //                    opened_hand_pos = 0;
+ 439          //                    dx_sx_hand = -1;   //dx hand
+ 440          //                }
+ 441          //            }
+ 442          //            break;
+ 443          //
+ 444          ////===============================================     set_max_step_pos_per_cycle
+ 445          //
+ 446          //        case PARAM_MAX_STEP_POS:
+ 447          //            aux_int = *((int32 *) &g_rx.buffer[3]);
+ 448          //            if (aux_int >= 0) {
+ 449          //                g_mem.max_step_pos = aux_int;
+ 450          //            }
+ 451          //            break;
+ 452          //
+ 453          ////===============================================     set_max_step_neg_per_cycle
+ 454          //
+ 455          //        case PARAM_MAX_STEP_NEG:
+ 456          //            aux_int = *((int32 *) &g_rx.buffer[3]);
+ 457          //            if (aux_int <= 0) {
+ 458          //                g_mem.max_step_neg = aux_int;
+ 459          //            }
+ 460          //            break;
+ 461          //
+ 462          ////========================================================     set_current_limit
+ 463          //
+ 464          //        case PARAM_CURRENT_LIMIT:
+ 465          //            g_mem.current_limit = *((int16*) &g_rx.buffer[3]);
+ 466          //            break;
+ 467          //
+ 468          ////=======================================================     set_emg_calib_flag
+ 469          //
+ 470          //        case PARAM_EMG_CALIB_FLAG:
+ 471          //            g_mem.emg_calibration_flag = *((uint8*) &g_rx.buffer[3]);
+ 472          //            break;
+ 473          //
+ 474          ////========================================================     set_emg_threshold
+ 475          //
+ 476          //        case PARAM_EMG_THRESHOLD:
+ 477          //            g_mem.emg_threshold[0] = *((uint16*) &g_rx.buffer[3]);
+ 478          //            g_mem.emg_threshold[1] = *((uint16*) &g_rx.buffer[5]);
+ 479          //            break;
+ 480          //
+ 481          ////========================================================     set_emg_max_value
+ 482          //
+ 483          //        case PARAM_EMG_MAX_VALUE:
+ 484          //            g_mem.emg_max_value[0] = *((uint32*) &g_rx.buffer[3]);
+ 485          //            g_mem.emg_max_value[1] = *((uint32*) &g_rx.buffer[7]);
+C51 COMPILER V9.51   COMMAND_PROCESSING                                                    04/30/2016 17:24:42 PAGE 9   
+
+ 486          //            break;
+ 487          //
+ 488          ////============================================================     set_emg_speed
+ 489          //
+ 490          //        case PARAM_EMG_SPEED:
+ 491          //            g_mem.emg_speed = *((uint8*) &g_rx.buffer[3]);
+ 492          //            break;
+ 493          //
+ 494          ////================================================     set_double_encoder_on_off
+ 495          //        case PARAM_DOUBLE_ENC_ON_OFF:
+ 496          //            aux_uchar = *((uint8*) &g_rx.buffer[3]);
+ 497          //            if (aux_uchar) {
+ 498          //                g_mem.double_encoder_on_off = 1;
+ 499          //            } else {
+ 500          //                g_mem.double_encoder_on_off = 0;
+ 501          //            }
+ 502          //            break;
+ 503          //
+ 504          ////===================================================     set_motor_handle_ratio
+ 505          //        case PARAM_MOT_HANDLE_RATIO:
+ 506          //            g_mem.motor_handle_ratio = *((int8*) &g_rx.buffer[3]);
+ 507          //            break;
+ 508          //
+ 509          ////===================================================     set_motor_supply_type
+ 510          //        case PARAM_MOTOR_SUPPLY:
+ 511          //            g_mem.activate_pwm_rescaling = g_rx.buffer[3];
+ 512          //            break;
+ 513          //
+ 514          //    }
+ 515          //    //Not sure if ACK_OK is correct, should check
+ 516          //    sendAcknowledgment(ACK_OK);
+ 517          //}
+ 518          //
+ 519          //
+ 520          ////==============================================================================
+ 521          ////                                                         COMMAND GET PARAMETER
+ 522          ////==============================================================================
+ 523          //
+ 524          //void paramGet(uint16 param_type)
+ 525          //{
+ 526          //    uint8 packet_data[20];
+ 527          //    uint16 packet_lenght;
+ 528          //    uint8 i;                // iterator
+ 529          //
+ 530          //    packet_data[0] = CMD_GET_PARAM;
+ 531          //
+ 532          //    switch(param_type) {
+ 533          //
+ 534          ////===================================================================     get_id
+ 535          //
+ 536          //        case PARAM_ID:
+ 537          //            packet_data[1] = c_mem.id;
+ 538          //            packet_lenght = 3;
+ 539          //            break;
+ 540          //
+ 541          ////=======================================================     get_pid_parameters
+ 542          //
+ 543          //        case PARAM_PID_CONTROL:
+ 544          //            *((double *) (packet_data + 1)) = (double) c_mem.k_p / 65536;
+ 545          //            *((double *) (packet_data + 5)) = (double) c_mem.k_i / 65536;
+ 546          //            *((double *) (packet_data + 9)) = (double) c_mem.k_d / 65536;
+ 547          //            packet_lenght = 14;
+C51 COMPILER V9.51   COMMAND_PROCESSING                                                    04/30/2016 17:24:42 PAGE 10  
+
+ 548          //            break;
+ 549          //
+ 550          ////=======================================================     get_pid_parameters
+ 551          //
+ 552          //        case PARAM_PID_CURR_CONTROL:
+ 553          //            *((double *) (packet_data + 1)) = (double) c_mem.k_p_c / 65536;
+ 554          //            *((double *) (packet_data + 5)) = (double) c_mem.k_i_c / 65536;
+ 555          //            *((double *) (packet_data + 9)) = (double) c_mem.k_d_c / 65536;
+ 556          //            packet_lenght = 14;
+ 557          //            break;
+ 558          //
+ 559          ////===================================================     get_startup_activation
+ 560          //
+ 561          //        case PARAM_STARTUP_ACTIVATION:
+ 562          //            packet_data[1] = c_mem.activ;
+ 563          //            packet_lenght = 3;
+ 564          //            break;
+ 565          //
+ 566          ////===========================================================     get_input_mode
+ 567          //
+ 568          //        case PARAM_INPUT_MODE:
+ 569          //            packet_data[1] = c_mem.input_mode;
+ 570          //            packet_lenght = 3;
+ 571          //            break;
+ 572          //
+ 573          ////=========================================================     get_control_mode
+ 574          //
+ 575          //        case PARAM_CONTROL_MODE:
+ 576          //            packet_data[1] = c_mem.control_mode;
+ 577          //            packet_lenght = 3;
+ 578          //            break;
+ 579          //
+ 580          ////===========================================================     get_resolution
+ 581          //
+ 582          //        case PARAM_POS_RESOLUTION:
+ 583          //            for (i = 0; i < NUM_OF_SENSORS; i++) {
+ 584          //                packet_data[i+1] = c_mem.res[i];
+ 585          //            }
+ 586          //            packet_lenght = NUM_OF_SENSORS + 2;
+ 587          //            break;
+ 588          //
+ 589          ////===============================================================     get_offset
+ 590          //
+ 591          //        case PARAM_MEASUREMENT_OFFSET:
+ 592          //            for(i = 0; i < NUM_OF_SENSORS; ++i) {
+ 593          //                *((int16 *) ( packet_data + 1 + (i * 2) )) = (int16) (c_mem.m_off[i] >> c_mem.res[i]);
+ 594          //            }
+ 595          //
+ 596          //            packet_lenght = 2 + NUM_OF_SENSORS * 2;
+ 597          //            break;
+ 598          //
+ 599          ////===========================================================     get_multiplier
+ 600          //
+ 601          //        case PARAM_MEASUREMENT_MULTIPLIER:
+ 602          //            for(i = 0; i < NUM_OF_SENSORS; ++i) {
+ 603          //                *((double *) ( packet_data + 1 + (i * 4) )) = c_mem.m_mult[i];
+ 604          //            }
+ 605          //
+ 606          //            packet_lenght = 2 + NUM_OF_SENSORS * 4;
+ 607          //            break;
+ 608          //
+ 609          ////=====================================================     get_pos_limit_enable
+C51 COMPILER V9.51   COMMAND_PROCESSING                                                    04/30/2016 17:24:42 PAGE 11  
+
+ 610          //
+ 611          //        case PARAM_POS_LIMIT_FLAG:
+ 612          //            packet_data[1] = c_mem.pos_lim_flag;
+ 613          //            packet_lenght = 3;
+ 614          //            break;
+ 615          //
+ 616          ////============================================================     get_pos_limit
+ 617          //
+ 618          //        case PARAM_POS_LIMIT:
+ 619          //            for (i = 0; i < NUM_OF_MOTORS; i++) {
+ 620          //                *((int32 *)( packet_data + 1 + (i * 2 * 4) )) = c_mem.pos_lim_inf[i];
+ 621          //                *((int32 *)( packet_data + 1 + (i * 2 * 4) + 4)) = c_mem.pos_lim_sup[i];
+ 622          //            }
+ 623          //            packet_lenght = 2 + (NUM_OF_MOTORS * 2 * 4);
+ 624          //            break;
+ 625          //
+ 626          ////=========================================================     get_max_step_pos
+ 627          //
+ 628          //        case PARAM_MAX_STEP_POS:
+ 629          //            *((int32 *)(packet_data + 1)) = c_mem.max_step_pos;
+ 630          //            packet_lenght = 6;
+ 631          //            break;
+ 632          //
+ 633          ////=========================================================     get_max_step_neg
+ 634          //
+ 635          //        case PARAM_MAX_STEP_NEG:
+ 636          //            *((int32 *)(packet_data + 1)) = c_mem.max_step_neg;
+ 637          //            packet_lenght = 6;
+ 638          //            break;
+ 639          //
+ 640          ////========================================================     get_current_limit
+ 641          //
+ 642          //        case PARAM_CURRENT_LIMIT:
+ 643          //            *((int16 *)(packet_data + 1)) = c_mem.current_limit;
+ 644          //            packet_lenght = 4;
+ 645          //            break;
+ 646          //
+ 647          ////=======================================================     get_emg_calib_flag
+ 648          //
+ 649          //        case PARAM_EMG_CALIB_FLAG:
+ 650          //            *((uint8 *)(packet_data + 1)) = c_mem.emg_calibration_flag;
+ 651          //            packet_lenght = 3;
+ 652          //            break;
+ 653          //
+ 654          ////========================================================     get_emg_threshold
+ 655          //
+ 656          //        case PARAM_EMG_THRESHOLD:
+ 657          //            *((uint16 *)(packet_data + 1)) = c_mem.emg_threshold[0];
+ 658          //            *((uint16 *)(packet_data + 3)) = c_mem.emg_threshold[1];
+ 659          //            packet_lenght = 6;
+ 660          //            break;
+ 661          //
+ 662          ////========================================================     get_emg_max_value
+ 663          //
+ 664          //        case PARAM_EMG_MAX_VALUE:
+ 665          //            *((uint32 *)(packet_data + 1)) = c_mem.emg_max_value[0];
+ 666          //            *((uint32 *)(packet_data + 5)) = c_mem.emg_max_value[1];
+ 667          //            packet_lenght = 10;
+ 668          //            break;
+ 669          //
+ 670          ////============================================================     get_emg_speed
+ 671          //
+C51 COMPILER V9.51   COMMAND_PROCESSING                                                    04/30/2016 17:24:42 PAGE 12  
+
+ 672          //        case PARAM_EMG_SPEED:
+ 673          //            *((uint8 *)(packet_data + 1)) = c_mem.emg_speed;
+ 674          //            packet_lenght = 3;
+ 675          //            break;
+ 676          //
+ 677          ////================================================     get_double_encoder_on_off
+ 678          //        case PARAM_DOUBLE_ENC_ON_OFF:
+ 679          //            *((uint8 *)(packet_data + 1)) = c_mem.double_encoder_on_off;
+ 680          //            packet_lenght = 3;
+ 681          //            break;
+ 682          //
+ 683          ////===================================================     get_motor_handle_ratio
+ 684          //        case PARAM_MOT_HANDLE_RATIO:
+ 685          //            *((int8 *)(packet_data + 1)) = c_mem.motor_handle_ratio;
+ 686          //            packet_lenght = 3;
+ 687          //            break;
+ 688          //
+ 689          ////===================================================     get_motor_supply_type
+ 690          //        case PARAM_MOTOR_SUPPLY:
+ 691          //            *((uint8 *)(packet_data + 1)) = c_mem.activate_pwm_rescaling;
+ 692          //            packet_lenght = 3;
+ 693          //            break;
+ 694          //
+ 695          ////===================================================     default
+ 696          //        default:
+ 697          //            break;
+ 698          //    }
+ 699          //
+ 700          //    packet_data[packet_lenght - 1] = LCRChecksum(packet_data,packet_lenght - 1);
+ 701          //    commWrite(packet_data, packet_lenght);
+ 702          //}
+ 703          //
+ 704          ////==============================================================================
+ 705          ////                                                           PREPARE DEVICE INFO
+ 706          ////==============================================================================
+ 707          //
+ 708          void infoPrepare(unsigned char *info_string) // QUESTA VA MODIFICATA
+ 709          {
+ 710   1      
+ 711   1          if(c_mem.id != 250){                //To avoid dummy board ping
+ 712   2              unsigned char str[100];
+ 713   2              strcpy(info_string, "");
+ 714   2              strcat(info_string, "\r\n");
+ 715   2              strcat(info_string, "Firmware version: ");
+ 716   2              strcat(info_string, VERSION);
+ 717   2              strcat(info_string, ".\r\n\r\n");
+ 718   2      
+ 719   2              strcat(info_string, "DEVICE INFO\r\n");
+ 720   2              sprintf(str, "ID: %d\r\n", (int) c_mem.id);
+ 721   2              strcat(info_string, str);
+ 722   2              strcat(info_string, "\r\n");
+ 723   2          }
+ 724   1      }
+ 725          //
+ 726          ////==============================================================================
+ 727          ////                                                      WRITE FUNCTION FOR RS485
+ 728          ////==============================================================================
+ 729          //
+ 730          //void commWrite(uint8 *packet_data, uint16 packet_lenght)
+ 731          //{
+ 732          //    static uint16 i;    // iterator
+ 733          //
+C51 COMPILER V9.51   COMMAND_PROCESSING                                                    04/30/2016 17:24:42 PAGE 13  
+
+ 734          //    // frame - start
+ 735          //    UART_RS485_PutChar(':');
+ 736          //    UART_RS485_PutChar(':');
+ 737          //    // frame - ID
+ 738          //    UART_RS485_PutChar(g_mem.id);
+ 739          //    // frame - length
+ 740          //    UART_RS485_PutChar((uint8)packet_lenght);
+ 741          //    // frame - packet data
+ 742          //    for(i = 0; i < packet_lenght; ++i) {
+ 743          //        UART_RS485_PutChar(packet_data[i]);
+ 744          //    }
+ 745          //
+ 746          //    i = 0;
+ 747          //
+ 748          //    while(!(UART_RS485_ReadTxStatus() & UART_RS485_TX_STS_COMPLETE) && i++ <= 1000){}
+ 749          //
+ 750          //    RS485_CTS_Write(1);
+ 751          //    RS485_CTS_Write(0);
+ 752          //}
+ 753          //
+ 754          ////==============================================================================
+ 755          ////                                                             CHECKSUM FUNCTION
+ 756          ////==============================================================================
+ 757          //
+ 758          uint8 LCRChecksum(uint8 *data_array, uint8 data_length) {
+ 759   1          uint8 i;
+ 760   1          uint8 checksum = 0x00;
+ 761   1          for(i = 0; i < data_length; ++i) {
+ 762   2             checksum = checksum ^ data_array[i];
+ 763   2          }
+ 764   1          return checksum;
+ 765   1      }
+ 766          //
+ 767          //
+ 768          ////==============================================================================
+ 769          ////                                                       ACKNOWLEDGMENT FUNCTION
+ 770          ////==============================================================================
+ 771          //
+ 772          //void sendAcknowledgment(uint8 value) {
+ 773          //    int packet_lenght = 2;
+ 774          //    uint8 packet_data[2];
+ 775          //
+ 776          //    packet_data[0] = value;
+ 777          //    packet_data[1] = value;
+ 778          //
+ 779          //    commWrite(packet_data, packet_lenght);
+ 780          //}
+ 781          //
+ 782          ////==============================================================================
+ 783          ////                                                                  STORE MEMORY
+ 784          ////==============================================================================
+ 785          //
+ 786          ///**
+ 787          //* This function stores current memory settings on the eeprom with the specified
+ 788          //* displacement
+ 789          //**/
+ 790          //
+ 791          //uint8 memStore(int displacement)
+ 792          //{
+ 793          //    int i;  // iterator
+ 794          //    uint8 writeStatus;
+ 795          //    int pages;
+C51 COMPILER V9.51   COMMAND_PROCESSING                                                    04/30/2016 17:24:42 PAGE 14  
+
+ 796          //    uint8 ret_val = 1;
+ 797          //
+ 798          //    // Disable Interrupt
+ 799          //    ISR_RS485_RX_Disable();
+ 800          //
+ 801          //    // Stop motors
+ 802          //    //PWM_MOTORS_WriteCompare1(0);
+ 803          //    //PWM_MOTORS_WriteCompare2(0);
+ 804          //
+ 805          //    // Retrieve temperature for better writing performance
+ 806          //    CySetTemp();
+ 807          //
+ 808          //    memcpy( &c_mem, &g_mem, sizeof(g_mem) );
+ 809          //
+ 810          //    pages = sizeof(g_mem) / 16 + (sizeof(g_mem) % 16 > 0);
+ 811          //
+ 812          //    for(i = 0; i < pages; ++i) {
+ 813          //        writeStatus = EEPROM_Write(&g_mem.flag + 16 * i, i + displacement);
+ 814          //        if(writeStatus != CYRET_SUCCESS) {
+ 815          //            ret_val = 0;
+ 816          //            break;
+ 817          //        }
+ 818          //    }
+ 819          //
+ 820          //    memcpy( &g_mem, &c_mem, sizeof(g_mem) );
+ 821          //
+ 822          //    // Re-Enable Interrupt
+ 823          //    ISR_RS485_RX_Enable();
+ 824          //
+ 825          //    return ret_val;
+ 826          //}
+ 827          //
+ 828          //
+ 829          ////==============================================================================
+ 830          ////                                                                 RECALL MEMORY
+ 831          ////==============================================================================
+ 832          //
+ 833          ///**
+ 834          //* This function loads user settings from the eeprom.
+ 835          //**/
+ 836          //
+ 837          //void memRecall(void)
+ 838          //{
+ 839          //    uint16 i;
+ 840          //
+ 841          //    for (i = 0; i < sizeof(g_mem); i++) {
+ 842          //        ((reg8 *) &g_mem.flag)[i] = EEPROM_ADDR[i];
+ 843          //    }
+ 844          //
+ 845          //    //check for initialization
+ 846          //    if (g_mem.flag == FALSE) {
+ 847          //        memRestore();
+ 848          //    } else {
+ 849          //        memcpy( &c_mem, &g_mem, sizeof(g_mem) );
+ 850          //    }
+ 851          //
+ 852          //    // hand settings
+ 853          //    if (g_mem.pos_lim_inf[0] == 0) {
+ 854          //        closed_hand_pos = g_mem.pos_lim_sup[0];
+ 855          //        opened_hand_pos = 0;
+ 856          //        dx_sx_hand = 1; //sx hand
+ 857          //    } else {
+C51 COMPILER V9.51   COMMAND_PROCESSING                                                    04/30/2016 17:24:42 PAGE 15  
+
+ 858          //        closed_hand_pos = -g_mem.pos_lim_inf[0];
+ 859          //        opened_hand_pos = 0;
+ 860          //        dx_sx_hand = -1; //dx hand
+ 861          //    }
+ 862          //}
+ 863          //
+ 864          //
+ 865          ////==============================================================================
+ 866          ////                                                                RESTORE MEMORY
+ 867          ////==============================================================================
+ 868          //
+ 869          ///**
+ 870          //* This function loads default settings from the eeprom.
+ 871          //**/
+ 872          //
+ 873          //uint8 memRestore(void) {
+ 874          //    uint16 i;
+ 875          //
+ 876          //    for (i = 0; i < sizeof(g_mem); i++) {
+ 877          //        ((reg8 *) &g_mem.flag)[i] = EEPROM_ADDR[i + (DEFAULT_EEPROM_DISPLACEMENT * 16)];
+ 878          //    }
+ 879          //
+ 880          //    //check for initialization
+ 881          //    if (g_mem.flag == FALSE) {
+ 882          //        return memInit();
+ 883          //    } else {
+ 884          //        return memStore(0);
+ 885          //    }
+ 886          //}
+ 887          //
+ 888          ////==============================================================================
+ 889          ////                                                                   MEMORY INIT
+ 890          ////==============================================================================
+ 891          //
+ 892          ///**
+ 893          //* This function initialize memory when eeprom is compromised.
+ 894          //**/
+ 895          //
+ 896          //uint8 memInit(void)
+ 897          //{
+ 898          //    uint8 i;
+ 899          //
+ 900          //    //initialize memory settings
+ 901          //    g_mem.id            = 1;
+ 902          //
+ 903          //    g_mem.k_p           =  0.01 * 65536;
+ 904          //    g_mem.k_i           =     0 * 65536;
+ 905          //    g_mem.k_d           = 0.007 * 65536;  //Changed in order to avoid metallic clatter previous value 0.
+             -2
+ 906          //    g_mem.k_p_c         =     1 * 65536;
+ 907          //    g_mem.k_i_c         =     0 * 65536;
+ 908          //    g_mem.k_d_c         =     0 * 65536;
+ 909          //
+ 910          //    g_mem.activ         = 0;
+ 911          //    g_mem.input_mode    = INPUT_MODE_EXTERNAL;
+ 912          //    g_mem.control_mode  = CONTROL_ANGLE;
+ 913          //
+ 914          //    g_mem.pos_lim_flag = 1;
+ 915          //
+ 916          //    g_mem.activate_pwm_rescaling = MAXON_12V;           //rescaling active for 12V motors
+ 917          //
+ 918          //    g_mem.res[0] = 3;
+C51 COMPILER V9.51   COMMAND_PROCESSING                                                    04/30/2016 17:24:42 PAGE 16  
+
+ 919          //    g_mem.res[1] = 3;
+ 920          //    g_mem.res[2] = 3;
+ 921          //
+ 922          //    for (i = 0; i < NUM_OF_MOTORS; i++) {
+ 923          //        g_mem.pos_lim_inf[i] = 0;
+ 924          //        g_mem.pos_lim_sup[i] = (int32)19000 << g_mem.res[0];
+ 925          //    }
+ 926          //
+ 927          //    for(i = 0; i < NUM_OF_SENSORS; ++i)
+ 928          //    {
+ 929          //        g_mem.m_mult[i] = 1;
+ 930          //        g_mem.m_off[i] = (int32)0 << g_mem.res[i];
+ 931          //    }
+ 932          //
+ 933          //    g_mem.max_step_pos = 0;
+ 934          //    g_mem.max_step_neg = 0;
+ 935          //
+ 936          //    g_mem.current_limit = DEFAULT_CURRENT_LIMIT;
+ 937          //
+ 938          //    // EMG calibration enabled by default
+ 939          //    g_mem.emg_calibration_flag = 0;
+ 940          //
+ 941          //    g_mem.emg_max_value[0] = 0;
+ 942          //    g_mem.emg_max_value[1] = 0;
+ 943          //
+ 944          //    g_mem.emg_threshold[0] = 100;
+ 945          //    g_mem.emg_threshold[1] = 100;
+ 946          //
+ 947          //    g_mem.emg_speed = 100;
+ 948          //
+ 949          //    g_mem.double_encoder_on_off = 1;
+ 950          //    g_mem.motor_handle_ratio = 22;
+ 951          //
+ 952          //    // set the initialized flag to show EEPROM has been populated
+ 953          //    g_mem.flag = TRUE;
+ 954          //    
+ 955          //    //write that configuration to EEPROM
+ 956          //    return ( memStore(0) && memStore(DEFAULT_EEPROM_DISPLACEMENT) );
+ 957          //}
+ 958          //
+ 959          //
+C51 COMPILER V9.51   COMMAND_PROCESSING                                                    04/30/2016 17:24:42 PAGE 17  
+
+ASSEMBLY LISTING OF GENERATED OBJECT CODE
+
+
+             ; FUNCTION commProcess (BEGIN)
+                                           ; SOURCE LINE # 20
+                                           ; SOURCE LINE # 33
+0000 900000      E     MOV     DPTR,#g_rx
+0003 E0                MOVX    A,@DPTR
+0004 900000      R     MOV     DPTR,#rx_cmd
+0007 F0                MOVX    @DPTR,A
+                                           ; SOURCE LINE # 36
+0008 7B01              MOV     R3,#01H
+000A 7A00        E     MOV     R2,#HIGH g_rx
+000C 7900        E     MOV     R1,#LOW g_rx
+000E 900000      E     MOV     DPTR,#g_rx+080H
+0011 E0                MOVX    A,@DPTR
+0012 A3                INC     DPTR
+0013 E0                MOVX    A,@DPTR
+0014 14                DEC     A
+0015 FD                MOV     R5,A
+0016 120000      R     LCALL   _LCRChecksum
+0019 900000      R     MOV     DPTR,#aux_checksum
+001C EF                MOV     A,R7
+001D F0                MOVX    @DPTR,A
+                                           ; SOURCE LINE # 38
+001E 900000      E     MOV     DPTR,#g_rx+080H
+0021 E0                MOVX    A,@DPTR
+0022 FC                MOV     R4,A
+0023 A3                INC     DPTR
+0024 E0                MOVX    A,@DPTR
+0025 2400        E     ADD     A,#LOW g_rx+0FFFFH
+0027 F582              MOV     DPL,A
+0029 7400        E     MOV     A,#HIGH g_rx+0FFFFH
+002B 3C                ADDC    A,R4
+002C F583              MOV     DPH,A
+002E E0                MOVX    A,@DPTR
+002F B50707            CJNE    A,AR7,?C0002
+                                           ; SOURCE LINE # 40
+0032         ?C0001:
+                                           ; SOURCE LINE # 42
+0032 900000      R     MOV     DPTR,#rx_cmd
+0035 E0                MOVX    A,@DPTR
+0036 FF                MOV     R7,A
+0037 8000              SJMP    ?C0002
+                                           ; SOURCE LINE # 300
+                                           ; SOURCE LINE # 301
+0039         ?C0002:
+0039 22                RET     
+             ; FUNCTION commProcess (END)
+
+             ; FUNCTION infoSend (BEGIN)
+                                           ; SOURCE LINE # 308
+                                           ; SOURCE LINE # 310
+0000 7B01              MOV     R3,#01H
+0002 7A00        R     MOV     R2,#HIGH packet_string
+0004 7900        R     MOV     R1,#LOW packet_string
+0006 120000      R     LCALL   _infoPrepare
+                                           ; SOURCE LINE # 311
+0009 7B01              MOV     R3,#01H
+000B 7A00        R     MOV     R2,#HIGH packet_string
+000D 7900        R     MOV     R1,#LOW packet_string
+000F 120000      E     LCALL   _UART_RS485_PutString
+C51 COMPILER V9.51   COMMAND_PROCESSING                                                    04/30/2016 17:24:42 PAGE 18  
+
+                                           ; SOURCE LINE # 312
+0012 22                RET     
+             ; FUNCTION infoSend (END)
+
+             ; FUNCTION _infoPrepare (BEGIN)
+                                           ; SOURCE LINE # 708
+0000 900000      R     MOV     DPTR,#info_string
+0003 120000      E     LCALL   ?C?PSTXDATA
+                                           ; SOURCE LINE # 709
+                                           ; SOURCE LINE # 711
+0006 900000      E     MOV     DPTR,#c_mem+01H
+0009 E0                MOVX    A,@DPTR
+000A 64FA              XRL     A,#0FAH
+000C 7003              JNZ     $ + 5H
+000E 020000      R     LJMP    ?C0006
+                                           ; SOURCE LINE # 713
+0011 900000      R     MOV     DPTR,#info_string
+0014 120000      E     LCALL   ?C?PLDXDATA
+0017 A801              MOV     R0,AR1
+0019 AC02              MOV     R4,AR2
+001B AD03              MOV     R5,AR3
+001D 7BFF              MOV     R3,#0FFH
+001F 7A00        R     MOV     R2,#HIGH ?SC_0
+0021 7900        R     MOV     R1,#LOW ?SC_0
+0023 120000      E     LCALL   ?C?STRCPYAMD
+                                           ; SOURCE LINE # 714
+0026 7BFF              MOV     R3,#0FFH
+0028 7A00        R     MOV     R2,#HIGH ?SC_1
+002A 7900        R     MOV     R1,#LOW ?SC_1
+002C 900000      E     MOV     DPTR,#?_strcat?BYTE+03H
+002F 120000      E     LCALL   ?C?PSTXDATA
+0032 900000      R     MOV     DPTR,#info_string
+0035 120000      E     LCALL   ?C?PLDXDATA
+0038 120000      E     LCALL   _strcat
+                                           ; SOURCE LINE # 715
+003B 7BFF              MOV     R3,#0FFH
+003D 7A00        R     MOV     R2,#HIGH ?SC_4
+003F 7900        R     MOV     R1,#LOW ?SC_4
+0041 900000      E     MOV     DPTR,#?_strcat?BYTE+03H
+0044 120000      E     LCALL   ?C?PSTXDATA
+0047 900000      R     MOV     DPTR,#info_string
+004A 120000      E     LCALL   ?C?PLDXDATA
+004D 120000      E     LCALL   _strcat
+                                           ; SOURCE LINE # 716
+0050 7BFF              MOV     R3,#0FFH
+0052 7A00        R     MOV     R2,#HIGH ?SC_23
+0054 7900        R     MOV     R1,#LOW ?SC_23
+0056 900000      E     MOV     DPTR,#?_strcat?BYTE+03H
+0059 120000      E     LCALL   ?C?PSTXDATA
+005C 900000      R     MOV     DPTR,#info_string
+005F 120000      E     LCALL   ?C?PLDXDATA
+0062 120000      E     LCALL   _strcat
+                                           ; SOURCE LINE # 717
+0065 7BFF              MOV     R3,#0FFH
+0067 7A00        R     MOV     R2,#HIGH ?SC_37
+0069 7900        R     MOV     R1,#LOW ?SC_37
+006B 900000      E     MOV     DPTR,#?_strcat?BYTE+03H
+006E 120000      E     LCALL   ?C?PSTXDATA
+0071 900000      R     MOV     DPTR,#info_string
+0074 120000      E     LCALL   ?C?PLDXDATA
+0077 120000      E     LCALL   _strcat
+                                           ; SOURCE LINE # 719
+C51 COMPILER V9.51   COMMAND_PROCESSING                                                    04/30/2016 17:24:42 PAGE 19  
+
+007A 7BFF              MOV     R3,#0FFH
+007C 7A00        R     MOV     R2,#HIGH ?SC_43
+007E 7900        R     MOV     R1,#LOW ?SC_43
+0080 900000      E     MOV     DPTR,#?_strcat?BYTE+03H
+0083 120000      E     LCALL   ?C?PSTXDATA
+0086 900000      R     MOV     DPTR,#info_string
+0089 120000      E     LCALL   ?C?PLDXDATA
+008C 120000      E     LCALL   _strcat
+                                           ; SOURCE LINE # 720
+008F 7BFF              MOV     R3,#0FFH
+0091 7A00        R     MOV     R2,#HIGH ?SC_57
+0093 7900        R     MOV     R1,#LOW ?SC_57
+0095 900000      E     MOV     DPTR,#?_sprintf?BYTE+03H
+0098 120000      E     LCALL   ?C?PSTXDATA
+009B 900000      E     MOV     DPTR,#c_mem+01H
+009E E0                MOVX    A,@DPTR
+009F FF                MOV     R7,A
+00A0 900000      E     MOV     DPTR,#?_sprintf?BYTE+06H
+00A3 E4                CLR     A
+00A4 F0                MOVX    @DPTR,A
+00A5 A3                INC     DPTR
+00A6 EF                MOV     A,R7
+00A7 F0                MOVX    @DPTR,A
+00A8 7B01              MOV     R3,#01H
+00AA 7A00        R     MOV     R2,#HIGH str
+00AC 7900        R     MOV     R1,#LOW str
+00AE 120000      E     LCALL   _sprintf
+                                           ; SOURCE LINE # 721
+00B1 7B01              MOV     R3,#01H
+00B3 7A00        R     MOV     R2,#HIGH str
+00B5 7900        R     MOV     R1,#LOW str
+00B7 900000      E     MOV     DPTR,#?_strcat?BYTE+03H
+00BA 120000      E     LCALL   ?C?PSTXDATA
+00BD 900000      R     MOV     DPTR,#info_string
+00C0 120000      E     LCALL   ?C?PLDXDATA
+00C3 120000      E     LCALL   _strcat
+                                           ; SOURCE LINE # 722
+00C6 7BFF              MOV     R3,#0FFH
+00C8 7A00        R     MOV     R2,#HIGH ?SC_1
+00CA 7900        R     MOV     R1,#LOW ?SC_1
+00CC 900000      E     MOV     DPTR,#?_strcat?BYTE+03H
+00CF 120000      E     LCALL   ?C?PSTXDATA
+00D2 900000      R     MOV     DPTR,#info_string
+00D5 120000      E     LCALL   ?C?PLDXDATA
+00D8 120000      E     LCALL   _strcat
+                                           ; SOURCE LINE # 723
+                                           ; SOURCE LINE # 724
+00DB         ?C0006:
+00DB 22                RET     
+             ; FUNCTION _infoPrepare (END)
+
+             ; FUNCTION _LCRChecksum (BEGIN)
+                                           ; SOURCE LINE # 758
+0000 900000      R     MOV     DPTR,#data_array
+0003 120000      E     LCALL   ?C?PSTXDATA
+0006 900000      R     MOV     DPTR,#data_length
+0009 ED                MOV     A,R5
+000A F0                MOVX    @DPTR,A
+                                           ; SOURCE LINE # 760
+;---- Variable 'checksum' assigned to Register 'R7' ----
+000B E4                CLR     A
+000C FF                MOV     R7,A
+C51 COMPILER V9.51   COMMAND_PROCESSING                                                    04/30/2016 17:24:42 PAGE 20  
+
+                                           ; SOURCE LINE # 761
+;---- Variable 'i' assigned to Register 'R6' ----
+000D FE                MOV     R6,A
+000E         ?C0007:
+000E 900000      R     MOV     DPTR,#data_length
+0011 E0                MOVX    A,@DPTR
+0012 FD                MOV     R5,A
+0013 EE                MOV     A,R6
+0014 C3                CLR     C
+0015 9D                SUBB    A,R5
+0016 5014              JNC     ?C0008
+                                           ; SOURCE LINE # 762
+0018 900000      R     MOV     DPTR,#data_array
+001B 120000      E     LCALL   ?C?PLDXDATA
+001E E9                MOV     A,R1
+001F 2E                ADD     A,R6
+0020 F9                MOV     R1,A
+0021 E4                CLR     A
+0022 3A                ADDC    A,R2
+0023 FA                MOV     R2,A
+0024 120000      E     LCALL   ?C?CLDPTR
+0027 6F                XRL     A,R7
+0028 FF                MOV     R7,A
+                                           ; SOURCE LINE # 763
+0029 0E                INC     R6
+002A 80E2              SJMP    ?C0007
+002C         ?C0008:
+                                           ; SOURCE LINE # 764
+                                           ; SOURCE LINE # 765
+002C         ?C0010:
+002C 22                RET     
+             ; FUNCTION _LCRChecksum (END)
+
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    342    ----
+   CONSTANT SIZE    =     66    ----
+   XDATA SIZE       =      2    1207
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+   EDATA SIZE       =   ----    ----
+   HDATA SIZE       =   ----    ----
+   XDATA CONST SIZE =   ----    ----
+   FAR CONST SIZE   =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

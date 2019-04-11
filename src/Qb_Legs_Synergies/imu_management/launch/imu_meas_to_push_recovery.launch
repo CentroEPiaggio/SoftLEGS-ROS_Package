@@ -1,0 +1,8 @@
+<launch>
+
+    <!-- launch IMU management node -->
+    <include file="$(find imu_management)/launch/qb_interface_imu_management.launch"/>
+    <!-- launch the node that manages the imu data and redirects them to push recovery -->
+    <node name="IMU_evaluation" pkg="imu_management" type="IMU_evaluation" output="screen"/>
+
+</launch>

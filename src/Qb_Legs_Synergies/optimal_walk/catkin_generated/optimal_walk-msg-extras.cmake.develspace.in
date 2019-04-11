@@ -1,0 +1,2 @@
+set(optimal_walk_MESSAGE_FILES "/home/riccardo/catkin_ws/src/Qb_Legs_Synergies/optimal_walk/msg/dataset_name.msg")
+set(optimal_walk_SERVICE_FILES "/home/riccardo/catkin_ws/src/Qb_Legs_Synergies/optimal_walk/srv/num_sim_srv.srv;/home/riccardo/catkin_ws/src/Qb_Legs_Synergies/optimal_walk/srv/sim_start_srv.srv;/home/riccardo/catkin_ws/src/Qb_Legs_Synergies/optimal_walk/srv/sim_stop_srv.srv")

@@ -1,0 +1,1 @@
+std::vector<double> bias_in_common={0,0,0,0,0,0};

@@ -1,0 +1,8 @@
+prefix=/home/riccardo/catkin_ws/install
+
+Name: qb_legs_gui
+Description: Description of qb_legs_gui
+Version: 0.0.0
+Cflags: -I/home/riccardo/catkin_ws/install/include
+Libs: -L/home/riccardo/catkin_ws/install/lib 
+Requires: 

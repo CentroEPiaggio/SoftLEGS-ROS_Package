@@ -1,0 +1,83 @@
+cube4_joint_state_controller:
+  type: joint_state_controller/JointStateController
+  publish_rate: 100
+
+# control the qbmove with shaft reference position and stiffness preset
+cube4_position_and_preset_trajectory_controller:
+  type: position_controllers/JointTrajectoryController
+  joints:
+    - cube4_shaft_joint
+    - cube4_stiffness_preset_virtual_joint
+  constraints:
+    goal_time: 0.2
+    stopped_velocity_tolerance: 0.1
+    cube4_shaft_joint:
+      trajectory: 0.1
+      goal: 0.05
+    cube4_stiffness_preset_virtual_joint:
+      trajectory: 0.1
+      goal: 0.05
+  state_publish_rate: 100
+  action_monitor_rate: 120
+  stop_trajectory_duration: 0
+
+# control the qbmove with motor positions
+cube4_motor_positions_trajectory_controller:
+  type: position_controllers/JointTrajectoryController
+  joints:
+    - cube4_motor_1_joint
+    - cube4_motor_2_joint
+  constraints:
+    goal_time: 0.2
+    stopped_velocity_tolerance: 0.1
+    cube4_motor_1_joint:
+      trajectory: 0.1
+      goal: 0.05
+    cube4_motor_2_joint:
+      trajectory: 0.1
+      goal: 0.05
+  state_publish_rate: 100
+  action_monitor_rate: 120
+  stop_trajectory_duration: 0
+
+cube5_joint_state_controller:
+  type: joint_state_controller/JointStateController
+  publish_rate: 100
+
+# control the qbmove with shaft reference position and stiffness preset
+cube5_position_and_preset_trajectory_controller:
+  type: position_controllers/JointTrajectoryController
+  joints:
+    - cube5_shaft_joint
+    - cube5_stiffness_preset_virtual_joint
+  constraints:
+    goal_time: 0.2
+    stopped_velocity_tolerance: 0.1
+    cube5_shaft_joint:
+      trajectory: 0.1
+      goal: 0.05
+    cube5_stiffness_preset_virtual_joint:
+      trajectory: 0.1
+      goal: 0.05
+  state_publish_rate: 100
+  action_monitor_rate: 120
+  stop_trajectory_duration: 0
+
+# control the qbmove with motor positions
+cube5_motor_positions_trajectory_controller:
+  type: position_controllers/JointTrajectoryController
+  joints:
+    - cube5_motor_1_joint
+    - cube5_motor_2_joint
+  constraints:
+    goal_time: 0.2
+    stopped_velocity_tolerance: 0.1
+    cube5_motor_1_joint:
+      trajectory: 0.1
+      goal: 0.05
+    cube5_motor_2_joint:
+      trajectory: 0.1
+      goal: 0.05
+  state_publish_rate: 100
+  action_monitor_rate: 120
+  stop_trajectory_duration: 0

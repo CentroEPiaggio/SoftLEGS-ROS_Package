@@ -1,0 +1,3 @@
+<launch>
+  <node pkg="synergies" name="synergies_qb_legs_control" type="synergies" output="screen"/>
+</launch>

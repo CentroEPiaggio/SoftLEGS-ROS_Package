@@ -1,0 +1,8 @@
+prefix=/home/riccardo/catkin_ws/install
+
+Name: qb_chain_control
+Description: Description of qb_chain_control
+Version: 0.1.3
+Cflags: 
+Libs: -L/home/riccardo/catkin_ws/install/lib 
+Requires: 

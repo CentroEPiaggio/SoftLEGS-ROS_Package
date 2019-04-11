@@ -1,0 +1,159 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://ros.org/wiki/xacro">
+
+	<xacro:include filename="$(find qblegs-ros)/urdf/qbmove.gazebo.xacro" />
+	<xacro:include filename="$(find qblegs-ros)/urdf/qbmove.transmission.xacro" />
+	<xacro:include filename="$(find qblegs-ros)/urdf/materials.urdf.xacro" />
+	<xacro:include filename="$(find qblegs-ros)/urdf/common.urdf.xacro" />
+
+	<!-- macro for one qb_move with forward mounting -->
+	<xacro:macro name="qb_move_forward" params="parent name position orientation cube_mass">
+		<joint name="${name}_dummy_joint" type="fixed">
+			<origin xyz="${position}" rpy="${orientation}" />
+			<parent link="${parent}"/>
+			<child link="${name}_mesh_link"/>
+		</joint>
+
+		<link name="${name}_mesh_link">
+			<inertial>
+				<!-- inertia of a full, uniform cube -->
+				<origin xyz="0 0 0" rpy="0 0 0" />
+				<mass value="${cube_mass}"/>
+				<inertia ixx="${cube_mass * cube_size * cube_size / 6.0 * mm2_to_m2}" ixy="0.0" ixz="0.0" iyy="${cube_mass * cube_size * cube_size / 6.0 * mm2_to_m2}" iyz="0.0" izz="${cube_mass * cube_size * cube_size / 6.0 * mm2_to_m2}"/>
+			</inertial>
+			<visual>
+				<origin xyz="0 0 0" rpy="0 0 0" />
+				<geometry>
+					<mesh filename="package://qblegs-ros/meshes/cube.stl" />
+				</geometry>
+			<material name="QB/Blue" />
+			</visual>
+			<collision>
+			  <origin xyz="0 0 0" rpy="0 0 0"/>
+			  <geometry>
+				<box size="${cube_size/scale_f} ${cube_size/scale_f} ${cube_size/scale_f}"/>
+			  </geometry>
+			</collision>
+		</link>
+
+		<joint name="${name}_joint" type="revolute">
+			<origin xyz="0 0 0" rpy="0 0 0" />
+			<parent link="${name}_mesh_link"/>
+			<child link="${name}"/>
+			<axis xyz="0 0 1" />
+			<dynamics damping="${damping_all}" />
+			<limit lower="${low_b * pi / 180}" upper="${up_b * pi / 180}" effort="${effort}" velocity="${velocity}"/>
+		</joint>
+
+		<link name="${name}" />
+
+		<!-- extensions -->
+		<xacro:qb_move_gazebo name="${name}" />
+		<xacro:qb_move_transmission name="${name}" />
+	</xacro:macro>
+
+	<!-- macro for non-actuated qb_move -->
+	<xacro:macro name="qb_empty_macro" params="parent name position orientation cube_mass">
+		<joint name="${name}_dummy_joint" type="fixed">
+			<origin xyz="${position}" rpy="${orientation}" />
+			<parent link="${parent}"/>
+			<child link="${name}_mesh_link"/>
+		</joint>
+
+		<link name="${name}_mesh_link">
+			<inertial>
+				<origin xyz="0 0 0" rpy="0 0 0" />
+				<mass value="${cube_mass}"/>
+				<inertia ixx="${cube_mass * cube_size * cube_size / 6.0 * mm2_to_m2}" ixy="0.0" ixz="0.0" iyy="${cube_mass * cube_size * cube_size / 6.0 * mm2_to_m2}" iyz="0.0" izz="${cube_mass * cube_size * cube_size / 6.0 * mm2_to_m2}"/>
+			</inertial>
+			<visual>
+				<origin xyz="0 0 0" rpy="0 0 0" />
+				<geometry>
+					<mesh filename="package://qblegs-ros/meshes/cube.stl" />
+				</geometry>
+			<material name="QB/Blue" />
+			</visual>
+			<collision>
+			  <origin xyz="0 0 0" rpy="0 0 0"/>
+			  <geometry>
+				<box size="${cube_size/scale_f} ${cube_size/scale_f} ${cube_size/scale_f}"/>
+			  </geometry>
+			</collision>
+		</link>
+
+		<joint name="${name}_dummy_joint_bis" type="fixed">
+			<origin xyz="0 0 0" rpy="0 0 0" />
+			<parent link="${name}_mesh_link"/>
+			<child link="${name}"/>
+		</joint>
+
+		<link name="${name}" />
+
+		<!-- extensions -->
+		<xacro:qb_move_gazebo name="${name}" />
+	</xacro:macro>
+
+	<!-- macro for inversely-mounted qb_move -->
+	<xacro:macro name="qb_move_reverse_macro" params="parent name position orientation cube_mass">
+		<joint name="${name}_joint" type="revolute">
+			<origin xyz="${position}" rpy="${orientation}" />
+			<parent link="${parent}"/>
+			<child link="${name}_mesh_link"/>
+			<axis xyz="0 0 1" />
+			<dynamics damping="${damping_all}" />
+			<limit lower="${low_b * pi / 180}" upper="${up_b * pi / 180}" effort="${effort}" velocity="${velocity}"/>
+		</joint>
+
+		<link name="${name}_mesh_link">
+			<inertial>
+				<!-- inertia of a full, uniform cube -->
+				<origin xyz="0 0 0" rpy="0 0 0" />
+				<mass value="${cube_mass}"/>
+				<inertia ixx="${cube_mass * cube_size * cube_size / 6.0 * mm2_to_m2}" ixy="0.0" ixz="0.0" iyy="${cube_mass * cube_size * cube_size / 6.0 * mm2_to_m2}" iyz="0.0" izz="${cube_mass * cube_size * cube_size / 6.0 * mm2_to_m2}"/>
+			</inertial>
+			<visual>
+				<origin xyz="0 0 0" rpy="0 0 0" />
+				<geometry>
+					<mesh filename="package://qblegs-ros/meshes/cube.stl" />
+				</geometry>
+			<material name="QB/Blue" />
+			</visual>
+			<collision>
+			  <origin xyz="0 0 0" rpy="0 0 0"/>
+			  <geometry>
+				<box size="${cube_size/scale_f} ${cube_size/scale_f} ${cube_size/scale_f}"/>
+			  </geometry>
+			</collision>
+		</link>
+
+		<joint name="${name}_dummy_joint" type="fixed">
+			<origin xyz="0 0 0" rpy="0 0 0" />
+			<parent link="${name}_mesh_link"/>
+			<child link="${name}"/>
+		</joint>
+
+		<link name="${name}" />
+
+		<!-- extensions -->
+		<xacro:qb_move_gazebo name="${name}" />
+		<xacro:qb_move_transmission name="${name}" />
+	</xacro:macro>
+
+
+	<!-- instantiate macros for the various versions -->
+
+	<!-- advanced -->
+	<xacro:macro name="qb_move" params="parent name position orientation">
+		<xacro:qb_move_forward parent="${parent}" name="${name}" position="${position}" orientation="${orientation}" cube_mass="${advanced_cube_mass}"/>
+	</xacro:macro>
+
+	<xacro:macro name="qb_empty" params="parent name position orientation">
+		<xacro:qb_empty_macro parent="${parent}" name="${name}" position="${position}" orientation="${orientation}" cube_mass="${advanced_cube_mass}"/>
+	</xacro:macro>
+
+	<!-- maker pro -->
+	<xacro:macro name="qb_move_reverse" params="parent name position orientation">
+		<xacro:qb_move_reverse_macro parent="${parent}" name="${name}" position="${position}" orientation="${orientation}" cube_mass="${makerpro_cube_mass}"/>
+	</xacro:macro>
+
+</robot>

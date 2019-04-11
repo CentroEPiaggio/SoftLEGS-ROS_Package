@@ -1,0 +1,108 @@
+C51 COMPILER V9.51   GLOBALS                                                               09/26/2016 17:10:31 PAGE 1   
+
+
+C51 COMPILER V9.51, COMPILATION OF MODULE GLOBALS
+OBJECT MODULE PLACED IN .\DP8051_Keil_951\Release\globals.obj
+COMPILER INVOKED BY: C:\Program Files (x86)\Cypress\PSoC Creator\3.3\PSoC Creator\import\keil\pk51\9.51\C51\BIN\c51.exe 
+                    -.\globals.c NOIV LARGE MODDP2 OMF2 VB(1) NOIP INCDIR(.,Generated_Source\PSoC3) FF(3) DB DF(NDEBUG) WL(2) PR(.\DP8051_Kei
+                    -l_951\Release/globals.lst) CD OT(11,SPEED) OJ(.\DP8051_Keil_951\Release\globals.obj)
+
+line level    source
+
+*** MESSAGE C286 IN LINE 0 OF (null): license limits optimization to level 5
+   1          // ----------------------------------------------------------------------------
+   2          // Copyright (C)  qbrobotics. All rights reserved.
+   3          // www.qbrobotics.com
+   4          // ----------------------------------------------------------------------------
+   5          
+   6          /**
+   7          * \file         globals.c
+   8          *
+   9          * \brief        Global variables.
+  10          * \date         May 16, 2016
+  11          * \author       qbrobotics
+  12          * \copyright    (C)  qbrobotics. All rights reserved.
+  13          */
+  14          
+  15          //=================================================================     includes
+  16          #include <globals.h>
+  17          
+  18          //=============================================      global variables definition
+  19          
+  20          
+  21          struct st_data  g_rx;                       // income data
+  22          struct st_mem   g_mem, c_mem;               // memory
+  23          
+  24          float tau_feedback;
+  25          
+  26          // Timer value for debug field
+  27          
+  28          uint32 timer_value;
+  29          uint32 timer_value0;
+  30          
+  31          // Device Data
+  32          
+  33          int32   dev_tension;                // Power supply tension
+  34          uint8   dev_pwm_limit;
+  35          
+  36          // Bit Flag
+  37          
+  38          CYBIT reset_last_value_flag;
+  39          CYBIT tension_valid;
+  40          CYBIT interrupt_flag;
+  41          CYBIT watchdog_flag;
+  42          
+  43          // DMA Buffer
+  44          
+  45          int16 ADC_buf[1]; 
+  46          
+  47          // PWM value
+  48          int8 pwm_sign;
+  49          
+  50          // IMU variables
+  51          uint8 N_IMU_Connected;
+  52          uint8 IMU_connected[N_IMU_MAX];
+C51 COMPILER V9.51   GLOBALS                                                               09/26/2016 17:10:31 PAGE 2   
+
+  53          uint8 IMU_conf[N_IMU_MAX][3];
+  54          uint8 imu_send_flag;
+  55          int imus_data_size;
+  56          int single_imu_size[N_IMU_MAX];
+  57          
+  58          struct st_imu g_imu[N_IMU_MAX];
+  59          struct st_imu g_imuNew[N_IMU_MAX];
+  60          
+  61          uint8 Accel[N_IMU_MAX][6];
+  62          uint8 Gyro[N_IMU_MAX][6];
+  63          uint8 Mag[N_IMU_MAX][6];
+  64          uint8 MagCal[N_IMU_MAX][3];
+  65          
+  66          int frsAccReg;
+  67          int frsGyroReg;
+  68          uint8   rateAcc;                    // Acc ticks to g conversion factor
+  69          uint8   rateGyro;                   // Gyro ticks to deg/s conversion factor
+  70          
+  71          /* END OF FILE */
+C51 COMPILER V9.51   GLOBALS                                                               09/26/2016 17:10:31 PAGE 3   
+
+ASSEMBLY LISTING OF GENERATED OBJECT CODE
+
+
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =   ----    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   1286    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =      4    ----
+   EDATA SIZE       =   ----    ----
+   HDATA SIZE       =   ----    ----
+   XDATA CONST SIZE =   ----    ----
+   FAR CONST SIZE   =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

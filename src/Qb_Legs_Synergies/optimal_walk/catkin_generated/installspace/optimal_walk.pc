@@ -1,0 +1,8 @@
+prefix=/home/riccardo/catkin_ws/install
+
+Name: optimal_walk
+Description: Description of optimal_walk
+Version: 0.0.0
+Cflags: 
+Libs: -L/home/riccardo/catkin_ws/install/lib 
+Requires: geometry_msgs roscpp rospy std_msgs message_runtime

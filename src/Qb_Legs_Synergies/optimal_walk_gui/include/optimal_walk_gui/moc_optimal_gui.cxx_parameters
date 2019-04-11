@@ -1,0 +1,14 @@
+-I/usr/include/qt4
+-I/usr/include/qt4/QtGui
+-I/usr/include/qt4/QtCore
+-I/home/riccardo/catkin_ws/src/Qb_Legs_Synergies/optimal_walk_gui/include/optimal_walk_gui
+-DROS_BUILD_SHARED_LIBS=1
+-DROS_PACKAGE_NAME="optimal_walk_gui"
+-DROSCONSOLE_BACKEND_LOG4CXX
+-D$<$<NOT:$<CONFIG:Debug>>:QT_NO_DEBUG>
+-DQT_GUI_LIB
+-DQT_CORE_LIB
+-DQT_NO_KEYWORDS
+-o
+/home/riccardo/catkin_ws/src/Qb_Legs_Synergies/optimal_walk_gui/include/optimal_walk_gui/moc_optimal_gui.cxx
+/home/riccardo/catkin_ws/src/Qb_Legs_Synergies/optimal_walk_gui/include/optimal_walk_gui/optimal_gui.h

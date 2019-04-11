@@ -1,0 +1,37 @@
+<launch>
+
+    <!-- _____ VARIABLES _____ -->
+    <!-- if `true` doesn't launch synergies and redirect measures to rviz -->
+    <arg name="measures" default="false" />
+    <!-- ______ stride parameters ______ -->
+    <arg name="height"      default="std_msgs/Float32 'data: 0.03'" />
+    <arg name="length"      default="std_msgs/Float32 'data: 0.05'" />
+    <arg name="speed"       default="std_msgs/Float32 'data: 0.00'" />
+
+    <!-- _____ VARIABLES _____ -->
+    <arg name="stiffness"   default="geometry_msgs/Pose -- '[40, 30, 30]' '[35, 40, 40, 0']"/>
+
+    <!-- ______ LAUNCH NODES _____ -->
+    <!-- launch rviz with SOftLegs robot -->
+    <include file="$(find qblegs-ros)/launch/view_legs.launch" />
+
+    <remap from="/qb_legs_trajectories" to="/qb_legs_measures" if="$(arg measures)" />
+
+    <!-- launch node to redirect message from the robot to rviz -->
+    <node name="redirect_pose_to_rviz" pkg="qblegs-ros" type="redirect_pose_to_rviz" output="screen"/> 
+
+    <!-- launch node synergies for trajectories and motors management -->
+    <!-- <node name="synergies" pkg="synergies" type="synergies" output="screen"/> -->
+    <node name="synergies_3param" pkg="synergies" type="synergies_3param" output="screen" unless="$(arg measures)"/> 
+
+    <!-- ______ PUBLISH TOPICS ______ -->
+    <!-- set the default value ot the 3 STRIDE PARAMETERS -->
+    <node pkg="rostopic" type="rostopic" name="speed_topic"  args="pub -1 /synergies_des_speed       $(arg speed)"/>
+    <node pkg="rostopic" type="rostopic" name="height_topic" args="pub -1 /synergies_des_foot_height $(arg height)"/>
+    <node pkg="rostopic" type="rostopic" name="length_topic" args="pub -1 /synergies_des_length      $(arg length)"/>
+
+    <!-- ______ PUBLISH TOPICS ______ -->
+    <node pkg="rostopic" type="rostopic" name="stiffnes" args="pub -1 /qb_legs_stiffness $(arg stiffness)"/>
+    
+</launch>
+

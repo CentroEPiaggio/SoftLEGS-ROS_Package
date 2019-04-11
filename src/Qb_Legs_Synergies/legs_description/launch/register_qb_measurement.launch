@@ -1,0 +1,17 @@
+<launch>
+
+    <!-- `bag_name`   prefix name of the bag file -->
+    <!-- `topic`      topic to be saved -->
+
+    <arg name="saving_dir" />
+    <arg name="sub_folder" />
+
+    <arg name="bag_name9"   default="qb_measurement" /> 
+    <arg name="topic9"      default="/qb_legs_measures" />
+    <arg name="bag_name10"  default="qb_ref_traj" /> 
+    <arg name="topic10"     default="/qb_legs_trajectories" />
+
+    <node pkg="rosbag" type="record" name="record_qb_meas"     args="record -o $(arg saving_dir)$(arg sub_folder)$(arg bag_name9) $(arg topic9)"/> 
+    <node pkg="rosbag" type="record" name="record_qb_ref_traj" args="record -o $(arg saving_dir)$(arg sub_folder)$(arg bag_name10) $(arg topic10)"/> 
+
+</launch>

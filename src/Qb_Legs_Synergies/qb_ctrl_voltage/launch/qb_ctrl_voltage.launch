@@ -1,0 +1,3 @@
+<launch>
+<node pkg="qb_ctrl_voltage_node" name="qb_ctrl_voltage_control" type="qb_ctrl_voltage" output="screen"/>
+</launch>

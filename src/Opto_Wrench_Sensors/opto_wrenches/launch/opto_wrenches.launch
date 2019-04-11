@@ -1,0 +1,15 @@
+<launch>
+
+  <arg name="spin_rate" default="990" />
+  <arg name="filter" default="15" />
+  <arg name="file_results" default="results.txt"/>
+
+  <node name="wrenches" pkg="opto_wrenches" type="opto_wrenches_node" output="screen">
+    <param name="spin_rate" value="$(arg spin_rate)" />
+    <param name="filter" value="$(arg filter)" />
+    <param name="file_results" value="$(arg file_results)" />
+  </node>
+
+  <arg name="yamlFile" default="$(find opto_wrenches)/conf/config.yaml"/>
+
+</launch>

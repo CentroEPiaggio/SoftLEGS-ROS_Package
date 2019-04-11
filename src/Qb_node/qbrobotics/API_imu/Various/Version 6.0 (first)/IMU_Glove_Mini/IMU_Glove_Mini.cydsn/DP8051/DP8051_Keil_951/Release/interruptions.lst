@@ -1,0 +1,868 @@
+C51 COMPILER V9.51   INTERRUPTIONS                                                         04/30/2016 17:24:43 PAGE 1   
+
+
+C51 COMPILER V9.51, COMPILATION OF MODULE INTERRUPTIONS
+OBJECT MODULE PLACED IN .\DP8051\DP8051_Keil_951\Release\interruptions.obj
+COMPILER INVOKED BY: C:\Program Files (x86)\Cypress\PSoC Creator\3.3\PSoC Creator\import\keil\pk51\9.51\C51\BIN\c51.exe 
+                    -.\interruptions.c NOIV LARGE MODDP2 OMF2 VB(1) NOIP INCDIR(.,Generated_Source\PSoC3) FF(3) DB DF(NDEBUG) WL(2) PR(.\DP80
+                    -51\DP8051_Keil_951\Release/interruptions.lst) CD OT(8,SIZE) OJ(.\DP8051\DP8051_Keil_951\Release\interruptions.obj)
+
+line level    source
+
+*** MESSAGE C286 IN LINE 0 OF (null): license limits optimization to level 5
+   1          //=================================================================     includes
+   2          #include <interruptions.h>
+   3          #include <command_processing.h>
+   4          #include <globals.h>
+   5          
+   6          
+   7          //==============================================================================
+   8          //                                                            RS485 RX INTERRUPT
+   9          //==============================================================================
+  10          // Processing RS-485 data frame:
+  11          //
+  12          // - 0:     Waits for beggining characters
+  13          // - 1:     Waits for ID;
+  14          // - 2:     Data length;
+  15          // - 3:     Receive all bytes;
+  16          // - 4:     Wait for another device end of transmission;
+  17          //
+  18          //==============================================================================
+  19          
+  20          CY_ISR(ISR_RS485_RX_ExInterrupt){
+  21   1      
+  22   1      //===============================================     local variables definition
+  23   1      
+  24   1          
+  25   1          static uint8    state = 0;                          // actual state
+  26   1          static struct   st_data data_packet;                // local data packet
+  27   1          static uint8    rx_queue[3];                        // last 3 bytes received
+  28   1          static uint8    rx_data;                            // RS485 UART rx data
+  29   1          static uint8    rx_data_type;                       // packet for me or not
+  30   1          extern int status;
+  31   1      
+  32   1      
+  33   1      //==========================================================     receive routine
+  34   1      
+  35   1      // get data while rx fifo is not empty
+  36   1          while (UART_RS485_ReadRxStatus() & UART_RS485_RX_STS_FIFO_NOTEMPTY) {
+  37   2             rx_data = UART_RS485_GetChar();
+  38   2      
+  39   2              switch (state) {
+  40   3                  // ----- wait for frame start -----
+  41   3                  case 0:
+  42   3      
+  43   3                      rx_queue[0] = rx_queue[1];
+  44   3                      rx_queue[1] = rx_queue[2];
+  45   3                      rx_queue[2] = rx_data;
+  46   3      
+  47   3                      // Finding starting frame
+  48   3                      if ((rx_queue[1] == ':') && (rx_queue[2] == ':')) {
+  49   4                          rx_queue[0] = 0;
+  50   4                          rx_queue[1] = 0;
+  51   4                          rx_queue[2] = 0;
+  52   4                          state       = 1;
+C51 COMPILER V9.51   INTERRUPTIONS                                                         04/30/2016 17:24:43 PAGE 2   
+
+  53   4                      } else if ((rx_queue[0] == 63) && (rx_queue[1] == 13) && (rx_queue[2] == 10)){
+  54   4                          // 63 = ASCII - ?; 13 = ASCII - CR; 10 = ASCII - LF 
+  55   4                          //UART_RS485_PutString("Ciao");
+  56   4                          //infoSend();
+  57   4                      } else if (rx_queue[0] == 60){
+  58   4                          //else if ((rx_queue[0] == 60) && (rx_queue[1] == 13) && (rx_queue[2] == 10)){
+  59   4                          // 60 = ASCII - <; 13 = ASCII - CR; 10 = ASCII - LF 
+  60   4                          
+  61   4                          //UART_RS485_PutString("Ciao");
+  62   4                          status = 1;
+  63   4                      } else if ((rx_queue[0] == 62) && (rx_queue[1] == 13) && (rx_queue[2] == 10)){
+  64   4                          // 62 = ASCII - >; 13 = ASCII - CR; 10 = ASCII - LF 
+  65   4                          status = 0;
+  66   4                      }
+  67   3                      break;
+  68   3      
+  69   3                  // ----- wait for id -----
+  70   3                  case 1:
+  71   3      
+  72   3                      // packet is for my ID or is broadcast
+  73   3                      if((rx_data == c_mem.id) || (rx_data == 0)) {
+  74   4                          rx_data_type = 0;
+  75   4                      } else {                //packet is for others
+  76   4                          rx_data_type = 1;
+  77   4                      }
+  78   3                      data_packet.length = -1;
+  79   3                      state = 2;
+  80   3                      break;
+  81   3      
+  82   3                  // ----- wait for length -----
+  83   3                  case 2:
+  84   3      
+  85   3                      data_packet.length = rx_data;
+  86   3                      // check validity of pack length
+  87   3                     if (data_packet.length <= 1) {
+  88   4                          data_packet.length = -1;
+  89   4                          state = 0;
+  90   4                      } else if (data_packet.length > 128) {
+  91   4                          data_packet.length = -1;
+  92   4                          state = 0;
+  93   4                      } else {
+  94   4                          data_packet.ind = 0;
+  95   4                          if(rx_data_type == 0) {
+  96   5                              state = 3;          // packet for me or broadcast
+  97   5                          } else {
+  98   5                              state = 4;          // packet for others
+  99   5                          }
+ 100   4                      }
+ 101   3                      break;
+ 102   3      
+ 103   3                  // ----- receving -----
+ 104   3                  case 3:
+ 105   3      
+ 106   3                      data_packet.buffer[data_packet.ind] = rx_data;
+ 107   3                      data_packet.ind++;
+ 108   3      
+ 109   3                      // check end of transmission
+ 110   3                      if (data_packet.ind >= data_packet.length) {
+ 111   4                          // verify if frame ID corresponded to the device ID
+ 112   4                          if (rx_data_type == 0) {
+ 113   5                              // copying data from buffer to global packet
+ 114   5                              memcpy(g_rx.buffer, data_packet.buffer, data_packet.length);
+C51 COMPILER V9.51   INTERRUPTIONS                                                         04/30/2016 17:24:43 PAGE 3   
+
+ 115   5                              g_rx.length = data_packet.length;
+ 116   5                              //commProcess();
+ 117   5                          }
+ 118   4                          data_packet.ind    =  0;
+ 119   4                          data_packet.length = -1;
+ 120   4                          state              =  0;
+ 121   4                      }
+ 122   3                      break;
+ 123   3      
+ 124   3                  // ----- other device is receving -----
+ 125   3                  case 4:
+ 126   3      
+ 127   3      //                if(!(--data_packet.length)) {
+ 128   3      //                    data_packet.ind    = 0;
+ 129   3      //                    data_packet.length = -1;
+ 130   3      //                    RS485_CTS_Write(1);             //CTS on falling edge
+ 131   3      //                    RS485_CTS_Write(0);
+ 132   3      //                    state              = 0;
+ 133   3      //                }
+ 134   3                      break;
+ 135   3              }
+ 136   2          }
+ 137   1      
+ 138   1          /* PSoC3 ES1, ES2 RTC ISR PATCH  */
+ 139   1          #if(CYDEV_CHIP_FAMILY_USED == CYDEV_CHIP_FAMILY_PSOC3)
+ 140   1              #if((CYDEV_CHIP_REVISION_USED <= CYDEV_CHIP_REVISION_3A_ES2) && (ISR_RS485_RX__ES2_PATCH ))
+              //            ISR_MOTORS_CONTROL_ISR_PATCH();
+                      #endif
+ 143   1          #endif
+ 144   1      }
+ 145          
+ 146          //==============================================================================
+ 147          //                                                            FUNCTION SCHEDULER
+ 148          //==============================================================================
+ 149          // Call all the function with the right frequency
+ 150          //==============================================================================
+ 151          
+ 152          //void function_scheduler(void) {
+ 153              // Base frequency 1000 Hz
+ 154          
+ 155              //static uint16 counter_calibration = DIV_INIT_VALUE;
+ 156              // QUESTE VANNO RISCRITTE PER I SEGNALI EMG
+ 157              //analog_read_init(0);
+ 158              //analog_read_end(0);
+ 159              //analog_read_init(1);
+ 160              //analog_read_end(1);
+ 161          
+ 162              // Divider 10, freq = 500 Hz
+ 163              //if (calib.enabled == TRUE) {
+ 164              //    if (counter_calibration == CALIBRATION_DIV) {
+ 165              //        calibration();
+ 166              //        counter_calibration = 0;
+ 167              //    }
+ 168              //    counter_calibration++;
+ 169              //}
+ 170          
+ 171              //timer_value = (uint32)MY_TIMER_ReadCounter();
+ 172          //}
+ 173          
+ 174          
+ 175          
+ 176          
+C51 COMPILER V9.51   INTERRUPTIONS                                                         04/30/2016 17:24:43 PAGE 4   
+
+ 177          //==============================================================================
+ 178          //                                                           ANALOG MEASUREMENTS
+ 179          //==============================================================================
+ 180          
+ 181          //void analog_read_init(uint8 index) {
+ 182          
+ 183              // should I execute the function for this index?
+ 184          //    if(index >= NUM_OF_ANALOG_INPUTS)
+ 185          //        return;
+ 186          
+ 187          //    AMUX_FastSelect(index);
+ 188          //    ADC_StartConvert();
+ 189          //}
+ 190          
+ 191          
+ 192          //void analog_read_end(uint8 index) {
+ 193          
+ 194          //    static int32 value, i_aux;
+ 195          
+ 196          //    static uint16 emg_counter_1 = 0;
+ 197          //    static uint16 emg_counter_2 = 0;
+ 198          
+ 199          //    static uint8 emg_1_status = 1;  // 0 normal execution
+ 200          //    static uint8 emg_2_status = 1;  // 1 reset status
+ 201                                              // 2 discard values
+ 202                                              // 3 sum values and mean
+ 203                                              // 4 wait
+ 204          
+ 205              // should I execute the function for this index?
+ 206          //    if(index >= NUM_OF_ANALOG_INPUTS)
+ 207          //        return;
+ 208          
+ 209          //    if (ADC_IsEndConversion(ADC_WAIT_FOR_RESULT)) {
+ 210          
+ 211          //        value = (int32) ADC_GetResult16();
+ 212          //        ADC_StopConvert();
+ 213          
+ 214          //        switch(index) {
+ 215                      // --- Input tension ---
+ 216          //            case 0:
+ 217          //                device.tension = filter_v((value - 1638) * device.tension_conv_factor);
+ 218                          //until there is no valid input tension repeat this measurement
+ 219          //                if (device.tension < 0) {
+ 220          //                    emg_1_status = 1;   // reset status
+ 221          //                    emg_2_status = 1;
+ 222          //                    device.tension_valid = FALSE;
+ 223          
+ 224          //                    if (c_mem.emg_calibration_flag) {
+ 225          //                        if ((c_mem.input_mode == INPUT_MODE_EMG_PROPORTIONAL) ||
+ 226          //                            (c_mem.input_mode == INPUT_MODE_EMG_INTEGRAL) ||
+ 227          //                            (c_mem.input_mode == INPUT_MODE_EMG_FCFS) ||
+ 228          //                            (c_mem.input_mode == INPUT_MODE_EMG_FCFS_ADV)) {
+ 229          //                            g_ref.onoff = 0x00;
+ 230          //                            MOTOR_ON_OFF_Write(g_ref.onoff);
+ 231          //                        }
+ 232          //                    }
+ 233          //                } else {
+ 234          //                    device.tension_valid = TRUE;
+ 235          //                    if(g_mem.activate_pwm_rescaling)        //pwm rescaling is activated
+ 236          //                        pwm_limit_search();                 //only for 12V motors
+ 237          //                }
+ 238          //                break;
+C51 COMPILER V9.51   INTERRUPTIONS                                                         04/30/2016 17:24:43 PAGE 5   
+
+ 239          
+ 240                      // --- Current motor 1 ---
+ 241          //            case 1:
+ 242          //                if (device.tension_valid) {
+ 243          //                    g_meas.curr[0] =  filter_i1(abs(((value - 1638) * 4000) / (1638)));
+ 244          //                } else {
+ 245          //                    g_meas.curr[0] = 0;
+ 246          //                }
+ 247          //                break;
+ 248          
+ 249                      // --- EMG 1 ---
+ 250          //            case 2:
+ 251                          // execute only if there is tension
+ 252          //                if (device.tension_valid == FALSE) {
+ 253          //                    g_meas.emg[0] = 0;
+ 254          //                    break;
+ 255          //                }
+ 256          
+ 257                          // if calibration is not needed go to "normal execution"
+ 258           //               if (!g_mem.emg_calibration_flag) {
+ 259           //                   emg_1_status = 0; //normal execution
+ 260           //               }
+ 261                          // EMG 1 calibration state machine
+ 262           //               switch(emg_1_status) {
+ 263           //                   case 0: // normal execution
+ 264           //                       i_aux = filter_ch1(value);
+ 265           //                       i_aux = (1024 * i_aux) / g_mem.emg_max_value[0];
+ 266          
+ 267                                  //Saturation
+ 268          //                        if (i_aux < 0) {
+ 269          //                            i_aux = 0;
+ 270          //                        } else if (i_aux > 1024) {
+ 271          //                            i_aux = 1024;
+ 272          //                        }
+ 273          
+ 274          //                        g_meas.emg[0] = i_aux;
+ 275          //                        break;
+ 276          
+ 277          //                    case 1: // reset variables
+ 278          //                        emg_counter_1 = 0;
+ 279          //                        g_mem.emg_max_value[0] = 0;
+ 280          //                        emg_1_status = 2; // goto next status
+ 281          //                        break;
+ 282          
+ 283          //                    case 2: // discard first EMG_SAMPLE_TO_DISCARD samples
+ 284          //                        emg_counter_1++;
+ 285          //                        if (emg_counter_1 == EMG_SAMPLE_TO_DISCARD) {
+ 286          //                            emg_counter_1 = 0;          // reset counter
+ 287          //                            LED_REG_Write(0x01);        // turn on LED
+ 288          //                            emg_1_status = 3;           // sum and mean status
+ 289          //                        }
+ 290          //                        break;
+ 291          
+ 292          //                    case 3: // sum first SAMPLES_FOR_EMG_MEAN samples
+ 293                                  // NOTE max(value)*SAMPLES_FOR_EMG_MEAN must fit in 32bit
+ 294          //                        emg_counter_1++;
+ 295          //                        g_mem.emg_max_value[0] += filter_ch1(value);
+ 296          //                        if (emg_counter_1 == SAMPLES_FOR_EMG_MEAN) {
+ 297          //                            g_mem.emg_max_value[0] = g_mem.emg_max_value[0] / SAMPLES_FOR_EMG_MEAN; // c
+             -alc mean
+ 298          //                            LED_REG_Write(0x00);        // led OFF
+ 299          //                            emg_counter_1 = 0;          // reset counter
+C51 COMPILER V9.51   INTERRUPTIONS                                                         04/30/2016 17:24:43 PAGE 6   
+
+ 300          //                            emg_1_status = 0;           // goto normal execution
+ 301          //                        }
+ 302          //                        break;
+ 303          
+ 304          //                    default:
+ 305          //                        break;
+ 306          //                }
+ 307          //                break; // main switch break
+ 308          
+ 309                      // --- EMG 2 ---
+ 310          //            case 3:
+ 311                          // execute only if there is tension
+ 312          //                if (device.tension_valid == FALSE) {
+ 313          //                    g_meas.emg[1] = 0;
+ 314          //                    break;
+ 315          //                }
+ 316          
+ 317                          // if calibration is not needed go to "normal execution"
+ 318          //                if (!g_mem.emg_calibration_flag) {
+ 319          //                    emg_2_status = 0; // normal execution
+ 320          //                }
+ 321          
+ 322                          // EMG 2 calibration state machine
+ 323          //                switch(emg_2_status) {
+ 324          //                    case 0: // normal execution
+ 325          //                        i_aux = filter_ch2(value);
+ 326          //                        i_aux = (1024 * i_aux) / g_mem.emg_max_value[1];
+ 327          
+ 328          //                        if (i_aux < 0) {
+ 329          //                            i_aux = 0;
+ 330          //                        } else if (i_aux > 1024) {
+ 331          //                            i_aux = 1024;
+ 332          //                        }
+ 333          
+ 334          //                        g_meas.emg[1] = i_aux;
+ 335          //                        break;
+ 336          
+ 337          //                    case 1: // reset variables
+ 338          //                        emg_counter_2 = 0;
+ 339          //                        g_mem.emg_max_value[1] = 0;
+ 340          //                        emg_2_status = 4; // wait for EMG 1 calibration
+ 341          //                        break;
+ 342          
+ 343          //                    case 2: // discard first EMG_SAMPLE_TO_DISCARD samples
+ 344          //                        emg_counter_2++;
+ 345          //                        if (emg_counter_2 == EMG_SAMPLE_TO_DISCARD) {
+ 346          //                            emg_counter_2 = 0;          // reset counter
+ 347          //                            LED_REG_Write(0x01);        // turn on LED
+ 348          //                            emg_2_status = 3;           // sum and mean status
+ 349          //                        }
+ 350          //                        break;
+ 351          
+ 352          //                    case 3: // sum first SAMPLES_FOR_EMG_MEAN samples
+ 353                                  // NOTE max(value)*SAMPLES_FOR_EMG_MEAN must fit in 32bit
+ 354          //                        emg_counter_2++;
+ 355          //                        g_mem.emg_max_value[1] += filter_ch2(value);
+ 356          //                        if (emg_counter_2 == SAMPLES_FOR_EMG_MEAN) {
+ 357          //                            g_mem.emg_max_value[1] = g_mem.emg_max_value[1] / SAMPLES_FOR_EMG_MEAN; // c
+             -alc mean
+ 358          //                            LED_REG_Write(0x00);        // led OFF
+ 359          //                            emg_counter_2 = 0;          // reset counter
+ 360          
+C51 COMPILER V9.51   INTERRUPTIONS                                                         04/30/2016 17:24:43 PAGE 7   
+
+ 361                                      // if EMG control mode active, activate motors accordingly with startup value
+ 362          //                            if ((c_mem.input_mode == INPUT_MODE_EMG_PROPORTIONAL) ||
+ 363          //                                (c_mem.input_mode == INPUT_MODE_EMG_INTEGRAL) ||
+ 364          //                                (c_mem.input_mode == INPUT_MODE_EMG_FCFS) ||
+ 365          //                                (c_mem.input_mode == INPUT_MODE_EMG_FCFS_ADV)) {
+ 366          //                                if (c_mem.control_mode == CONTROL_ANGLE) {
+ 367          //                                    g_ref.pos[0] = g_meas.pos[0];
+ 368          //                                    g_ref.pos[1] = g_meas.pos[1];
+ 369          //                                }
+ 370          //                                g_ref.onoff = c_mem.activ;
+ 371          //                                MOTOR_ON_OFF_Write(g_ref.onoff);
+ 372          //                            }
+ 373          
+ 374          //                            emg_2_status = 0;           // goto normal execution
+ 375          //                        }
+ 376          //                        break;
+ 377          
+ 378          //                    case 4: // wait for EMG calibration to be done
+ 379          //                        if (emg_1_status == 0) {
+ 380          //                            emg_2_status = 2;           // goto discart sample
+ 381          //                        }
+ 382          //                        break;
+ 383          
+ 384          //                    default:
+ 385          //                        break;
+ 386          //                }
+ 387          //                break; // emg switch break
+ 388          
+ 389          //            default:
+ 390          //                break; // main switch break
+ 391          //        }
+ 392          //    }
+ 393          //}
+ 394          
+ 395          //==============================================================================
+ 396          //                                                           OVERCURRENT CONTROL
+ 397          //==============================================================================
+ 398          
+ 399          //void overcurrent_control(void) {
+ 400          //    if (c_mem.current_limit != 0) {
+ 401                  // if the current is over the limit
+ 402          //        if (g_meas.curr[0] > c_mem.current_limit) {
+ 403                      //decrese pwm_limit
+ 404          //            device.pwm_limit--;
+ 405                  // if the current is in the safe zone
+ 406          //        } else if (g_meas.curr[0] < (c_mem.current_limit - CURRENT_HYSTERESIS)) {
+ 407                      //increase pwm_limit
+ 408          //            device.pwm_limit++;
+ 409          //        }
+ 410          
+ 411                  // bound pwm_limit
+ 412          //        if (device.pwm_limit < 0) {
+ 413          //            device.pwm_limit = 0;
+ 414          //        } else if (device.pwm_limit > 100) {
+ 415          //            device.pwm_limit = 100;
+ 416          //        }
+ 417          //    }
+ 418          //}
+ 419          
+ 420          //void pwm_limit_search() {
+ 421          //    uint8 index;
+ 422          //    uint16 max_tension = 25500; 
+C51 COMPILER V9.51   INTERRUPTIONS                                                         04/30/2016 17:24:43 PAGE 8   
+
+ 423          //    uint16 min_tension = 11500;
+ 424          
+ 425          //    if (device.tension > max_tension) {
+ 426          //        device.pwm_limit = 0;
+ 427          //    } else if (device.tension < min_tension) {
+ 428          //        device.pwm_limit = 100;
+ 429          //    } else {
+ 430          //        index = (uint8)((device.tension - min_tension) / 500);
+ 431          //        device.pwm_limit = pwm_preload_values[index];
+ 432          //    }
+ 433          //}
+C51 COMPILER V9.51   INTERRUPTIONS                                                         04/30/2016 17:24:43 PAGE 9   
+
+ASSEMBLY LISTING OF GENERATED OBJECT CODE
+
+
+             ; FUNCTION ISR_RS485_RX_ExInterrupt (BEGIN)
+0000 C0E0              PUSH    ACC
+0002 C0F0              PUSH    B
+0004 C083              PUSH    DPH
+0006 C082              PUSH    DPL
+0008 C085              PUSH    DPH1
+000A C084              PUSH    DPL1
+000C C086              PUSH    DPS
+000E 758600            MOV     DPS,#00H
+0011 C000        E     PUSH    ?C?XPAGE1SFR
+0013 750000      E     MOV     ?C?XPAGE1SFR,#?C?XPAGE1RST
+0016 C0D0              PUSH    PSW
+0018 75D000            MOV     PSW,#00H
+001B C000              PUSH    AR0
+001D C001              PUSH    AR1
+001F C002              PUSH    AR2
+0021 C003              PUSH    AR3
+0023 C004              PUSH    AR4
+0025 C005              PUSH    AR5
+0027 C006              PUSH    AR6
+0029 C007              PUSH    AR7
+                                           ; SOURCE LINE # 20
+002B         ?C0001:
+                                           ; SOURCE LINE # 36
+002B 120000      E     LCALL   UART_RS485_ReadRxStatus
+002E EF                MOV     A,R7
+002F 20E503            JB      ACC.5,$ + 6H
+0032 020000      R     LJMP    ?C0027
+                                           ; SOURCE LINE # 37
+0035 120000      E     LCALL   UART_RS485_GetChar
+0038 900000      R     MOV     DPTR,#rx_data
+003B EF                MOV     A,R7
+003C F0                MOVX    @DPTR,A
+                                           ; SOURCE LINE # 39
+003D 900000      R     MOV     DPTR,#state
+0040 E0                MOVX    A,@DPTR
+0041 14                DEC     A
+0042 7003              JNZ     $ + 5H
+0044 020000      R     LJMP    ?C0012
+0047 14                DEC     A
+0048 7003              JNZ     $ + 5H
+004A 020000      R     LJMP    ?C0016
+004D 14                DEC     A
+004E 7003              JNZ     $ + 5H
+0050 020000      R     LJMP    ?C0023
+0053 2403              ADD     A,#03H
+0055 70D4              JNZ     ?C0001
+                                           ; SOURCE LINE # 41
+0057         ?C0004:
+                                           ; SOURCE LINE # 43
+0057 900000      R     MOV     DPTR,#rx_queue+01H
+005A E0                MOVX    A,@DPTR
+005B 900000      R     MOV     DPTR,#rx_queue
+005E F0                MOVX    @DPTR,A
+                                           ; SOURCE LINE # 44
+005F 900000      R     MOV     DPTR,#rx_queue+02H
+0062 E0                MOVX    A,@DPTR
+0063 900000      R     MOV     DPTR,#rx_queue+01H
+0066 F0                MOVX    @DPTR,A
+C51 COMPILER V9.51   INTERRUPTIONS                                                         04/30/2016 17:24:43 PAGE 10  
+
+                                           ; SOURCE LINE # 45
+0067 900000      R     MOV     DPTR,#rx_data
+006A E0                MOVX    A,@DPTR
+006B 900000      R     MOV     DPTR,#rx_queue+02H
+006E F0                MOVX    @DPTR,A
+                                           ; SOURCE LINE # 48
+006F 900000      R     MOV     DPTR,#rx_queue+01H
+0072 E0                MOVX    A,@DPTR
+0073 FF                MOV     R7,A
+0074 B43A15            CJNE    A,#03AH,?C0005
+0077 A3                INC     DPTR
+0078 E0                MOVX    A,@DPTR
+0079 B43A10            CJNE    A,#03AH,?C0005
+                                           ; SOURCE LINE # 49
+007C 900000      R     MOV     DPTR,#rx_queue
+007F E4                CLR     A
+0080 F0                MOVX    @DPTR,A
+                                           ; SOURCE LINE # 50
+0081 A3                INC     DPTR
+0082 F0                MOVX    @DPTR,A
+                                           ; SOURCE LINE # 51
+0083 A3                INC     DPTR
+0084 F0                MOVX    @DPTR,A
+                                           ; SOURCE LINE # 52
+0085 900000      R     MOV     DPTR,#state
+0088 04                INC     A
+0089 F0                MOVX    @DPTR,A
+                                           ; SOURCE LINE # 53
+008A 809F              SJMP    ?C0001
+008C         ?C0005:
+008C 900000      R     MOV     DPTR,#rx_queue
+008F E0                MOVX    A,@DPTR
+0090 FE                MOV     R6,A
+0091 B43F0C            CJNE    A,#03FH,?C0007
+0094 EF                MOV     A,R7
+0095 B40D08            CJNE    A,#0DH,?C0007
+0098 900000      R     MOV     DPTR,#rx_queue+02H
+009B E0                MOVX    A,@DPTR
+009C 640A              XRL     A,#0AH
+009E 608B              JZ      ?C0001
+                                           ; SOURCE LINE # 57
+00A0         ?C0007:
+00A0 EE                MOV     A,R6
+00A1 B43C0B            CJNE    A,#03CH,?C0009
+                                           ; SOURCE LINE # 62
+00A4 900000      E     MOV     DPTR,#status
+00A7 E4                CLR     A
+00A8 F0                MOVX    @DPTR,A
+00A9 A3                INC     DPTR
+00AA 04                INC     A
+00AB F0                MOVX    @DPTR,A
+                                           ; SOURCE LINE # 63
+00AC 020000      R     LJMP    ?C0001
+00AF         ?C0009:
+00AF 900000      R     MOV     DPTR,#rx_queue
+00B2 E0                MOVX    A,@DPTR
+00B3 643E              XRL     A,#03EH
+00B5 6003              JZ      $ + 5H
+00B7 020000      R     LJMP    ?C0001
+00BA A3                INC     DPTR
+00BB E0                MOVX    A,@DPTR
+00BC 640D              XRL     A,#0DH
+C51 COMPILER V9.51   INTERRUPTIONS                                                         04/30/2016 17:24:43 PAGE 11  
+
+00BE 6003              JZ      $ + 5H
+00C0 020000      R     LJMP    ?C0001
+00C3 A3                INC     DPTR
+00C4 E0                MOVX    A,@DPTR
+00C5 640A              XRL     A,#0AH
+00C7 6003              JZ      $ + 5H
+00C9 020000      R     LJMP    ?C0001
+                                           ; SOURCE LINE # 65
+00CC 900000      E     MOV     DPTR,#status
+00CF F0                MOVX    @DPTR,A
+00D0 A3                INC     DPTR
+00D1 F0                MOVX    @DPTR,A
+                                           ; SOURCE LINE # 66
+                                           ; SOURCE LINE # 67
+00D2 020000      R     LJMP    ?C0001
+                                           ; SOURCE LINE # 70
+00D5         ?C0012:
+                                           ; SOURCE LINE # 73
+00D5 900000      E     MOV     DPTR,#c_mem+01H
+00D8 E0                MOVX    A,@DPTR
+00D9 FF                MOV     R7,A
+00DA 900000      R     MOV     DPTR,#rx_data
+00DD E0                MOVX    A,@DPTR
+00DE FE                MOV     R6,A
+00DF 6F                XRL     A,R7
+00E0 6003              JZ      ?C0014
+00E2 EE                MOV     A,R6
+00E3 7007              JNZ     ?C0013
+00E5         ?C0014:
+                                           ; SOURCE LINE # 74
+00E5 900000      R     MOV     DPTR,#rx_data_type
+00E8 E4                CLR     A
+00E9 F0                MOVX    @DPTR,A
+                                           ; SOURCE LINE # 75
+00EA 8006              SJMP    ?C0015
+00EC         ?C0013:
+                                           ; SOURCE LINE # 76
+00EC 900000      R     MOV     DPTR,#rx_data_type
+00EF 7401              MOV     A,#01H
+00F1 F0                MOVX    @DPTR,A
+                                           ; SOURCE LINE # 77
+00F2         ?C0015:
+                                           ; SOURCE LINE # 78
+00F2 900000      R     MOV     DPTR,#data_packet+080H
+00F5 74FF              MOV     A,#0FFH
+00F7 F0                MOVX    @DPTR,A
+00F8 A3                INC     DPTR
+00F9 F0                MOVX    @DPTR,A
+                                           ; SOURCE LINE # 79
+00FA 900000      R     MOV     DPTR,#state
+00FD 7402              MOV     A,#02H
+00FF F0                MOVX    @DPTR,A
+                                           ; SOURCE LINE # 80
+0100 020000      R     LJMP    ?C0001
+                                           ; SOURCE LINE # 83
+0103         ?C0016:
+                                           ; SOURCE LINE # 85
+0103 900000      R     MOV     DPTR,#rx_data
+0106 E0                MOVX    A,@DPTR
+0107 FF                MOV     R7,A
+0108 7E00              MOV     R6,#00H
+010A 900000      R     MOV     DPTR,#data_packet+080H
+C51 COMPILER V9.51   INTERRUPTIONS                                                         04/30/2016 17:24:43 PAGE 12  
+
+010D EE                MOV     A,R6
+010E F0                MOVX    @DPTR,A
+010F A3                INC     DPTR
+0110 EF                MOV     A,R7
+0111 F0                MOVX    @DPTR,A
+                                           ; SOURCE LINE # 87
+0112 D3                SETB    C
+0113 9401              SUBB    A,#01H
+0115 7480              MOV     A,#080H
+0117 9480              SUBB    A,#080H
+0119 5010              JNC     ?C0017
+                                           ; SOURCE LINE # 88
+011B 900000      R     MOV     DPTR,#data_packet+080H
+011E 74FF              MOV     A,#0FFH
+0120 F0                MOVX    @DPTR,A
+0121 A3                INC     DPTR
+0122 F0                MOVX    @DPTR,A
+                                           ; SOURCE LINE # 89
+0123 900000      R     MOV     DPTR,#state
+0126 E4                CLR     A
+0127 F0                MOVX    @DPTR,A
+                                           ; SOURCE LINE # 90
+0128 020000      R     LJMP    ?C0001
+012B         ?C0017:
+012B D3                SETB    C
+012C 900000      R     MOV     DPTR,#data_packet+081H
+012F E0                MOVX    A,@DPTR
+0130 9480              SUBB    A,#080H
+0132 900000      R     MOV     DPTR,#data_packet+080H
+0135 E0                MOVX    A,@DPTR
+0136 6480              XRL     A,#080H
+0138 9480              SUBB    A,#080H
+013A 400D              JC      ?C0019
+                                           ; SOURCE LINE # 91
+013C 74FF              MOV     A,#0FFH
+013E F0                MOVX    @DPTR,A
+013F A3                INC     DPTR
+0140 F0                MOVX    @DPTR,A
+                                           ; SOURCE LINE # 92
+0141 900000      R     MOV     DPTR,#state
+0144 E4                CLR     A
+0145 F0                MOVX    @DPTR,A
+                                           ; SOURCE LINE # 93
+0146 020000      R     LJMP    ?C0001
+0149         ?C0019:
+                                           ; SOURCE LINE # 94
+0149 900000      R     MOV     DPTR,#data_packet+082H
+014C E4                CLR     A
+014D F0                MOVX    @DPTR,A
+014E A3                INC     DPTR
+014F F0                MOVX    @DPTR,A
+                                           ; SOURCE LINE # 95
+0150 900000      R     MOV     DPTR,#rx_data_type
+0153 E0                MOVX    A,@DPTR
+0154 7009              JNZ     ?C0021
+                                           ; SOURCE LINE # 96
+0156 900000      R     MOV     DPTR,#state
+0159 7403              MOV     A,#03H
+015B F0                MOVX    @DPTR,A
+                                           ; SOURCE LINE # 97
+015C 020000      R     LJMP    ?C0001
+015F         ?C0021:
+C51 COMPILER V9.51   INTERRUPTIONS                                                         04/30/2016 17:24:43 PAGE 13  
+
+                                           ; SOURCE LINE # 98
+015F 900000      R     MOV     DPTR,#state
+0162 7404              MOV     A,#04H
+0164 F0                MOVX    @DPTR,A
+                                           ; SOURCE LINE # 99
+                                           ; SOURCE LINE # 100
+                                           ; SOURCE LINE # 101
+0165 020000      R     LJMP    ?C0001
+                                           ; SOURCE LINE # 104
+0168         ?C0023:
+                                           ; SOURCE LINE # 106
+0168 900000      R     MOV     DPTR,#rx_data
+016B E0                MOVX    A,@DPTR
+016C FF                MOV     R7,A
+016D 900000      R     MOV     DPTR,#data_packet+082H
+0170 E0                MOVX    A,@DPTR
+0171 FC                MOV     R4,A
+0172 A3                INC     DPTR
+0173 E0                MOVX    A,@DPTR
+0174 2400        R     ADD     A,#LOW data_packet
+0176 F582              MOV     DPL,A
+0178 7400        R     MOV     A,#HIGH data_packet
+017A 3C                ADDC    A,R4
+017B F583              MOV     DPH,A
+017D EF                MOV     A,R7
+017E F0                MOVX    @DPTR,A
+                                           ; SOURCE LINE # 107
+017F 900000      R     MOV     DPTR,#data_packet+082H
+0182 E4                CLR     A
+0183 75F001            MOV     B,#01H
+0186 120000      E     LCALL   ?C?IILDX
+                                           ; SOURCE LINE # 110
+0189 900000      R     MOV     DPTR,#data_packet+080H
+018C E0                MOVX    A,@DPTR
+018D FE                MOV     R6,A
+018E A3                INC     DPTR
+018F E0                MOVX    A,@DPTR
+0190 FF                MOV     R7,A
+0191 C3                CLR     C
+0192 900000      R     MOV     DPTR,#data_packet+083H
+0195 E0                MOVX    A,@DPTR
+0196 9F                SUBB    A,R7
+0197 EE                MOV     A,R6
+0198 6480              XRL     A,#080H
+019A F8                MOV     R0,A
+019B 900000      R     MOV     DPTR,#data_packet+082H
+019E E0                MOVX    A,@DPTR
+019F 6480              XRL     A,#080H
+01A1 98                SUBB    A,R0
+01A2 5003              JNC     $ + 5H
+01A4 020000      R     LJMP    ?C0001
+                                           ; SOURCE LINE # 112
+01A7 900000      R     MOV     DPTR,#rx_data_type
+01AA E0                MOVX    A,@DPTR
+01AB 7024              JNZ     ?C0025
+                                           ; SOURCE LINE # 114
+01AD 900000      R     MOV     DPTR,#data_packet+080H
+01B0 E0                MOVX    A,@DPTR
+01B1 A3                INC     DPTR
+01B2 E0                MOVX    A,@DPTR
+01B3 7800        E     MOV     R0,#LOW g_rx
+01B5 7C00        E     MOV     R4,#HIGH g_rx
+C51 COMPILER V9.51   INTERRUPTIONS                                                         04/30/2016 17:24:43 PAGE 14  
+
+01B7 7D01              MOV     R5,#01H
+01B9 7B01              MOV     R3,#01H
+01BB 7A00        R     MOV     R2,#HIGH data_packet
+01BD 7900        R     MOV     R1,#LOW data_packet
+01BF 120000      E     LCALL   ?C?COPYAMD
+                                           ; SOURCE LINE # 115
+01C2 900000      R     MOV     DPTR,#data_packet+080H
+01C5 E0                MOVX    A,@DPTR
+01C6 FF                MOV     R7,A
+01C7 A3                INC     DPTR
+01C8 E0                MOVX    A,@DPTR
+01C9 900000      E     MOV     DPTR,#g_rx+080H
+01CC CF                XCH     A,R7
+01CD F0                MOVX    @DPTR,A
+01CE A3                INC     DPTR
+01CF EF                MOV     A,R7
+01D0 F0                MOVX    @DPTR,A
+                                           ; SOURCE LINE # 117
+01D1         ?C0025:
+                                           ; SOURCE LINE # 118
+01D1 900000      R     MOV     DPTR,#data_packet+082H
+01D4 E4                CLR     A
+01D5 F0                MOVX    @DPTR,A
+01D6 A3                INC     DPTR
+01D7 F0                MOVX    @DPTR,A
+                                           ; SOURCE LINE # 119
+01D8 900000      R     MOV     DPTR,#data_packet+080H
+01DB 74FF              MOV     A,#0FFH
+01DD F0                MOVX    @DPTR,A
+01DE A3                INC     DPTR
+01DF F0                MOVX    @DPTR,A
+                                           ; SOURCE LINE # 120
+01E0 900000      R     MOV     DPTR,#state
+01E3 E4                CLR     A
+01E4 F0                MOVX    @DPTR,A
+                                           ; SOURCE LINE # 121
+                                           ; SOURCE LINE # 122
+01E5 020000      R     LJMP    ?C0001
+                                           ; SOURCE LINE # 125
+                                           ; SOURCE LINE # 134
+                                           ; SOURCE LINE # 135
+                                           ; SOURCE LINE # 136
+01E8 020000      R     LJMP    ?C0001
+                                           ; SOURCE LINE # 144
+01EB         ?C0027:
+01EB D007              POP     AR7
+01ED D006              POP     AR6
+01EF D005              POP     AR5
+01F1 D004              POP     AR4
+01F3 D003              POP     AR3
+01F5 D002              POP     AR2
+01F7 D001              POP     AR1
+01F9 D000              POP     AR0
+01FB D0D0              POP     PSW
+01FD D000        E     POP     ?C?XPAGE1SFR
+01FF D086              POP     DPS
+0201 D084              POP     DPL1
+0203 D085              POP     DPH1
+0205 D082              POP     DPL
+0207 D083              POP     DPH
+0209 D0F0              POP     B
+020B D0E0              POP     ACC
+C51 COMPILER V9.51   INTERRUPTIONS                                                         04/30/2016 17:24:43 PAGE 15  
+
+020D 32                RETI    
+             ; FUNCTION ISR_RS485_RX_ExInterrupt (END)
+
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    526    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =    139    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+   EDATA SIZE       =   ----    ----
+   HDATA SIZE       =   ----    ----
+   XDATA CONST SIZE =   ----    ----
+   FAR CONST SIZE   =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

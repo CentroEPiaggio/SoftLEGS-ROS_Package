@@ -1,0 +1,8 @@
+prefix=/home/riccardo/catkin_ws/install
+
+Name: qb_hand_control
+Description: Description of qb_hand_control
+Version: 0.9.5
+Cflags: -I/home/riccardo/catkin_ws/install/include
+Libs: -L/home/riccardo/catkin_ws/install/lib -llibqb_hand_control
+Requires: roscpp qb_device_control qb_hand_hardware_interface

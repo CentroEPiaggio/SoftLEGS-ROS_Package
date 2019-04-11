@@ -1,0 +1,25 @@
+<launch>
+
+  <arg name="spin_rate" default="990" />
+  <arg name="filter" default="15" />
+  <arg name="file_results" default="results.txt"/>
+
+  <node name="single_wrench" pkg="opto_single_wrench" type="opto_single_wrench_node" output="screen" >
+    <param name="spin_rate" value="$(arg spin_rate)" />
+<!--     <param name="port_id" value="0"/> -->
+    <param name="filter" value="$(arg filter)" />
+    <param name="Foot_Name" value="$(arg Foot_Name)"/>
+    <param name="file_results" value="$(arg file_results)" />
+  </node>
+
+  <arg name="yamlFile" default="$(find opto_single_wrench)/conf/config.yaml"/>
+
+ 
+<!--  <node name="forces" pkg="force_sensor_ati" type="merge_forces" output="screen">
+    <param name="spin_rate" value="$(arg spin_rate)" />
+    <rosparam command="load" file="$(arg yamlFile)"/>
+    <param name="file_results" value="$(arg file_results)" />
+  </node>-->
+
+
+</launch>

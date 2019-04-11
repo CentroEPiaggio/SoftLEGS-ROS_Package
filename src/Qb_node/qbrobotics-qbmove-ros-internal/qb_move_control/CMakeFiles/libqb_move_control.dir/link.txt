@@ -1,0 +1,1 @@
+/usr/bin/c++  -fPIC   -shared -Wl,-soname,libqb_move_control.so -o /home/riccardo/catkin_ws/devel/lib/libqb_move_control.so CMakeFiles/libqb_move_control.dir/src/qb_move_control.cpp.o 

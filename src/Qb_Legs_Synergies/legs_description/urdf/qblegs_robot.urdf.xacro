@@ -1,0 +1,44 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="qb_legs">
+
+	<!-- we need the definition of the qb_move unit -->
+	<xacro:include filename="$(find qblegs-ros)/urdf/qblegs.urdf.xacro" />
+
+	<!-- base reference-->
+	<link name="qb_legs_base"/>
+
+	<!-- CdM uprward -->
+  	<link name="cdm_upward"/>
+	<!-- z pos cdm-->
+	<joint name="base_to_upw_leg" type="prismatic">
+		<axis xyz="0 0 1"/>
+		<limit effort="1000.0" lower="-1.57" upper="1.57" velocity="5"/>
+		<parent link="qb_legs_base"/>
+		<child link="cdm_upward"/>
+	</joint>
+
+	<!-- CdM forward -->
+	<link name="cdm_forward"/>
+	<!-- x pos cdm -->
+	<joint name="upw_to_fwd_leg" type="prismatic">
+		<axis xyz="1 0 0"/>
+		<limit effort="1000.0" lower="-1.57" upper="1.57" velocity="5"/>
+		<parent link="cdm_upward"/>
+		<child link="cdm_forward"/>
+	</joint>
+
+	<!-- CdM pitch -->
+	<link name="cdm_pitch"/>
+	<!-- x pos cdm -->
+	<joint name="fwd_to_pch_leg" type="revolute">
+		<axis xyz="0 1 0"/>
+		<limit effort="1000.0" lower="-1.57" upper="1.57" velocity="5"/>
+		<parent link="cdm_forward"/>
+		<child link="cdm_pitch"/>
+	</joint>
+
+	<xacro:qb_legs parent="cdm_pitch" name="qb_legs">
+		<origin xyz="0.0 0.0 0.0" rpy="0 0 0"/>
+	</xacro:qb_legs>
+
+</robot>

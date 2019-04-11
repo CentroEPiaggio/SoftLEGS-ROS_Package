@@ -1,0 +1,260 @@
+C51 COMPILER V9.51   SPIM_1_INT                                                            04/30/2016 17:24:45 PAGE 1   
+
+
+C51 COMPILER V9.51, COMPILATION OF MODULE SPIM_1_INT
+OBJECT MODULE PLACED IN .\DP8051\DP8051_Keil_951\Release\SPIM_1_INT.obj
+COMPILER INVOKED BY: C:\Program Files (x86)\Cypress\PSoC Creator\3.3\PSoC Creator\import\keil\pk51\9.51\C51\BIN\c51.exe 
+                    -.\Generated_Source\PSoC3\SPIM_1_INT.c NOIV LARGE MODDP2 OMF2 VB(1) NOIP INCDIR(.,Generated_Source\PSoC3) FF(3) DB DF(NDE
+                    -BUG) WL(2) PR(.\DP8051\DP8051_Keil_951\Release/SPIM_1_INT.lst) CD OT(8,SIZE) OJ(.\DP8051\DP8051_Keil_951\Release\SPIM_1_
+                    -INT.obj)
+
+line level    source
+
+*** MESSAGE C286 IN LINE 0 OF (null): license limits optimization to level 5
+   1          /*******************************************************************************
+   2          * File Name: SPIM_1_INT.c
+   3          * Version 2.50
+   4          *
+   5          * Description:
+   6          *  This file provides all Interrupt Service Routine (ISR) for the SPI Master
+   7          *  component.
+   8          *
+   9          * Note:
+  10          *  None.
+  11          *
+  12          ********************************************************************************
+  13          * Copyright 2008-2015, Cypress Semiconductor Corporation.  All rights reserved.
+  14          * You may use this file only in accordance with the license, terms, conditions,
+  15          * disclaimers, and limitations in the end user license agreement accompanying
+  16          * the software package with which this file was provided.
+  17          *******************************************************************************/
+  18          
+  19          #include "SPIM_1_PVT.h"
+  20          #include "cyapicallbacks.h"
+  21          
+  22          /* User code required at start of ISR */
+  23          /* `#START SPIM_1_ISR_START_DEF` */
+  24          
+  25          /* `#END` */
+  26          
+  27          
+  28          /*******************************************************************************
+  29          * Function Name: SPIM_1_TX_ISR
+  30          ********************************************************************************
+  31          *
+  32          * Summary:
+  33          *  Interrupt Service Routine for TX portion of the SPI Master.
+  34          *
+  35          * Parameters:
+  36          *  None.
+  37          *
+  38          * Return:
+  39          *  None.
+  40          *
+  41          * Global variables:
+  42          *  SPIM_1_txBufferWrite - used for the account of the bytes which
+  43          *  have been written down in the TX software buffer.
+  44          *  SPIM_1_txBufferRead - used for the account of the bytes which
+  45          *  have been read from the TX software buffer, modified when exist data to
+  46          *  sending and FIFO Not Full.
+  47          *  SPIM_1_txBuffer[SPIM_1_TX_BUFFER_SIZE] - used to store
+  48          *  data to sending.
+  49          *  All described above Global variables are used when Software Buffer is used.
+  50          *
+  51          *******************************************************************************/
+C51 COMPILER V9.51   SPIM_1_INT                                                            04/30/2016 17:24:45 PAGE 2   
+
+  52          CY_ISR(SPIM_1_TX_ISR)
+  53          {
+  54   1          #if(SPIM_1_TX_SOFTWARE_BUF_ENABLED)
+                      uint8 tmpStatus;
+                  #endif /* (SPIM_1_TX_SOFTWARE_BUF_ENABLED) */
+  57   1      
+  58   1          #ifdef SPIM_1_TX_ISR_ENTRY_CALLBACK
+                      SPIM_1_TX_ISR_EntryCallback();
+                  #endif /* SPIM_1_TX_ISR_ENTRY_CALLBACK */
+  61   1      
+  62   1          /* User code required at start of ISR */
+  63   1          /* `#START SPIM_1_TX_ISR_START` */
+  64   1      
+  65   1          /* `#END` */
+  66   1          
+  67   1          #if(SPIM_1_TX_SOFTWARE_BUF_ENABLED)
+                      /* Check if TX data buffer is not empty and there is space in TX FIFO */
+                      while(SPIM_1_txBufferRead != SPIM_1_txBufferWrite)
+                      {
+                          tmpStatus = SPIM_1_GET_STATUS_TX(SPIM_1_swStatusTx);
+                          SPIM_1_swStatusTx = tmpStatus;
+              
+                          if(0u != (SPIM_1_swStatusTx & SPIM_1_STS_TX_FIFO_NOT_FULL))
+                          {
+                              if(0u == SPIM_1_txBufferFull)
+                              {
+                                 SPIM_1_txBufferRead++;
+              
+                                  if(SPIM_1_txBufferRead >= SPIM_1_TX_BUFFER_SIZE)
+                                  {
+                                      SPIM_1_txBufferRead = 0u;
+                                  }
+                              }
+                              else
+                              {
+                                  SPIM_1_txBufferFull = 0u;
+                              }
+              
+                              /* Put data element into the TX FIFO */
+                              CY_SET_REG8(SPIM_1_TXDATA_PTR, 
+                                                           SPIM_1_txBuffer[SPIM_1_txBufferRead]);
+                          }
+                          else
+                          {
+                              break;
+                          }
+                      }
+              
+                      if(SPIM_1_txBufferRead == SPIM_1_txBufferWrite)
+                      {
+                          /* TX Buffer is EMPTY: disable interrupt on TX NOT FULL */
+                          SPIM_1_TX_STATUS_MASK_REG &= ((uint8) ~SPIM_1_STS_TX_FIFO_NOT_FULL);
+                      }
+              
+                  #endif /* (SPIM_1_TX_SOFTWARE_BUF_ENABLED) */
+ 107   1      
+ 108   1          /* User code required at end of ISR (Optional) */
+ 109   1          /* `#START SPIM_1_TX_ISR_END` */
+ 110   1      
+ 111   1          /* `#END` */
+ 112   1          
+ 113   1          #ifdef SPIM_1_TX_ISR_EXIT_CALLBACK
+C51 COMPILER V9.51   SPIM_1_INT                                                            04/30/2016 17:24:45 PAGE 3   
+
+                      SPIM_1_TX_ISR_ExitCallback();
+                  #endif /* SPIM_1_TX_ISR_EXIT_CALLBACK */
+ 116   1      }
+ 117          
+ 118          
+ 119          /*******************************************************************************
+ 120          * Function Name: SPIM_1_RX_ISR
+ 121          ********************************************************************************
+ 122          *
+ 123          * Summary:
+ 124          *  Interrupt Service Routine for RX portion of the SPI Master.
+ 125          *
+ 126          * Parameters:
+ 127          *  None.
+ 128          *
+ 129          * Return:
+ 130          *  None.
+ 131          *
+ 132          * Global variables:
+ 133          *  SPIM_1_rxBufferWrite - used for the account of the bytes which
+ 134          *  have been written down in the RX software buffer modified when FIFO contains
+ 135          *  new data.
+ 136          *  SPIM_1_rxBufferRead - used for the account of the bytes which
+ 137          *  have been read from the RX software buffer, modified when overflow occurred.
+ 138          *  SPIM_1_rxBuffer[SPIM_1_RX_BUFFER_SIZE] - used to store
+ 139          *  received data, modified when FIFO contains new data.
+ 140          *  All described above Global variables are used when Software Buffer is used.
+ 141          *
+ 142          *******************************************************************************/
+ 143          CY_ISR(SPIM_1_RX_ISR)
+ 144          {
+ 145   1          #if(SPIM_1_RX_SOFTWARE_BUF_ENABLED)
+                      uint8 tmpStatus;
+                      uint8 rxData;
+                  #endif /* (SPIM_1_RX_SOFTWARE_BUF_ENABLED) */
+ 149   1      
+ 150   1          #ifdef SPIM_1_RX_ISR_ENTRY_CALLBACK
+                      SPIM_1_RX_ISR_EntryCallback();
+                  #endif /* SPIM_1_RX_ISR_ENTRY_CALLBACK */
+ 153   1      
+ 154   1          /* User code required at start of ISR */
+ 155   1          /* `#START SPIM_1_RX_ISR_START` */
+ 156   1      
+ 157   1          /* `#END` */
+ 158   1          
+ 159   1          #if(SPIM_1_RX_SOFTWARE_BUF_ENABLED)
+              
+                      tmpStatus = SPIM_1_GET_STATUS_RX(SPIM_1_swStatusRx);
+                      SPIM_1_swStatusRx = tmpStatus;
+              
+                      /* Check if RX data FIFO has some data to be moved into the RX Buffer */
+                      while(0u != (SPIM_1_swStatusRx & SPIM_1_STS_RX_FIFO_NOT_EMPTY))
+                      {
+                          rxData = CY_GET_REG8(SPIM_1_RXDATA_PTR);
+              
+                          /* Set next pointer. */
+                          SPIM_1_rxBufferWrite++;
+                          if(SPIM_1_rxBufferWrite >= SPIM_1_RX_BUFFER_SIZE)
+                          {
+                              SPIM_1_rxBufferWrite = 0u;
+                          }
+              
+C51 COMPILER V9.51   SPIM_1_INT                                                            04/30/2016 17:24:45 PAGE 4   
+
+                          if(SPIM_1_rxBufferWrite == SPIM_1_rxBufferRead)
+                          {
+                              SPIM_1_rxBufferRead++;
+                              if(SPIM_1_rxBufferRead >= SPIM_1_RX_BUFFER_SIZE)
+                              {
+                                  SPIM_1_rxBufferRead = 0u;
+                              }
+              
+                              SPIM_1_rxBufferFull = 1u;
+                          }
+              
+                          /* Move data from the FIFO to the Buffer */
+                          SPIM_1_rxBuffer[SPIM_1_rxBufferWrite] = rxData;
+              
+                          tmpStatus = SPIM_1_GET_STATUS_RX(SPIM_1_swStatusRx);
+                          SPIM_1_swStatusRx = tmpStatus;
+                      }
+              
+                  #endif /* (SPIM_1_RX_SOFTWARE_BUF_ENABLED) */
+ 195   1      
+ 196   1          /* User code required at end of ISR (Optional) */
+ 197   1          /* `#START SPIM_1_RX_ISR_END` */
+ 198   1      
+ 199   1          /* `#END` */
+ 200   1          
+ 201   1          #ifdef SPIM_1_RX_ISR_EXIT_CALLBACK
+                      SPIM_1_RX_ISR_ExitCallback();
+                  #endif /* SPIM_1_RX_ISR_EXIT_CALLBACK */
+ 204   1      }
+ 205          
+ 206          /* [] END OF FILE */
+C51 COMPILER V9.51   SPIM_1_INT                                                            04/30/2016 17:24:45 PAGE 5   
+
+ASSEMBLY LISTING OF GENERATED OBJECT CODE
+
+
+             ; FUNCTION SPIM_1_TX_ISR (BEGIN)
+                                           ; SOURCE LINE # 52
+                                           ; SOURCE LINE # 116
+0000 32                RETI    
+             ; FUNCTION SPIM_1_TX_ISR (END)
+
+             ; FUNCTION SPIM_1_RX_ISR (BEGIN)
+                                           ; SOURCE LINE # 143
+                                           ; SOURCE LINE # 204
+0000 32                RETI    
+             ; FUNCTION SPIM_1_RX_ISR (END)
+
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =      2    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+   EDATA SIZE       =   ----    ----
+   HDATA SIZE       =   ----    ----
+   XDATA CONST SIZE =   ----    ----
+   FAR CONST SIZE   =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

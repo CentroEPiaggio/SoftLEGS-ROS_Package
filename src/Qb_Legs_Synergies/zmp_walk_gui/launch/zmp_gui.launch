@@ -1,0 +1,4 @@
+<launch>
+<node pkg="zmp_walk_gui" name="zmp_gui_main" type="zmp_walk_gui" output="screen"/>
+</launch>
+

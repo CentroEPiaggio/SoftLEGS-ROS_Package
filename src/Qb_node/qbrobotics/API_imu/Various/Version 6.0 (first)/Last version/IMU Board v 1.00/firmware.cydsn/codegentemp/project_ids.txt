@@ -1,0 +1,6 @@
+C:\Users\MattiaCP\Google Drive\QB\IMU\Last Version\IMU Board v 1.00\firmware.cydsn\firmware.cyprj|ce648105-678a-46f7-8919-d77874206d6c
+C:\Program Files (x86)\Cypress\PSoC Creator\3.3\PSoC Creator\psoc\content\default\CyAnnotationLibrary\CyAnnotationLibrary.cylib\CyAnnotationLibrary.cyprj|826236b8-6117-41d7-a443-682456f8a3a9
+C:\Program Files (x86)\Cypress\PSoC Creator\3.3\PSoC Creator\psoc\content\default\CyReferenceLibrary\CyReferenceLibrary.cylib\CyReferenceLibrary.cyprj|a194ef25-7167-45dd-8b96-2a1f34ff3d10
+C:\Program Files (x86)\Cypress\PSoC Creator\3.3\PSoC Creator\psoc\content\cycomponentlibraryupdates\CyComponentLibraryUpdates.cylib\CyComponentLibraryUpdates.cyprj|4ec4815e-1bf5-4ec4-9a22-cbac11608cc6
+C:\Program Files (x86)\Cypress\PSoC Creator\3.3\PSoC Creator\psoc\content\cycomponentlibrary\CyComponentLibrary.cylib\CyComponentLibrary.cyprj|b6f1d236-980f-4dc7-8fb7-bc3b5614bd42
+C:\Program Files (x86)\Cypress\PSoC Creator\3.3\PSoC Creator\psoc\content\cyprimitives\CyPrimitives.cylib\CyPrimitives.cyprj|e5a316ba-6386-4050-8aa2-03ecfe34bd2f

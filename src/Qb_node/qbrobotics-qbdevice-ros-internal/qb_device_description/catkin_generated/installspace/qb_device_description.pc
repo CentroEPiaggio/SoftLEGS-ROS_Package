@@ -1,0 +1,8 @@
+prefix=/home/riccardo/catkin_ws/install
+
+Name: qb_device_description
+Description: Description of qb_device_description
+Version: 0.11.3
+Cflags: 
+Libs: -L/home/riccardo/catkin_ws/install/lib 
+Requires: 
