@@ -1,0 +1,5 @@
+# ignore folders
+.vscode/
+
+# ignore all .bag files
+#*.bag
